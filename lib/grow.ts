@@ -62,7 +62,11 @@ export async function createPaymentRequest(
         name: item.name,
         price: item.price,
         quantity: item.quantity,
-        vatType: 1, // Regular VAT — Grow adds 18% on top of this (pre-VAT) price
+        // vatType 1 = Regular VAT. Confirmed against a real transaction that
+        // Grow extracts an implied VAT portion from this price rather than
+        // adding VAT on top — so callers must pass the final, already
+        // VAT-inclusive price here for the charge to match what was quoted.
+        vatType: 1,
       })),
     }),
   });
@@ -78,18 +82,4 @@ export async function createPaymentRequest(
   };
 
   return { paymentUrl: data.paymentUrl, growPaymentId: data.paymentLinkId };
-}
-
-export function verifyWebhookSignature(rawBody: string, signatureHeader: string | null): boolean {
-  if (!process.env.GROW_WEBHOOK_SECRET) {
-    console.warn("[grow] GROW_WEBHOOK_SECRET not set — accepting webhook without verification (dev only).");
-    return true;
-  }
-
-  // TODO: once the Grow module's "notify Url" is pointed at a real deployed
-  // domain (needs HTTPS, not localhost), capture a real payment-status
-  // payload from Grow and wire up actual signature verification here.
-  throw new Error(
-    `Grow webhook verification not implemented yet (received signature header: ${signatureHeader}, body length: ${rawBody.length}).`
-  );
 }
