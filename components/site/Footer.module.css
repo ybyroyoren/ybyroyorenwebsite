@@ -42,6 +42,24 @@
   color: var(--cream);
 }
 
+.iconLink {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid rgba(239, 232, 216, 0.3);
+  color: var(--cream);
+  padding: 0 !important;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.iconLink:hover {
+  background: rgba(239, 232, 216, 0.12);
+  border-color: var(--cream);
+}
+
 .newsletterForm {
   display: flex;
   gap: 8px;
@@ -103,10 +121,16 @@
 
 .bottom {
   display: flex;
+  align-items: center;
   justify-content: space-between;
   padding-top: 18px;
   font-size: 13px;
   color: rgba(239, 232, 216, 0.45);
+}
+
+.bottomText {
+  display: flex;
+  gap: 24px;
 }
 
 @media (max-width: 860px) {
