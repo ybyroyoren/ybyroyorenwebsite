@@ -6,15 +6,11 @@ export default function HomePage() {
     <section className={styles.hero}>
       <div className={styles.heroMark}>Y</div>
       <div className={`wrap ${styles.inner}`}>
-        <div className={styles.eyebrow}>שף פרטי · Roy Oren</div>
-        <h1>
-          ארוחה טובה
-          <br />
-          מתחילה <em>בשולחן שלך</em>.
-        </h1>
+        <div className={styles.eyebrow}>שף פרטי - קייטרינג - חנות מוצרים - Y by Roy Oren</div>
+        <h1>Y - בית ליצירה קולינרית</h1>
         <p className={styles.sub}>
-          הארוחה הפתוחה הקרובה מתמלאת — נשארו מקומות אחרונים. מוצרים ביתיים ואירועים פרטיים
-          מחכים בהמשך.
+          ארוחות אינטימיות, אירועים גדולים, ארוחות פתוחות אצלנו בחלל האירוח או חנות מוצרים מעשה
+          ידינו. אנחנו פה בשבילכם.
         </p>
         <div className={styles.actions}>
           <Link className={`${styles.btn} ${styles.btnPrimary}`} href="/meals">

@@ -40,7 +40,13 @@ export default function ContactPage() {
         </div>
 
         <div className={styles.mapBlock}>
-          <div className={styles.mapVisual} />
+          <iframe
+            className={styles.mapVisual}
+            src={`https://www.google.com/maps?q=${encodeURIComponent("רחוב השוק 34, תל אביב")}&output=embed`}
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            title="מפה — רחוב השוק 34, תל אביב"
+          />
           <div className={styles.mapLinks}>
             <a
               href="https://www.google.com/maps/search/?api=1&query=רחוב+השוק+34+תל+אביב"

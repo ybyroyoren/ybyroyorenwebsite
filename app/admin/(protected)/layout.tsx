@@ -24,7 +24,12 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   return (
     <div className={styles.shell}>
       <aside className={styles.sidebar}>
-        <div className={styles.mark}>Y</div>
+        <Link href="/" className={styles.mark}>
+          Y
+        </Link>
+        <Link href="/" className={styles.siteLink}>
+          ← חזרה לאתר
+        </Link>
         <div className={styles.subtitle}>
           {admin.email}
           <br />

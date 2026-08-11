@@ -22,10 +22,10 @@
 }
 
 .introCol {
-  padding: 44px 60px 80px 40px;
+  padding: 80px 60px 80px 40px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   border-left: 1px solid var(--line);
 }
 

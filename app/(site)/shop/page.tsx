@@ -29,7 +29,7 @@ export default async function ShopPage({
       <div className={`wrap ${styles.pageHead}`}>
         <div className={styles.eyebrow}>חנות</div>
         <h1>מהמטבח שלי, ישר אליכם</h1>
-        <p>כל המוצרים מיוצרים בבית לפי הזמנה. בחרו, הוסיפו לעגלה ובחרו תאריך איסוף בסוף התהליך.</p>
+        <p>כל המוצרים מיוצרים אצלנו לפי הזמנה. בחרו, הוסיפו לעגלה ובחרו תאריך איסוף בסוף התהליך.</p>
         <div className={styles.pickupNote}>
           איסוף עצמי מרחוב השוק 34, תל אביב · משלוח מוגבל בקרוב
         </div>
