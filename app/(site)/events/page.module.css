@@ -1,0 +1,273 @@
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: calc(100vh - 65px);
+}
+
+@media (max-width: 960px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+  .introCol {
+    border-left: none !important;
+    border-bottom: 1px solid var(--line);
+    padding: 60px 32px !important;
+  }
+  .formCol {
+    padding: 60px 32px !important;
+  }
+  .fieldRow {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+.introCol {
+  padding: 44px 60px 80px 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-left: 1px solid var(--line);
+}
+
+.eyebrow {
+  font-size: 13px;
+  letter-spacing: 0.16em;
+  color: var(--olive-deep);
+  font-weight: 600;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.eyebrow::before {
+  content: "";
+  width: 30px;
+  height: 1px;
+  background: var(--olive-deep);
+}
+
+.introCol h1 {
+  font-size: clamp(34px, 4vw, 50px);
+  line-height: 1.15;
+  margin-bottom: 22px;
+  max-width: 440px;
+}
+
+.introCol > p {
+  color: var(--ink-soft);
+  font-size: 16px;
+  line-height: 1.7;
+  max-width: 420px;
+  margin-bottom: 40px;
+}
+
+.carouselWrap {
+  max-width: 420px;
+  margin-bottom: 24px;
+}
+
+.leadTimeNote {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px;
+  background: var(--olive-mist);
+  border-radius: 8px;
+  font-size: 13.5px;
+  color: var(--olive-deep);
+  font-weight: 600;
+  margin-bottom: 44px;
+  max-width: 420px;
+}
+
+.eventTypes {
+  display: flex;
+  flex-direction: column;
+}
+
+.eventTypeRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 16px 0;
+  border-top: 1px solid var(--line);
+  font-size: 14.5px;
+}
+
+.eventTypeRow:last-child {
+  border-bottom: 1px solid var(--line);
+}
+
+.eventTypeRow span:first-child {
+  font-weight: 600;
+}
+
+.eventTypeRow span:last-child {
+  color: var(--ink-soft);
+}
+
+.formCol {
+  padding: 80px 40px 80px 60px;
+}
+
+.formCol h2 {
+  font-size: 26px;
+  margin-bottom: 8px;
+}
+
+.formSub {
+  color: var(--ink-soft);
+  font-size: 14px;
+  margin-bottom: 36px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  max-width: 480px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.field label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.req {
+  color: var(--danger);
+}
+
+.field input,
+.field select,
+.field textarea {
+  padding: 13px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: transparent;
+  font-family: inherit;
+  font-size: 14.5px;
+  color: var(--ink);
+}
+
+.field textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.fieldRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.chip {
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.chip.selected {
+  background: var(--ink);
+  color: var(--cream);
+  border-color: var(--ink);
+}
+
+.guestStepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 8px 10px;
+  width: fit-content;
+}
+
+.guestStepper button {
+  width: 26px;
+  height: 26px;
+  font-size: 17px;
+  flex-shrink: 0;
+}
+
+.guestStepper input {
+  width: 52px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 15px;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  color: var(--ink);
+  -moz-appearance: textfield;
+}
+
+.guestStepper input::-webkit-outer-spin-button,
+.guestStepper input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.fieldNote {
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.checkboxRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13.5px;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.checkboxRow input {
+  margin-top: 3px;
+  accent-color: var(--olive-deep);
+}
+
+.submitBtn {
+  margin-top: 10px;
+  background: var(--ink);
+  color: var(--cream);
+  padding: 16px;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.submitBtn:hover {
+  background: var(--olive-deep);
+}
+
+.footnote {
+  font-size: 12px;
+  color: var(--ink-soft);
+  text-align: center;
+}
+
+.successMsg {
+  font-size: 14px;
+  color: var(--olive-deep);
+  background: var(--olive-mist);
+  padding: 14px 16px;
+  border-radius: 8px;
+}

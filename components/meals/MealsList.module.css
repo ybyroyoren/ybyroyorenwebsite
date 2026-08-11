@@ -1,0 +1,412 @@
+.card {
+  display: grid;
+  grid-template-columns: 140px 1fr 200px 160px;
+  align-items: center;
+  gap: 28px;
+  padding: 30px 26px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  margin-bottom: 14px;
+  transition: all 0.25s ease;
+  cursor: pointer;
+}
+
+.card:hover {
+  background: var(--cream-dark);
+  border-color: var(--ink);
+}
+
+.card.full {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.card.full:hover {
+  background: transparent;
+  border-color: var(--line);
+}
+
+.dateBlock {
+  text-align: center;
+}
+
+.day {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--olive-deep);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.dayNum {
+  font-family: var(--font-serif-family);
+  font-size: 30px;
+}
+
+.month {
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.info h3 {
+  font-size: 22px;
+  margin-bottom: 6px;
+}
+
+.desc {
+  font-size: 14px;
+  color: var(--ink-soft);
+  line-height: 1.5;
+  max-width: 360px;
+}
+
+.seatsBlock {
+  text-align: center;
+}
+
+.seatsBar {
+  width: 140px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--olive-mist);
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.seatsBarFill {
+  height: 100%;
+  background: var(--olive-deep);
+  border-radius: 999px;
+}
+
+.seatsText {
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.seatsText.low {
+  color: var(--danger);
+}
+
+.ctaCol {
+  text-align: left;
+}
+
+.price {
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin-bottom: 8px;
+}
+
+.price b {
+  font-size: 17px;
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.btn {
+  display: inline-block;
+  font-size: 14px;
+  font-weight: 600;
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+  padding: 9px 22px;
+  transition: all 0.2s ease;
+}
+
+.card:hover .btn {
+  background: var(--ink);
+  color: var(--cream);
+}
+
+.fullBadge {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 9px 18px;
+  display: inline-block;
+}
+
+@media (max-width: 860px) {
+  .card {
+    grid-template-columns: 1fr;
+    text-align: right;
+    gap: 14px;
+  }
+  .seatsBlock,
+  .ctaCol {
+    text-align: right;
+  }
+  .seatsBar {
+    width: 100%;
+  }
+}
+
+/* ---------- drawer ---------- */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(23, 20, 16, 0.4);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: 200;
+}
+
+.overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: min(460px, 92vw);
+  background: var(--cream);
+  z-index: 201;
+  transform: translateX(-100%);
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 20px 0 60px rgba(0, 0, 0, 0.15);
+}
+
+.drawer.open {
+  transform: translateX(0);
+}
+
+.drawerHead {
+  padding: 28px 30px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.dayTag {
+  font-size: 12px;
+  color: var(--olive-deep);
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.drawerHead h3 {
+  font-size: 24px;
+}
+
+.close {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.drawerBody {
+  flex: 1;
+  overflow-y: auto;
+  padding: 26px 30px;
+}
+
+.summary {
+  font-size: 14px;
+  color: var(--ink-soft);
+  line-height: 1.6;
+  margin-bottom: 24px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--line);
+}
+
+.seatsPicker {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 20px;
+}
+
+.seatsPickerLabel {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.seatsPickerLabel small {
+  display: block;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--ink-soft);
+  margin-top: 2px;
+}
+
+.qtyControl {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 6px 8px;
+}
+
+.qtyControl button {
+  width: 24px;
+  height: 24px;
+  font-size: 16px;
+}
+
+.allergyWarning {
+  font-size: 12.5px;
+  color: var(--danger);
+  line-height: 1.6;
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  background: rgba(139, 58, 43, 0.08);
+  border: 1px solid rgba(139, 58, 43, 0.25);
+  border-radius: 8px;
+}
+
+.dinersList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.dinerRow {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.dinerRowLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--olive-deep);
+  margin-bottom: 10px;
+}
+
+.dinerRowRequired {
+  color: var(--danger);
+}
+
+.dinerRow input[type="text"] {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: var(--cream);
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--ink);
+  margin-bottom: 10px;
+}
+
+.restrictionChecks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.restrictionChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  cursor: pointer;
+  user-select: none;
+}
+
+.restrictionChip input {
+  accent-color: var(--olive-deep);
+}
+
+.drawerFooter {
+  padding: 24px 30px 30px;
+  border-top: 1px solid var(--line);
+}
+
+.totalsRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  color: var(--ink-soft);
+  margin-bottom: 8px;
+}
+
+.totalsRow.grand {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.balanceNote {
+  font-size: 12.5px;
+  margin-top: 6px;
+  margin-bottom: 20px;
+  background: var(--olive-mist);
+  color: var(--olive-deep);
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.registerBtn {
+  display: block;
+  width: 100%;
+  margin-top: 4px;
+  background: var(--ink);
+  color: var(--cream);
+  padding: 16px;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.registerBtn:hover {
+  background: var(--olive-deep);
+}
+
+.registerBtn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.cancelNote {
+  font-size: 12px;
+  color: var(--ink-soft);
+  margin-top: 14px;
+  text-align: center;
+}
+
+.contactFields {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.contactFields input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: var(--cream);
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.error {
+  color: var(--danger);
+  font-size: 13px;
+  margin-bottom: 12px;
+}

@@ -1,0 +1,78 @@
+.hero {
+  padding: 90px 0 70px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+}
+
+@media (max-width: 860px) {
+  .hero {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+}
+
+.eyebrow {
+  font-size: 13px;
+  letter-spacing: 0.16em;
+  color: var(--olive-deep);
+  font-weight: 600;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.eyebrow::before {
+  content: "";
+  width: 30px;
+  height: 1px;
+  background: var(--olive-deep);
+}
+
+.hero h1 {
+  font-size: clamp(36px, 4.5vw, 54px);
+  line-height: 1.15;
+  margin-bottom: 22px;
+}
+
+.hero p {
+  color: var(--ink-soft);
+  font-size: 16px;
+  line-height: 1.75;
+  max-width: 460px;
+}
+
+.visual {
+  aspect-ratio: 4/5;
+  border-radius: 6px;
+  background: linear-gradient(155deg, var(--olive), var(--ink));
+  position: relative;
+  overflow: hidden;
+}
+
+.visual::after {
+  content: "Y";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-serif-family);
+  font-weight: 900;
+  font-size: 140px;
+  color: rgba(239, 232, 216, 0.1);
+}
+
+.visual.hasPhoto::after {
+  content: none;
+}
+
+.photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}

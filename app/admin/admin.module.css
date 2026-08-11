@@ -1,0 +1,370 @@
+.shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--font-sans-family);
+}
+
+.sidebar {
+  background: var(--ink);
+  color: var(--cream);
+  padding: 32px 22px;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+@media print {
+  .sidebar {
+    display: none !important;
+  }
+  .shell {
+    display: block;
+  }
+}
+
+.mark {
+  font-family: var(--font-serif-family);
+  font-size: 26px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.subtitle {
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: rgba(239, 232, 216, 0.55);
+  margin-bottom: 40px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid rgba(239, 232, 216, 0.14);
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.nav a {
+  padding: 11px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(239, 232, 216, 0.75);
+  transition: all 0.15s ease;
+}
+
+.nav a:hover {
+  background: rgba(239, 232, 216, 0.08);
+  color: var(--cream);
+}
+
+.signOut {
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(239, 232, 216, 0.5);
+  text-align: right;
+  border-top: 1px solid rgba(239, 232, 216, 0.14);
+  padding-top: 20px;
+  margin-top: 20px;
+}
+
+.signOut:hover {
+  color: var(--cream);
+}
+
+.content {
+  padding: 48px 56px 80px;
+  max-width: 1180px;
+}
+
+.content h1 {
+  font-family: var(--font-serif-family);
+  font-size: 30px;
+  font-weight: 500;
+  margin-bottom: 32px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+.card {
+  background: var(--cream-dark);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 28px 30px;
+  margin-bottom: 24px;
+}
+
+.card h2 {
+  font-family: var(--font-serif-family);
+  font-size: 19px;
+  font-weight: 500;
+  margin-bottom: 20px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.table th {
+  text-align: right;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  padding: 0 14px 12px;
+  border-bottom: 1.5px solid var(--ink);
+}
+
+.table th a {
+  color: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  white-space: nowrap;
+}
+
+.table th a:hover {
+  color: var(--ink);
+}
+
+.table td {
+  padding: 14px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: middle;
+}
+
+.table tbody tr:hover {
+  background: rgba(23, 20, 16, 0.02);
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.details {
+  display: grid;
+  grid-template-columns: max-content 1fr max-content 1fr;
+  gap: 12px 18px;
+  font-size: 14px;
+  margin: 0;
+}
+
+.details dt {
+  color: var(--ink-soft);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.details dd {
+  margin: 0;
+}
+
+.form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-end;
+}
+
+.listRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.listRow:last-of-type {
+  border-bottom: none;
+}
+
+.listIndex {
+  width: 20px;
+  flex-shrink: 0;
+  color: var(--ink-soft);
+  font-size: 13px;
+  text-align: center;
+}
+
+.linkButton {
+  font-weight: 600;
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--line);
+}
+
+.linkButton:hover {
+  text-decoration-color: var(--olive-deep);
+  color: var(--olive-deep);
+}
+
+.groupHeaderRow td {
+  background: var(--olive-mist);
+  padding: 12px 14px;
+}
+
+.groupHeaderBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.groupContact {
+  font-weight: 600;
+  font-size: 13.5px;
+}
+
+.groupContact span {
+  font-weight: 400;
+  color: var(--ink-soft);
+}
+
+.groupActions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.miniSelect {
+  padding: 7px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--cream);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.sectionNote {
+  color: var(--ink-soft);
+  font-size: 12.5px;
+  margin-top: 10px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.field label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--ink-soft);
+}
+
+.field input,
+.field select,
+.field textarea {
+  padding: 11px 13px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  font-family: inherit;
+  font-size: 14px;
+  background: var(--cream);
+  color: var(--ink);
+}
+
+.field input:focus-visible,
+.field select:focus-visible,
+.field textarea:focus-visible {
+  outline: 2px solid var(--olive-deep);
+  outline-offset: 1px;
+}
+
+.btn,
+.btnSecondary,
+.btnDanger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 11px 22px;
+  border-radius: 999px;
+  font-size: 13.5px;
+  font-weight: 600;
+  border: 1px solid transparent;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.btn {
+  background: var(--ink);
+  color: var(--cream);
+}
+
+.btn:hover {
+  background: var(--olive-deep);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.btnSecondary {
+  border-color: var(--ink);
+  color: var(--ink);
+  padding: 9px 18px;
+}
+
+.btnSecondary:hover {
+  background: var(--ink);
+  color: var(--cream);
+}
+
+.btnDanger {
+  border-color: var(--line);
+  color: var(--danger);
+  padding: 9px 18px;
+}
+
+.btnDanger:hover {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: white;
+}
+
+.badge {
+  display: inline-block;
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 5px 13px;
+  border-radius: 999px;
+}
+
+.badgePaid {
+  background: var(--olive-mist);
+  color: var(--olive-deep);
+}
+
+.badgePending {
+  background: rgba(139, 58, 43, 0.1);
+  color: var(--danger);
+}
+
+.error {
+  color: var(--danger);
+  font-size: 13px;
+}
+
+.muted {
+  color: var(--ink-soft);
+  font-size: 13px;
+}

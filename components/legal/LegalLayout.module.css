@@ -1,0 +1,73 @@
+.page {
+  padding: 70px 0 120px;
+}
+
+.eyebrow {
+  font-size: 13px;
+  letter-spacing: 0.16em;
+  color: var(--olive-deep);
+  font-weight: 600;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.eyebrow::before {
+  content: "";
+  width: 30px;
+  height: 1px;
+  background: var(--olive-deep);
+}
+
+.page h1 {
+  font-size: clamp(32px, 4vw, 46px);
+  margin-bottom: 10px;
+}
+
+.updated {
+  color: var(--ink-soft);
+  font-size: 13px;
+  margin-bottom: 46px;
+}
+
+.body {
+  max-width: 760px;
+  color: var(--ink-soft);
+  font-size: 15.5px;
+  line-height: 1.75;
+}
+
+.body h2 {
+  color: var(--ink);
+  font-size: 20px;
+  margin-top: 40px;
+  margin-bottom: 14px;
+}
+
+.body h2:first-child {
+  margin-top: 0;
+}
+
+.body p {
+  margin-bottom: 14px;
+}
+
+.body ul {
+  margin: 0 0 14px;
+  padding-inline-start: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.body strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.body a {
+  color: var(--olive-deep);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

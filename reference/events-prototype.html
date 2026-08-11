@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>אירועים פרטיים — Y | Roy Oren</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@300;400;500;700;900&family=Assistant:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #EFE8D8;
+    --cream-dark: #E3D9C2;
+    --ink: #171410;
+    --ink-soft: #3A342A;
+    --olive: #47502E;
+    --olive-deep: #333B20;
+    --olive-mist: #DCE0C8;
+    --line: rgba(23,20,16,0.14);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--cream); color: var(--ink); font-family: 'Assistant', sans-serif; }
+  h1, h2, h3 { font-family: 'Frank Ruhl Libre', serif; font-weight: 500; }
+  a { color: inherit; text-decoration: none; }
+  button { font-family: inherit; border: none; background: none; cursor: pointer; color: inherit; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
+
+  nav {
+    position: sticky; top: 0; z-index: 100; padding: 20px 0;
+    background: var(--cream); border-bottom: 1px solid var(--line);
+  }
+  nav .wrap { display: flex; justify-content: space-between; align-items: center; }
+  .nav-mark { font-family: 'Frank Ruhl Libre', serif; font-size: 24px; font-weight: 700; }
+  .nav-links { display: flex; gap: 32px; font-size: 15px; font-weight: 500; }
+  .nav-links a.active { color: var(--olive-deep); border-bottom: 1px solid var(--olive-deep); padding-bottom: 3px; }
+  .nav-cart { font-size: 14px; font-weight: 600; border: 1px solid var(--ink); border-radius: 999px; padding: 9px 20px; }
+
+  .page-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: calc(100vh - 65px);
+  }
+
+  .intro-col {
+    padding: 80px 60px 80px 40px;
+    display: flex; flex-direction: column; justify-content: center;
+    border-left: 1px solid var(--line);
+  }
+  .eyebrow {
+    font-size: 13px; letter-spacing: 0.16em; color: var(--olive-deep);
+    font-weight: 600; margin-bottom: 20px; display: flex; align-items: center; gap: 12px;
+  }
+  .eyebrow::before { content: ''; width: 30px; height: 1px; background: var(--olive-deep); }
+  .intro-col h1 { font-size: clamp(34px, 4vw, 50px); line-height: 1.15; margin-bottom: 22px; max-width: 440px; }
+  .intro-col > p { color: var(--ink-soft); font-size: 16px; line-height: 1.7; max-width: 420px; margin-bottom: 40px; }
+
+  .carousel { position: relative; margin-bottom: 24px; overflow: hidden; border-radius: 8px; max-width: 420px; }
+  .carousel-track { display: flex; gap: 10px; overflow-x: auto; scroll-behavior: smooth; scrollbar-width: none; }
+  .carousel-track::-webkit-scrollbar { display: none; }
+  .carousel-slide {
+    flex: 0 0 calc(50% - 5px); aspect-ratio: 4/3; border-radius: 8px;
+    background: linear-gradient(135deg, var(--cream-dark), var(--olive-mist));
+  }
+  .carousel-slide:nth-child(2) { background: linear-gradient(135deg, var(--olive-mist), var(--ink)); opacity: 0.85; }
+  .carousel-slide:nth-child(4) { background: linear-gradient(135deg, var(--ink), var(--olive)); opacity: 0.85; }
+  .carousel-nav {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    width: 34px; height: 34px; border-radius: 50%; background: var(--cream);
+    display: flex; align-items: center; justify-content: center; font-size: 16px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+  }
+  .carousel-nav.prev { right: 10px; }
+  .carousel-nav.next { left: 10px; }
+  .carousel-nav:hover { background: var(--olive-deep); color: var(--cream); }
+
+  .lead-time-note {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 12px 18px; background: var(--olive-mist); border-radius: 8px;
+    font-size: 13.5px; color: var(--olive-deep); font-weight: 600; margin-bottom: 44px;
+    max-width: 420px;
+  }
+
+  .event-types { display: flex; flex-direction: column; }
+  .event-type-row {
+    display: flex; justify-content: space-between; padding: 16px 0;
+    border-top: 1px solid var(--line); font-size: 14.5px;
+  }
+  .event-type-row:last-child { border-bottom: 1px solid var(--line); }
+  .event-type-row span:first-child { font-weight: 600; }
+  .event-type-row span:last-child { color: var(--ink-soft); }
+
+  /* ---------- FORM ---------- */
+  .form-col { padding: 80px 40px 80px 60px; }
+  .form-col h2 { font-size: 26px; margin-bottom: 8px; }
+  .form-col > p.form-sub { color: var(--ink-soft); font-size: 14px; margin-bottom: 36px; }
+
+  form { display: flex; flex-direction: column; gap: 22px; max-width: 480px; }
+  .field { display: flex; flex-direction: column; gap: 8px; }
+  .field label { font-size: 13px; font-weight: 600; color: var(--ink-soft); }
+  .field label .req { color: #8B3A2B; }
+  .field input[type="text"],
+  .field input[type="email"],
+  .field input[type="tel"],
+  .field input[type="date"],
+  .field select,
+  .field textarea {
+    padding: 13px 14px; border-radius: 8px;
+    border: 1px solid var(--line); background: transparent;
+    font-family: inherit; font-size: 14.5px; color: var(--ink);
+  }
+  .field textarea { resize: vertical; min-height: 100px; }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+  .guest-stepper {
+    display: inline-flex; align-items: center; gap: 10px;
+    border: 1px solid var(--line); border-radius: 999px; padding: 8px 10px; width: fit-content;
+  }
+  .guest-stepper button { width: 26px; height: 26px; font-size: 17px; flex-shrink: 0; }
+  .guest-stepper input[type="number"] {
+    width: 52px; text-align: center; font-weight: 600; font-size: 15px;
+    border: none; background: transparent; font-family: inherit; color: var(--ink);
+    -moz-appearance: textfield;
+  }
+  .guest-stepper input[type="number"]::-webkit-outer-spin-button,
+  .guest-stepper input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none; margin: 0;
+  }
+
+  .event-type-chips { display: flex; flex-wrap: wrap; gap: 10px; }
+  .type-chip {
+    padding: 10px 18px; border-radius: 999px; border: 1px solid var(--line);
+    font-size: 13.5px; font-weight: 500; cursor: pointer; transition: all 0.2s ease;
+  }
+  .type-chip.selected { background: var(--ink); color: var(--cream); border-color: var(--ink); }
+
+  .field-note {
+    font-size: 12px; color: var(--ink-soft);
+  }
+
+  .file-drop {
+    border: 1px dashed var(--line); border-radius: 10px; padding: 24px;
+    text-align: center; font-size: 13.5px; color: var(--ink-soft);
+    cursor: pointer; transition: all 0.2s ease;
+  }
+  .file-drop:hover, .file-drop.dragover { border-color: var(--olive-deep); background: var(--olive-mist); color: var(--olive-deep); }
+  .file-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .file-chip {
+    font-size: 12.5px; background: var(--olive-mist); color: var(--olive-deep);
+    padding: 6px 12px; border-radius: 999px; display: flex; align-items: center; gap: 8px;
+  }
+  .file-chip button { font-size: 13px; line-height: 1; color: var(--olive-deep); cursor: pointer; }
+
+  .checkbox-row {
+    display: flex; align-items: flex-start; gap: 10px;
+    font-size: 13.5px; color: var(--ink-soft); cursor: pointer;
+  }
+  .checkbox-row input { margin-top: 3px; accent-color: var(--olive-deep); }
+
+  .submit-btn {
+    margin-top: 10px;
+    background: var(--ink); color: var(--cream);
+    padding: 16px; border-radius: 999px;
+    font-size: 15px; font-weight: 600; text-align: center;
+  }
+  .submit-btn:hover { background: var(--olive-deep); }
+  .form-footnote { font-size: 12px; color: var(--ink-soft); text-align: center; }
+
+  @media (max-width: 960px) {
+    .nav-links { display: none; }
+    .page-layout { grid-template-columns: 1fr; }
+    .intro-col { border-left: none; border-bottom: 1px solid var(--line); padding: 60px 32px; }
+    .form-col { padding: 60px 32px; }
+    .field-row { grid-template-columns: 1fr; }
+  }
+  /* ---------- FOOTER ---------- */
+  footer { background: var(--olive-deep); color: var(--cream); padding: 90px 0 40px; }
+  .footer-grid { display: grid; grid-template-columns: 1.2fr 0.8fr 1fr 1fr; gap: 50px; padding-bottom: 60px; border-bottom: 1px solid rgba(239,232,216,0.18); }
+  .footer-mark { font-family: 'Frank Ruhl Libre', serif; font-size: 40px; font-weight: 700; margin-bottom: 18px; }
+  .footer-grid p { color: rgba(239,232,216,0.65); font-size: 14px; line-height: 1.7; max-width: 300px; }
+  .footer-col h4 { font-size: 13px; letter-spacing: 0.12em; color: rgba(239,232,216,0.5); margin-bottom: 20px; font-weight: 600; }
+  .footer-col a { display: block; padding: 7px 0; font-size: 15px; color: var(--cream); }
+  .newsletter-form { display: flex; gap: 8px; }
+  .newsletter-form input { flex: 1; min-width: 0; padding: 10px 12px; border-radius: 6px; border: 1px solid rgba(239,232,216,0.3); background: transparent; font-family: inherit; font-size: 13px; color: var(--cream); }
+  .newsletter-form input::placeholder { color: rgba(239,232,216,0.5); }
+  .newsletter-form button { padding: 10px 16px; border-radius: 6px; border: 1px solid var(--cream); background: var(--cream); color: var(--olive-deep); font-size: 13px; font-weight: 600; white-space: nowrap; }
+  .newsletter-form button:hover { background: transparent; color: var(--cream); }
+  .newsletter-msg { font-size: 12px; margin-top: 8px; color: rgba(239,232,216,0.7); }
+  .footer-bottom { display: flex; justify-content: space-between; padding-top: 30px; font-size: 13px; color: rgba(239,232,216,0.45); }
+  @media (max-width: 860px) { .footer-grid { grid-template-columns: 1fr; gap: 30px; } }
+
+  .back-to-top {
+    position: fixed; bottom: 28px; left: 28px; z-index: 150;
+    width: 46px; height: 46px; border-radius: 50%;
+    background: var(--ink); color: var(--cream); font-size: 18px;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transform: translateY(10px);
+    transition: all 0.3s ease; box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+  }
+  .back-to-top.visible { opacity: 1; pointer-events: auto; transform: translateY(0); }
+  .back-to-top:hover { background: var(--olive-deep); }
+
+  a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+    outline: 2px solid var(--olive-deep); outline-offset: 2px;
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="nav-mark" href="homepage-prototype.html">Y</a>
+    <div class="nav-links">
+      <a href="shop-prototype.html">חנות</a>
+      <a href="meals-prototype.html">ארוחות</a>
+      <a class="active" href="events-prototype.html">אירועים פרטיים</a>
+      <a href="about-prototype.html">אודות</a>
+      <a href="contact-prototype.html">יצירת קשר</a>
+    </div>
+    <a class="nav-cart" href="shop-prototype.html">עגלה · 0</a>
+  </div>
+</nav>
+
+<div class="page-layout">
+  <div class="intro-col">
+    <div class="eyebrow">אירועים פרטיים</div>
+    <h1>אירוע שנבנה בדיוק סביבכם</h1>
+    <p>ימי הולדת, אירועי חברה, ערבים משפחתיים — תפריט מותאם אישית, בבית שלכם או במקום שתבחרו. ממלאים פרטים, ואני חוזר/ת אליכם עם הצעה מותאמת.</p>
+
+    <div class="carousel" id="eventsCarousel">
+      <div class="carousel-track" id="carouselTrack">
+        <div class="carousel-slide"></div>
+        <div class="carousel-slide"></div>
+        <div class="carousel-slide"></div>
+        <div class="carousel-slide"></div>
+      </div>
+      <button class="carousel-nav prev" id="carouselPrev" aria-label="הקודם" type="button">‹</button>
+      <button class="carousel-nav next" id="carouselNext" aria-label="הבא" type="button">›</button>
+    </div>
+
+    <div class="lead-time-note">מומלץ להזמין מוקדם ככל האפשר על מנת לשריין את התאריך</div>
+
+    <div class="event-types">
+      <div class="event-type-row"><span>אצלנו, סביב שולחן</span><span>עד 24 סועדים</span></div>
+      <div class="event-type-row"><span>אצלנו, עמידה</span><span>עד 60 אורחים</span></div>
+      <div class="event-type-row"><span>אירוע חוץ, סביב שולחן</span><span>עד 30 סועדים</span></div>
+      <div class="event-type-row"><span>אירוע חוץ, בופה מעמדות הגשה</span><span>ללא הגבלה</span></div>
+    </div>
+  </div>
+
+  <div class="form-col">
+    <h2>בואו נתכנן את האירוע שלכם</h2>
+    <p class="form-sub">כמה פרטים, ואחזור אליכם בהקדם עם הצעה</p>
+    <form>
+      <div class="field">
+        <label>סוג האירוע <span class="req">*</span></label>
+        <div class="event-type-chips" id="typeChips">
+          <div class="type-chip" data-type="family">ערב משפחתי</div>
+          <div class="type-chip" data-type="corporate">אירוע חברה</div>
+          <div class="type-chip" data-type="wedding">חתונה</div>
+          <div class="type-chip" data-type="birthday">יום הולדת</div>
+          <div class="type-chip" data-type="holiday">ארוחת חג</div>
+          <div class="type-chip" data-type="bachelor">מסיבת רווקים/ות</div>
+          <div class="type-chip" data-type="barmitzvah">בר מצווה</div>
+          <div class="type-chip" data-type="other">אחר</div>
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>שם מלא <span class="req">*</span></label>
+          <input type="text" required>
+        </div>
+        <div class="field">
+          <label>טלפון <span class="req">*</span></label>
+          <input type="tel" required>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>אימייל <span class="req">*</span></label>
+        <input type="email" required>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>תאריך רצוי</label>
+          <input type="date">
+        </div>
+        <div class="field">
+          <label>שעת התחלה</label>
+          <select id="startTime"></select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>מיקום האירוע <span class="req">*</span></label>
+        <div class="event-type-chips" id="locationChips">
+          <div class="type-chip" data-loc="venue">אצלנו, בחלל האירוח</div>
+          <div class="type-chip" data-loc="other">בלוקיישן אחר</div>
+        </div>
+        <input type="text" id="locationDetail" placeholder="פרטי המיקום (כתובת / סוג המקום)" style="display:none; margin-top: 6px;">
+        <p class="field-note" id="venueAddressNote" style="display:none;">📍 חלל האירוח שלנו: רחוב השוק 34, תל אביב</p>
+      </div>
+
+      <div class="field">
+        <label>סגנון ההגשה <span class="req">*</span></label>
+        <div class="event-type-chips" id="formatChips">
+          <div class="type-chip" data-format="buffet">בופה (עמידה, דרינקים וביסים)</div>
+          <div class="type-chip" data-format="seated">ארוחת שף מלאה, סביב שולחן</div>
+          <div class="type-chip" data-format="other">אחר</div>
+        </div>
+        <div class="event-type-chips" id="serviceChips" style="display:none; margin-top: 10px;">
+          <div class="type-chip" data-service="plated">הגשה אישית לצלחת</div>
+          <div class="type-chip" data-service="family">הגשה למרכז השולחן</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>מספר אורחים משוער</label>
+        <div class="guest-stepper">
+          <button type="button" id="guestMinus">−</button>
+          <input type="number" id="guestCount" value="10" min="10">
+          <button type="button" id="guestPlus">+</button>
+        </div>
+        <p class="field-note" id="guestRangeNote">מינימום חיוב: 10 סועדים, גם אם מגיעים פחות</p>
+      </div>
+
+      <div class="field">
+        <label>ספרו לי קצת על האירוע</label>
+        <textarea placeholder="תפריט חלומי, אילוצי תזונה, תקציב משוער, כל מה שחשוב לדעת..."></textarea>
+      </div>
+
+      <label class="checkbox-row">
+        <input type="checkbox">
+        <span>אשמח לקבל עדכונים על ארוחות פתוחות ומוצרים חדשים</span>
+      </label>
+
+      <p class="field-note">בכל אירוע פרטי נוספת עלות קבועה של ₪600 לצוות ניקיון ושטיפת כלים. באירועי חוץ, החלל מוחזר נקי לחלוטין בסיום.</p>
+
+      <a class="submit-btn" href="#">שליחת פנייה</a>
+      <p class="form-footnote">אחזור אליכם בדרך כלל תוך יום עסקים אחד</p>
+    </form>
+  </div>
+</div>
+
+<footer id="contact">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-mark">Y</div>
+        <p>שף פרטי לאירועים וארוחות פתוחות - מכל הלב, מהמטבח שלי</p>
+      </div>
+      <div class="footer-col">
+        <h4>ניווט</h4>
+        <a href="shop-prototype.html">חנות</a>
+        <a href="meals-prototype.html">ארוחות</a>
+        <a href="events-prototype.html">אירועים פרטיים</a>
+      </div>
+      <div class="footer-col">
+        <h4>יצירת קשר</h4>
+        <a href="tel:0543737307">054-3737-307</a>
+        <a href="mailto:roy@ybyroyoren.com">roy@ybyroyoren.com</a>
+        <a href="https://instagram.com/ybyroyoren" target="_blank" rel="noopener">@ybyroyoren</a>
+      </div>
+      <div class="footer-col">
+        <h4>עדכונים</h4>
+        <p style="margin-bottom: 14px;">ארוחות חדשות ומוצרים ישר למייל</p>
+        <form class="newsletter-form" id="newsletterForm">
+          <input type="email" placeholder="האימייל שלכם" required>
+          <button type="submit">הרשמה</button>
+        </form>
+        <p class="newsletter-msg" id="newsletterMsg"></p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Roy Oren</span>
+      <span>אירועים פרטיים · טיוטת עיצוב</span>
+    </div>
+  </div>
+</footer>
+
+<button class="back-to-top" id="backToTop" aria-label="חזרה למעלה">↑</button>
+
+<script>
+const timeSelect = document.getElementById('startTime');
+for (let h = 8; h <= 23; h++) {
+  const opt = document.createElement('option');
+  const label = `${String(h).padStart(2,'0')}:00`;
+  opt.value = label;
+  opt.textContent = label;
+  timeSelect.appendChild(opt);
+}
+
+document.getElementById('typeChips').addEventListener('click', (e) => {
+  const chip = e.target.closest('.type-chip');
+  if (!chip) return;
+  document.querySelectorAll('#typeChips .type-chip').forEach(c => c.classList.remove('selected'));
+  chip.classList.add('selected');
+});
+
+let guests = 10;
+let selectedLocation = null;
+let selectedFormat = null;
+const guestInput = document.getElementById('guestCount');
+
+function getRange() {
+  if (selectedLocation === 'venue' && selectedFormat === 'seated') return { min: 10, max: 24, label: 'אצלנו, בישיבה' };
+  if (selectedLocation === 'venue' && selectedFormat === 'buffet') return { min: 10, max: 60, label: 'אצלנו, עמידה' };
+  if (selectedLocation === 'other' && selectedFormat === 'seated') return { min: 10, max: 30, label: 'אירוע חוץ, סביב שולחן' };
+  return { min: 10, max: null, label: null };
+}
+
+function clamp(val, range) {
+  let v = parseInt(val) || range.min;
+  if (v < range.min) v = range.min;
+  if (range.max && v > range.max) v = range.max;
+  return v;
+}
+
+function updateGuestConstraints() {
+  const range = getRange();
+  guestInput.min = range.min;
+  if (range.max) guestInput.max = range.max; else guestInput.removeAttribute('max');
+  guests = clamp(guestInput.value, range);
+  guestInput.value = guests;
+
+  const rangeNote = document.getElementById('guestRangeNote');
+  let text = range.max
+    ? `טווח מותר: ${range.min} עד ${range.max} סועדים (${range.label}) · מינימום חיוב על ${range.min}`
+    : `מינימום חיוב: ${range.min} סועדים, גם אם מגיעים פחות`;
+  if (selectedLocation === 'other' && guests > 30) {
+    text += ' · לאירועים מעל 30 סועדים נדרשת השכרת ציוד מחברה חיצונית; העלות מועברת ללקוח כפי שהיא, בנוסף למחיר האירוע.';
+  }
+  rangeNote.textContent = text;
+}
+
+document.getElementById('guestPlus').addEventListener('click', () => {
+  const range = getRange();
+  guests = clamp(guests + 1, range);
+  guestInput.value = guests;
+});
+document.getElementById('guestMinus').addEventListener('click', () => {
+  const range = getRange();
+  guests = clamp(guests - 1, range);
+  guestInput.value = guests;
+});
+guestInput.addEventListener('change', () => {
+  const range = getRange();
+  guests = clamp(guestInput.value, range);
+  guestInput.value = guests;
+  updateGuestConstraints();
+});
+
+document.getElementById('locationChips').addEventListener('click', (e) => {
+  const chip = e.target.closest('.type-chip');
+  if (!chip) return;
+  document.querySelectorAll('#locationChips .type-chip').forEach(c => c.classList.remove('selected'));
+  chip.classList.add('selected');
+  document.getElementById('locationDetail').style.display = chip.dataset.loc === 'other' ? 'block' : 'none';
+  document.getElementById('venueAddressNote').style.display = chip.dataset.loc === 'venue' ? 'block' : 'none';
+  selectedLocation = chip.dataset.loc;
+  updateGuestConstraints();
+});
+
+document.getElementById('formatChips').addEventListener('click', (e) => {
+  const chip = e.target.closest('.type-chip');
+  if (!chip) return;
+  document.querySelectorAll('#formatChips .type-chip').forEach(c => c.classList.remove('selected'));
+  chip.classList.add('selected');
+  document.getElementById('serviceChips').style.display = chip.dataset.format === 'seated' ? 'flex' : 'none';
+  selectedFormat = chip.dataset.format;
+  updateGuestConstraints();
+});
+
+document.getElementById('serviceChips').addEventListener('click', (e) => {
+  const chip = e.target.closest('.type-chip');
+  if (!chip) return;
+  document.querySelectorAll('#serviceChips .type-chip').forEach(c => c.classList.remove('selected'));
+  chip.classList.add('selected');
+});
+
+const carouselTrack = document.getElementById('carouselTrack');
+document.getElementById('carouselPrev').addEventListener('click', () => {
+  carouselTrack.scrollBy({ left: 200, behavior: 'smooth' });
+});
+document.getElementById('carouselNext').addEventListener('click', () => {
+  carouselTrack.scrollBy({ left: -200, behavior: 'smooth' });
+});
+
+updateGuestConstraints();
+
+document.getElementById('newsletterForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  document.getElementById('newsletterMsg').textContent = 'תודה! נרשמתם בהצלחה.';
+  e.target.reset();
+});
+
+const backToTop = document.getElementById('backToTop');
+window.addEventListener('scroll', () => {
+  backToTop.classList.toggle('visible', window.scrollY > 600);
+});
+backToTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+</script>
+
+</body>
+</html>

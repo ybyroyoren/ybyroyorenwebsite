@@ -1,0 +1,1870 @@
+{
+  "schemaVersion": 4,
+  "ingredients": [
+    {
+      "id": "b0f9875e-b0ed-41b8-8028-26ea0e0b9fc6",
+      "name": "גרעיני תירס טריים",
+      "unit": "גרם",
+      "supplierId": "0e559d07-5d14-46d3-82a3-7e6b5fb9e173",
+      "purchaseName": "קלחי תירס",
+      "purchaseUnit": "גרם",
+      "yieldPercent": "44",
+      "price": ""
+    },
+    {
+      "id": "2e30dc39-b28f-41b7-93d8-6b7afc7cb987",
+      "name": "מנצ׳גו",
+      "unit": "גרם",
+      "supplierId": "9eda00a6-ac75-4e38-9539-43678331e0b7",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "95",
+      "price": ""
+    },
+    {
+      "id": "b4c46a3d-5dc1-4d29-994f-ac91aec7a813",
+      "name": "פרמז׳נו רג׳יאנו",
+      "unit": "גרם",
+      "supplierId": "9eda00a6-ac75-4e38-9539-43678331e0b7",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "95",
+      "price": ""
+    },
+    {
+      "id": "c34c0c26-b3ab-4973-9abb-7883ebf96295",
+      "name": "מלח אטלנטי",
+      "unit": "גרם",
+      "supplierId": "4fe8fad4-3267-4b5e-864c-789d060fe69a",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": "0.015"
+    },
+    {
+      "id": "b2ba7373-9339-4bfa-bc6f-bf4b542c9fd1",
+      "name": "מלח דק",
+      "unit": "גרם",
+      "supplierId": "4fe8fad4-3267-4b5e-864c-789d060fe69a",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": "0.0014"
+    },
+    {
+      "id": "e441268d-95ac-4b19-816a-a17d8478d72c",
+      "name": "מלח גס",
+      "unit": "גרם",
+      "supplierId": "4fe8fad4-3267-4b5e-864c-789d060fe69a",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": "0.0014"
+    },
+    {
+      "id": "9bf250e5-9540-4900-8c43-6667b8999ad5",
+      "name": "מלח מלדון",
+      "unit": "גרם",
+      "supplierId": "f294adcb-987a-43a6-aafe-60f5e4ea0ecf",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "e8d8ad03-df66-411d-a0a7-118772b91a62",
+      "name": "שקדים חצויים",
+      "unit": "גרם",
+      "supplierId": "f294adcb-987a-43a6-aafe-60f5e4ea0ecf",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "455d42a7-3c67-466e-bc08-d1aa534ca3a7",
+      "name": "שקדים מקלות",
+      "unit": "גרם",
+      "supplierId": "f294adcb-987a-43a6-aafe-60f5e4ea0ecf",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "51089256-a7b1-4f1a-b2c4-a6f1927e644a",
+      "name": "שקדים טחונים (קמח)",
+      "unit": "גרם",
+      "supplierId": "f294adcb-987a-43a6-aafe-60f5e4ea0ecf",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "f722d031-a34d-40a3-8ff7-637177466a48",
+      "name": "אגוזי לוז מולבנים",
+      "unit": "גרם",
+      "supplierId": "f294adcb-987a-43a6-aafe-60f5e4ea0ecf",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "59c27c3d-3a06-489a-b1e9-9d9282829672",
+      "name": "גרוייר",
+      "unit": "גרם",
+      "supplierId": "9eda00a6-ac75-4e38-9539-43678331e0b7",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "91",
+      "price": ""
+    },
+    {
+      "id": "19cdb2b1-84d1-4e52-9923-5f988f83fad4",
+      "name": "גאודה",
+      "unit": "גרם",
+      "supplierId": "9eda00a6-ac75-4e38-9539-43678331e0b7",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "95",
+      "price": ""
+    },
+    {
+      "id": "6ebbe311-705b-47cf-9b54-59c78a5e9d53",
+      "name": "זרעי שומר",
+      "unit": "גרם",
+      "supplierId": "f294adcb-987a-43a6-aafe-60f5e4ea0ecf",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "5164903a-4af3-4c31-8858-07b5fa2f8014",
+      "name": "זרעי כמון",
+      "unit": "גרם",
+      "supplierId": "f294adcb-987a-43a6-aafe-60f5e4ea0ecf",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "a1453c99-99d4-46ae-8190-da76ec2babba",
+      "name": "זרעי כוסברה",
+      "unit": "גרם",
+      "supplierId": "f294adcb-987a-43a6-aafe-60f5e4ea0ecf",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "1126abaa-3b9b-4e72-9fbb-69c0433641e0",
+      "name": "עלי מרווה מיובשים",
+      "unit": "גרם",
+      "supplierId": "f294adcb-987a-43a6-aafe-60f5e4ea0ecf",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "84ab7699-302d-4a22-be1e-1fc35ac455df",
+      "name": "פלפל שחור שלם",
+      "unit": "גרם",
+      "supplierId": "f294adcb-987a-43a6-aafe-60f5e4ea0ecf",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "c2b23bee-05f7-4f1e-a870-6ee18d12e573",
+      "name": "חמאה אירית",
+      "unit": "גרם",
+      "supplierId": "53c938a0-bd2d-46f2-991a-00f1662b5d37",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": "0.042"
+    },
+    {
+      "id": "2f13894f-fcad-49f1-913f-23d527346fd5",
+      "name": "פטה מיוחדת",
+      "unit": "גרם",
+      "supplierId": "9eda00a6-ac75-4e38-9539-43678331e0b7",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "8c1bd6cf-a4d3-4a20-974a-1bb54d83806f",
+      "name": "סומק גס",
+      "unit": "גרם",
+      "supplierId": "f294adcb-987a-43a6-aafe-60f5e4ea0ecf",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "daa1b1c0-8965-4787-b73b-6328fae827a4",
+      "name": "סומק דק",
+      "unit": "גרם",
+      "supplierId": "f294adcb-987a-43a6-aafe-60f5e4ea0ecf",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "4e4a8338-aa09-4b68-bfe8-965009d77bc0",
+      "name": "זעתר תבלין",
+      "unit": "גרם",
+      "supplierId": "f294adcb-987a-43a6-aafe-60f5e4ea0ecf",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "a685c27a-438c-42fa-bb1b-ad2d00c5f3f1",
+      "name": "שמן זית",
+      "unit": "גרם",
+      "supplierId": "287c1ed3-9763-426d-b752-686d9e6d78b6",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "66d230e0-acda-41fb-8e4f-b846d87ccea0",
+      "name": "שמן קנולה",
+      "unit": "גרם",
+      "supplierId": "4fe8fad4-3267-4b5e-864c-789d060fe69a",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": "0.007"
+    },
+    {
+      "id": "e4a523d8-05af-4602-b2d2-be72e1c3bc6b",
+      "name": "חלב",
+      "unit": "גרם",
+      "supplierId": "a3188a21-09b4-416f-bc53-691ce6c7b04a",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "074d6ce5-3c71-4bf6-b569-819720cfaef5",
+      "name": "שמנת",
+      "unit": "גרם",
+      "supplierId": "a3188a21-09b4-416f-bc53-691ce6c7b04a",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": "0.02375"
+    },
+    {
+      "id": "3984312f-0363-4d80-927f-9fa56c8fb452",
+      "name": "ביצה",
+      "unit": "גרם",
+      "supplierId": "53c938a0-bd2d-46f2-991a-00f1662b5d37",
+      "purchaseName": "ביצים",
+      "purchaseUnit": "גרם",
+      "yieldPercent": "",
+      "price": "0.0208"
+    },
+    {
+      "id": "3c25a8be-6ac3-4515-82a9-6c9b067f7958",
+      "name": "לחם מחמצת",
+      "unit": "יחידה",
+      "supplierId": "d96f3ced-f567-4d91-bc24-aadb3df82104",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": "22.88"
+    },
+    {
+      "id": "f776f4c4-f9ea-4009-93d4-a9cb9d70297c",
+      "name": "מיץ לימון",
+      "unit": "גרם",
+      "supplierId": "0e559d07-5d14-46d3-82a3-7e6b5fb9e173",
+      "purchaseName": "לימון שלם",
+      "purchaseUnit": "גרם",
+      "yieldPercent": "30",
+      "price": ""
+    },
+    {
+      "id": "5517c371-cda1-429e-94ad-d703823cef45",
+      "name": "מיץ ליים",
+      "unit": "גרם",
+      "supplierId": "0e559d07-5d14-46d3-82a3-7e6b5fb9e173",
+      "purchaseName": "ליים שלם",
+      "purchaseUnit": "גרם",
+      "yieldPercent": "30",
+      "price": ""
+    },
+    {
+      "id": "03fa2890-ebe1-4f7c-8b99-9eb3579d2ffc",
+      "name": "מלפפון",
+      "unit": "גרם",
+      "supplierId": "0e559d07-5d14-46d3-82a3-7e6b5fb9e173",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "95",
+      "price": ""
+    },
+    {
+      "id": "04b98252-64eb-43b6-9a26-e43c08c6100e",
+      "name": "עגבניה מגי",
+      "unit": "גרם",
+      "supplierId": "0e559d07-5d14-46d3-82a3-7e6b5fb9e173",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "95",
+      "price": ""
+    },
+    {
+      "id": "015c96c6-f356-4da0-a8c1-ad3c7f823ed4",
+      "name": "בצל יבש",
+      "unit": "גרם",
+      "supplierId": "0e559d07-5d14-46d3-82a3-7e6b5fb9e173",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "92",
+      "price": ""
+    },
+    {
+      "id": "36a4e0dc-8149-4615-bd06-f2ffb8200e29",
+      "name": "בצל סגול",
+      "unit": "גרם",
+      "supplierId": "0e559d07-5d14-46d3-82a3-7e6b5fb9e173",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "92",
+      "price": ""
+    },
+    {
+      "id": "657c9c19-3a85-45fc-9462-df3238aca042",
+      "name": "שום",
+      "unit": "גרם",
+      "supplierId": "0e559d07-5d14-46d3-82a3-7e6b5fb9e173",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "75",
+      "price": ""
+    },
+    {
+      "id": "fc62e1d6-941b-412d-ade3-a489c41440a9",
+      "name": "תפו״א ראטה",
+      "unit": "גרם",
+      "supplierId": "0e559d07-5d14-46d3-82a3-7e6b5fb9e173",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "95",
+      "price": ""
+    },
+    {
+      "id": "a666dc3c-f902-4c0a-b744-feddd580ef93",
+      "name": "תפו״א באטר",
+      "unit": "גרם",
+      "supplierId": "0e559d07-5d14-46d3-82a3-7e6b5fb9e173",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "95",
+      "price": ""
+    },
+    {
+      "id": "aae670e9-a9ec-45f0-b692-97ca1cabde0e",
+      "name": "דלעת יפנית",
+      "unit": "גרם",
+      "supplierId": "0e559d07-5d14-46d3-82a3-7e6b5fb9e173",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "50",
+      "price": ""
+    },
+    {
+      "id": "40b97190-750d-43b2-8725-e8e6cbc00325",
+      "name": "יוגורט יווני",
+      "unit": "גרם",
+      "supplierId": "9eda00a6-ac75-4e38-9539-43678331e0b7",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": "0.02119"
+    },
+    {
+      "id": "7ed46163-55a8-4e82-9a76-95b8faae6d4f",
+      "name": "סירופ גלוקוז",
+      "unit": "גרם",
+      "supplierId": "56b9ecb3-4b2b-4d9d-94e5-2bcdc11d51dc",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "5a248669-061a-48e7-8c90-78a824a1eabc",
+      "name": "סוכר אינוורטי",
+      "unit": "גרם",
+      "supplierId": "4fe8fad4-3267-4b5e-864c-789d060fe69a",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "5ec4ac03-e6f0-499f-ae5f-d105bf5a8769",
+      "name": "חלמון",
+      "unit": "גרם",
+      "supplierId": "53c938a0-bd2d-46f2-991a-00f1662b5d37",
+      "purchaseName": "ביצים",
+      "purchaseUnit": "גרם",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "c3087654-f435-4b15-8fe0-2189430a370d",
+      "name": "חלבון",
+      "unit": "גרם",
+      "supplierId": "53c938a0-bd2d-46f2-991a-00f1662b5d37",
+      "purchaseName": "ביצים",
+      "purchaseUnit": "גרם",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "c127e3d1-d01e-4541-9a81-25363ef9a423",
+      "name": "חלמון מפוסטר",
+      "unit": "גרם",
+      "supplierId": "56b9ecb3-4b2b-4d9d-94e5-2bcdc11d51dc",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "bc8519d8-3c44-43cd-a1ea-40b666a1c500",
+      "name": "סוכר לבן",
+      "unit": "גרם",
+      "supplierId": "4fe8fad4-3267-4b5e-864c-789d060fe69a",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": "0.0032"
+    },
+    {
+      "id": "d33f5547-abd1-40bd-acb2-9801d841a1e7",
+      "name": "סוכר חום כהה",
+      "unit": "גרם",
+      "supplierId": "4fe8fad4-3267-4b5e-864c-789d060fe69a",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "cc62ff7d-7c9e-46dc-9161-c91dd30258ed",
+      "name": "סוכר חום בהיר",
+      "unit": "גרם",
+      "supplierId": "4fe8fad4-3267-4b5e-864c-789d060fe69a",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "e9eb6db1-5f18-42ea-8213-8e204765462d",
+      "name": "סוכר דמררה",
+      "unit": "גרם",
+      "supplierId": "4fe8fad4-3267-4b5e-864c-789d060fe69a",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "2be65fdf-100a-4bc4-b178-4eb584674973",
+      "name": "פלפל ירוק שלם (תבלין)",
+      "unit": "גרם",
+      "supplierId": "f294adcb-987a-43a6-aafe-60f5e4ea0ecf",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "464cab4b-8e5e-42b8-877e-21217a42eef7",
+      "name": "חיידקי יוגורט",
+      "unit": "גרם",
+      "supplierId": "0ac958c3-06be-4266-a404-cd039cff8483",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "2069d780-af09-48db-a4de-34f88fd7f4da",
+      "name": "חיידקי קפיר",
+      "unit": "גרם",
+      "supplierId": "0ac958c3-06be-4266-a404-cd039cff8483",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "8164ee71-7ad9-4749-be3c-ded7edef0114",
+      "name": "בצל שאלוט",
+      "unit": "גרם",
+      "supplierId": "0e559d07-5d14-46d3-82a3-7e6b5fb9e173",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "6addcf08-263e-4163-9ecd-23097d0d775d",
+      "name": "יין אדום",
+      "unit": "גרם",
+      "supplierId": "6f82d9bf-3130-410c-adee-474d15090f17",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "d00ef195-228e-45d3-982a-edbf5ddda188",
+      "name": "חומץ בלסמי",
+      "unit": "גרם",
+      "supplierId": "287c1ed3-9763-426d-b752-686d9e6d78b6",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "75c7ef7a-7313-489d-960b-248dc67d59ff",
+      "name": "קולורבי",
+      "unit": "גרם",
+      "supplierId": "0e559d07-5d14-46d3-82a3-7e6b5fb9e173",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "a78064b9-0792-4412-b313-916a699c328a",
+      "name": "רכז רימונים",
+      "unit": "גרם",
+      "supplierId": "4fe8fad4-3267-4b5e-864c-789d060fe69a",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "6c8248ca-73fd-410f-93d1-2ea80d057825",
+      "name": "עירית",
+      "unit": "גרם",
+      "supplierId": "0e559d07-5d14-46d3-82a3-7e6b5fb9e173",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "53493df2-3b18-4e8b-be8c-6f2c1788e6a7",
+      "name": "טימין",
+      "unit": "גרם",
+      "supplierId": "0e559d07-5d14-46d3-82a3-7e6b5fb9e173",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "d01245c7-9fbe-4b3b-b101-743a78130eb9",
+      "name": "רוזמרין",
+      "unit": "גרם",
+      "supplierId": "0e559d07-5d14-46d3-82a3-7e6b5fb9e173",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "b2bea53d-7328-472a-abbc-38ecb1dd7fc4",
+      "name": "מרווה",
+      "unit": "גרם",
+      "supplierId": "0e559d07-5d14-46d3-82a3-7e6b5fb9e173",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "e40410c8-c8a2-4176-a312-c5d1237acafe",
+      "name": "עלי זעתר",
+      "unit": "גרם",
+      "supplierId": "0e559d07-5d14-46d3-82a3-7e6b5fb9e173",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "7c42eb2d-05a3-4683-bb48-41899ddb5a72",
+      "name": "בזיליקום תאילנדי",
+      "unit": "גרם",
+      "supplierId": "0e559d07-5d14-46d3-82a3-7e6b5fb9e173",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "31f60a06-58f9-48aa-b033-d955c7caa4e7",
+      "name": "בזיליקום",
+      "unit": "גרם",
+      "supplierId": "0e559d07-5d14-46d3-82a3-7e6b5fb9e173",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "d3845744-e75a-4a43-b538-b3810fec7b54",
+      "name": "פטרוזיליה",
+      "unit": "גרם",
+      "supplierId": "0e559d07-5d14-46d3-82a3-7e6b5fb9e173",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "f648cf41-bb6a-4524-8761-e9150a8063be",
+      "name": "כוסברה",
+      "unit": "גרם",
+      "supplierId": "0e559d07-5d14-46d3-82a3-7e6b5fb9e173",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "cef2878f-3ad2-4f1d-9d25-eb0e3c1dbecd",
+      "name": "נענע",
+      "unit": "גרם",
+      "supplierId": "0e559d07-5d14-46d3-82a3-7e6b5fb9e173",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "fe75cb6e-214a-48e3-9b2e-d774f3384d36",
+      "name": "קמח לבן רגיל",
+      "unit": "גרם",
+      "supplierId": "4fe8fad4-3267-4b5e-864c-789d060fe69a",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": "0.0043"
+    },
+    {
+      "id": "f08ed902-3de7-44ce-99b0-63e264cba994",
+      "name": "מחית כמהין",
+      "unit": "גרם",
+      "supplierId": "05b7c454-bdfe-46f5-aa4c-7d35bfbace3f",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "dc76b70c-e990-4822-be02-a6cb31c9a079",
+      "name": "פטריות שמפיניון",
+      "unit": "גרם",
+      "supplierId": "0e559d07-5d14-46d3-82a3-7e6b5fb9e173",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "653ca46c-7936-4700-9438-852067115be6",
+      "name": "פטריות שימג׳י חומות",
+      "unit": "גרם",
+      "supplierId": "0e559d07-5d14-46d3-82a3-7e6b5fb9e173",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "4efb2037-8045-4f43-9ecc-d0cdc3a53525",
+      "name": "פטריות שימג׳י לבנות",
+      "unit": "גרם",
+      "supplierId": "0e559d07-5d14-46d3-82a3-7e6b5fb9e173",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "4409e181-b060-415a-8fe8-31e2b0f0cb06",
+      "name": "פטריות שיטאקי",
+      "unit": "גרם",
+      "supplierId": "0e559d07-5d14-46d3-82a3-7e6b5fb9e173",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "3ef3c34b-6ea9-4687-a6a8-d9fed2d64ea0",
+      "name": "פטריות פוטבלו",
+      "unit": "גרם",
+      "supplierId": "0e559d07-5d14-46d3-82a3-7e6b5fb9e173",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "549bfc8b-f2fa-4d95-ba5a-0a1e4be2d3ba",
+      "name": "פטריות פורצ׳יני מיובשות",
+      "unit": "גרם",
+      "supplierId": "287c1ed3-9763-426d-b752-686d9e6d78b6",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "cdf1a58e-edac-4446-bca2-6e536561bf2b",
+      "name": "פטריות שיטאקי מיובשות",
+      "unit": "גרם",
+      "supplierId": "51c7c4b3-3514-49f4-bacb-59a0b1b9874c",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "82d7795b-1fba-47cc-9191-544c8d4e3170",
+      "name": "יין בישול סיני",
+      "unit": "גרם",
+      "supplierId": "51c7c4b3-3514-49f4-bacb-59a0b1b9874c",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "0d88c82f-e273-4aac-bce6-641936ea1508",
+      "name": "כנפיים עוף",
+      "unit": "גרם",
+      "supplierId": "653c10fd-f2d5-427e-8613-1ef02b0477b1",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "4c935c46-7668-4b9f-b814-555b13d3d9cf",
+      "name": "עוף שלם",
+      "unit": "גרם",
+      "supplierId": "653c10fd-f2d5-427e-8613-1ef02b0477b1",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "4d9b7c3b-3cec-4bde-b032-d37262092cf1",
+      "name": "עלה דפנה",
+      "unit": "גרם",
+      "supplierId": "f294adcb-987a-43a6-aafe-60f5e4ea0ecf",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "e52a0ba3-e980-495a-ae2f-e7642458872d",
+      "name": "גזר",
+      "unit": "גרם",
+      "supplierId": "0e559d07-5d14-46d3-82a3-7e6b5fb9e173",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "dab8cd6f-f4eb-49fd-9a46-228a4b0d1507",
+      "name": "סלרי עלים",
+      "unit": "גרם",
+      "supplierId": "0e559d07-5d14-46d3-82a3-7e6b5fb9e173",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "4de3b19f-b4bb-4c6b-8c14-d85094e43b8e",
+      "name": "למונגראס",
+      "unit": "גרם",
+      "supplierId": "0e559d07-5d14-46d3-82a3-7e6b5fb9e173",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "da460ba7-5daa-4f02-8b92-4d5cae1fbd66",
+      "name": "כפיר ליים",
+      "unit": "גרם",
+      "supplierId": "0e559d07-5d14-46d3-82a3-7e6b5fb9e173",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "fc7fcd10-b976-4a2f-966c-c3343ec0eef4",
+      "name": "מוסר ים",
+      "unit": "גרם",
+      "supplierId": "379aa25d-4400-4fa7-a58f-1101917cb167",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "d3978d95-e91c-4927-8d1d-c615c1bd757d",
+      "name": "בר ים",
+      "unit": "גרם",
+      "supplierId": "379aa25d-4400-4fa7-a58f-1101917cb167",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "674fa9b1-95cf-4b82-a114-ae5df34bf8f0",
+      "name": "לברק",
+      "unit": "גרם",
+      "supplierId": "379aa25d-4400-4fa7-a58f-1101917cb167",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "2658b779-de62-4e28-bc7a-cea23d4a047e",
+      "name": "טונה אדומה",
+      "unit": "גרם",
+      "supplierId": "379aa25d-4400-4fa7-a58f-1101917cb167",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "0b066bda-f063-423e-9318-1d15004d5962",
+      "name": "חסה ליטל ג׳ם",
+      "unit": "גרם",
+      "supplierId": "0e559d07-5d14-46d3-82a3-7e6b5fb9e173",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "0c55597a-3b36-40d1-8663-6ed5978060c1",
+      "name": "אטריות שעועית",
+      "unit": "גרם",
+      "supplierId": "51c7c4b3-3514-49f4-bacb-59a0b1b9874c",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "657df0db-80f1-490f-8db7-22aee05c0cd8",
+      "name": "בצל ירוק",
+      "unit": "גרם",
+      "supplierId": "0e559d07-5d14-46d3-82a3-7e6b5fb9e173",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "2f33593c-8b24-43ad-90a1-e330250341ae",
+      "name": "סוכר דקלים",
+      "unit": "גרם",
+      "supplierId": "51c7c4b3-3514-49f4-bacb-59a0b1b9874c",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "25f05efe-c406-4dd9-aaf4-6d1f1ac5669c",
+      "name": "מירין",
+      "unit": "גרם",
+      "supplierId": "4fe8fad4-3267-4b5e-864c-789d060fe69a",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "fc8e5185-61a3-436e-a804-140806350daa",
+      "name": "חומץ אורז",
+      "unit": "גרם",
+      "supplierId": "4fe8fad4-3267-4b5e-864c-789d060fe69a",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "cebc18cc-87f3-4b59-8928-22e1d76a740c",
+      "name": "גוצ׳וצ׳אנג",
+      "unit": "גרם",
+      "supplierId": "51c7c4b3-3514-49f4-bacb-59a0b1b9874c",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "68929f12-4b7c-4ae8-a7b3-07d7a3d8f4c4",
+      "name": "בוטנים קלויים",
+      "unit": "גרם",
+      "supplierId": "f294adcb-987a-43a6-aafe-60f5e4ea0ecf",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "7d198dc1-9cfd-4b64-91fd-44bdf2280988",
+      "name": "רוטב דגים",
+      "unit": "גרם",
+      "supplierId": "51c7c4b3-3514-49f4-bacb-59a0b1b9874c",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "d051c4a2-cfc4-475d-aefb-a9f11fe80d3d",
+      "name": "תמרינדי",
+      "unit": "גרם",
+      "supplierId": "51c7c4b3-3514-49f4-bacb-59a0b1b9874c",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "7b96c05b-a2f1-4b22-abd6-aabb01cb539b",
+      "name": "ארטישוק ירושלמי",
+      "unit": "גרם",
+      "supplierId": "0e559d07-5d14-46d3-82a3-7e6b5fb9e173",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "c2f53d9e-8b86-40ce-930f-268b84358154",
+      "name": "סודה לשתיה",
+      "unit": "גרם",
+      "supplierId": "4fe8fad4-3267-4b5e-864c-789d060fe69a",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "7a97a0e4-28a8-4a4b-bf42-aae13d0d5892",
+      "name": "חמציץ",
+      "unit": "גרם",
+      "supplierId": "0e559d07-5d14-46d3-82a3-7e6b5fb9e173",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "ceb8812e-a96b-48cf-a496-26336c07e509",
+      "name": "דבש",
+      "unit": "גרם",
+      "supplierId": "4fe8fad4-3267-4b5e-864c-789d060fe69a",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "2bfbfdba-7b30-4417-98ec-83072e7e983f",
+      "name": "קסנתן גם",
+      "unit": "גרם",
+      "supplierId": "56b9ecb3-4b2b-4d9d-94e5-2bcdc11d51dc",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "a9aa0466-0b56-4192-b6f5-81c80a58e538",
+      "name": "ג׳ינג׳ר",
+      "unit": "גרם",
+      "supplierId": "0e559d07-5d14-46d3-82a3-7e6b5fb9e173",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "14c71ef2-dca0-4743-bee9-c0488fcbf523",
+      "name": "פלפל ירוק חריף",
+      "unit": "גרם",
+      "supplierId": "0e559d07-5d14-46d3-82a3-7e6b5fb9e173",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "ea59fed0-533e-4618-a4a5-ace015905417",
+      "name": "צ׳ילי אדום טרי",
+      "unit": "גרם",
+      "supplierId": "0e559d07-5d14-46d3-82a3-7e6b5fb9e173",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "9affee5a-111f-4cc2-b7ce-db6658fd15dd",
+      "name": "צ׳ילי גרוס",
+      "unit": "גרם",
+      "supplierId": "f294adcb-987a-43a6-aafe-60f5e4ea0ecf",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "f24b5b4f-c5f9-42b1-b5aa-5a0bcc5f1e38",
+      "name": "גומי זרעי חרובים",
+      "unit": "גרם",
+      "supplierId": "56b9ecb3-4b2b-4d9d-94e5-2bcdc11d51dc",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "2e95693e-290c-4eca-a9b7-88706d257f0d",
+      "name": "גלוקוז אבקה",
+      "unit": "גרם",
+      "supplierId": "56b9ecb3-4b2b-4d9d-94e5-2bcdc11d51dc",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "43daa31a-2362-434f-995f-6458f9a26e0d",
+      "name": "דקסטרוז אבקה",
+      "unit": "גרם",
+      "supplierId": "56b9ecb3-4b2b-4d9d-94e5-2bcdc11d51dc",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "f90a42b1-1e6f-4948-81ce-8c1168e02b16",
+      "name": "סטאב 2000 מייצב",
+      "unit": "גרם",
+      "supplierId": "56b9ecb3-4b2b-4d9d-94e5-2bcdc11d51dc",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "d5a5fca0-ae57-4324-8f96-9a2b6c57aede",
+      "name": "אבקת חלב",
+      "unit": "גרם",
+      "supplierId": "56b9ecb3-4b2b-4d9d-94e5-2bcdc11d51dc",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "77852de1-fde9-4f59-958b-9a5697454d2f",
+      "name": "מקל וניל",
+      "unit": "יחידה",
+      "supplierId": "56b9ecb3-4b2b-4d9d-94e5-2bcdc11d51dc",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": "7"
+    },
+    {
+      "id": "0d347b43-8bfe-4c04-b4a7-d1f7d59fe3d4",
+      "name": "מחית מנגו קפואה",
+      "unit": "גרם",
+      "supplierId": "287c1ed3-9763-426d-b752-686d9e6d78b6",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "d2967291-aa2d-4062-aa94-566f92dd7463",
+      "name": "מחית פטל קפואה",
+      "unit": "גרם",
+      "supplierId": "287c1ed3-9763-426d-b752-686d9e6d78b6",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "b8b4e23a-4c54-4d4b-908c-4c9f3f529abe",
+      "name": "מחית אננס קפואה",
+      "unit": "גרם",
+      "supplierId": "287c1ed3-9763-426d-b752-686d9e6d78b6",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "d7a1b496-bea5-46eb-8e1f-516e45fc70c1",
+      "name": "מחית קוקוס קפואה",
+      "unit": "גרם",
+      "supplierId": "287c1ed3-9763-426d-b752-686d9e6d78b6",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "8013334d-bf4a-4e67-9b5d-387d4f5ef5d0",
+      "name": "מחית פסיפלורה קפואה",
+      "unit": "גרם",
+      "supplierId": "287c1ed3-9763-426d-b752-686d9e6d78b6",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "8efe087d-9fa7-46fc-9fc0-7eb51db0d60d",
+      "name": "סופר ניוטרוז מייצב",
+      "unit": "גרם",
+      "supplierId": "56b9ecb3-4b2b-4d9d-94e5-2bcdc11d51dc",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "9dfff190-a425-44c8-ba36-5cd0e4adff3a",
+      "name": "שוקולד מריר 55 לובקה",
+      "unit": "גרם",
+      "supplierId": "4fe8fad4-3267-4b5e-864c-789d060fe69a",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "618d7cd7-1579-4e8c-9d34-0c07e3be4ac7",
+      "name": "שוקולד חלב 31 לובקה",
+      "unit": "גרם",
+      "supplierId": "4fe8fad4-3267-4b5e-864c-789d060fe69a",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "19931078-f17d-489b-8b73-96c4f1319fe3",
+      "name": "שוקולד לבן לובקה",
+      "unit": "גרם",
+      "supplierId": "4fe8fad4-3267-4b5e-864c-789d060fe69a",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "8ced5549-aaad-45f8-a554-6b1d3230d94c",
+      "name": "שוקולד מריר 70 לובקה",
+      "unit": "גרם",
+      "supplierId": "4fe8fad4-3267-4b5e-864c-789d060fe69a",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "226badc7-d39a-4cb6-8463-ba8030768646",
+      "name": "טחינה גולמית הר ברכה",
+      "unit": "גרם",
+      "supplierId": "4fe8fad4-3267-4b5e-864c-789d060fe69a",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "9dacf4ed-d181-47af-ab1e-5724094086b8",
+      "name": "אבקת סוכר",
+      "unit": "גרם",
+      "supplierId": "4fe8fad4-3267-4b5e-864c-789d060fe69a",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "92f31d70-397b-4389-91dd-529dc5908e5b",
+      "name": "שומשום לבן",
+      "unit": "גרם",
+      "supplierId": "f294adcb-987a-43a6-aafe-60f5e4ea0ecf",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "8ce2c8ba-3713-4193-8897-390fe651d923",
+      "name": "מחית יוזו קפואה",
+      "unit": "גרם",
+      "supplierId": "287c1ed3-9763-426d-b752-686d9e6d78b6",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "3eccc7ce-9367-47a6-b865-7aa7a97a8e47",
+      "name": "מיץ תפוז",
+      "unit": "גרם",
+      "supplierId": "0e559d07-5d14-46d3-82a3-7e6b5fb9e173",
+      "purchaseName": "תפוז",
+      "purchaseUnit": "גרם",
+      "yieldPercent": "30",
+      "price": ""
+    },
+    {
+      "id": "b3c4b528-7905-46ae-889b-a867bba5ff96",
+      "name": "חלב",
+      "unit": "גרם",
+      "supplierId": "a3188a21-09b4-416f-bc53-691ce6c7b04a",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "de36938a-e2c0-4f14-a37b-0e7e8c09d8a9",
+      "name": "קורנפלור",
+      "unit": "גרם",
+      "supplierId": "4fe8fad4-3267-4b5e-864c-789d060fe69a",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "9f2d5daa-24f0-445d-9a67-6ac14f0b60ee",
+      "name": "חלב סויה",
+      "unit": "גרם",
+      "supplierId": "a3188a21-09b4-416f-bc53-691ce6c7b04a",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "04aa7d67-d664-4765-ac27-1c276c4c1e83",
+      "name": "חלב שקדים",
+      "unit": "גרם",
+      "supplierId": "a3188a21-09b4-416f-bc53-691ce6c7b04a",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "8e42f048-f310-4be7-94eb-d06674658e16",
+      "name": "אבקת קקאו",
+      "unit": "גרם",
+      "supplierId": "56b9ecb3-4b2b-4d9d-94e5-2bcdc11d51dc",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "7c721f8b-e08f-4f75-9dfd-4786cf4eb0a9",
+      "name": "שמן קוקוס",
+      "unit": "גרם",
+      "supplierId": "4fe8fad4-3267-4b5e-864c-789d060fe69a",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "1878ae58-56c4-456a-a1f9-a13f20d0561e",
+      "name": "סירופ מייפל",
+      "unit": "גרם",
+      "supplierId": "f294adcb-987a-43a6-aafe-60f5e4ea0ecf",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "d90cf92c-7558-40b9-a12f-320875b4f506",
+      "name": "בייגל ירושלמי",
+      "unit": "גרם",
+      "supplierId": "05b7c454-bdfe-46f5-aa4c-7d35bfbace3f",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "c3967ef2-988b-44fe-bec4-fa669e90290f",
+      "name": "פינגר ליים",
+      "unit": "גרם",
+      "supplierId": "0e559d07-5d14-46d3-82a3-7e6b5fb9e173",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "980a4291-4b58-4e6f-9fd3-3f928b7154ad",
+      "name": "עשן נוזלי",
+      "unit": "גרם",
+      "supplierId": "4fe8fad4-3267-4b5e-864c-789d060fe69a",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "97ca7731-5b04-40bf-bd5b-4a9270dc9df7",
+      "name": "חציל",
+      "unit": "גרם",
+      "supplierId": "0e559d07-5d14-46d3-82a3-7e6b5fb9e173",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "6d7f0f7c-59ff-4f56-94ab-19c17dfcaffe",
+      "name": "קרם פרש",
+      "unit": "גרם",
+      "supplierId": "9eda00a6-ac75-4e38-9539-43678331e0b7",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "926c8e00-bfc4-4b12-b2b9-b89b8936d6bf",
+      "name": "חרדל דיז׳ון חלק",
+      "unit": "גרם",
+      "supplierId": "4fe8fad4-3267-4b5e-864c-789d060fe69a",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "53476575-5512-4963-875f-48607cc5b737",
+      "name": "חרדל דיז׳ון גרגירים",
+      "unit": "גרם",
+      "supplierId": "4fe8fad4-3267-4b5e-864c-789d060fe69a",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "730d4d33-4eed-4a4b-aeb8-cd496f7f1fad",
+      "name": "עגבניה שרי אדומה",
+      "unit": "גרם",
+      "supplierId": "0e559d07-5d14-46d3-82a3-7e6b5fb9e173",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "7b8ad92c-afa1-44e9-8115-70ace7e376a6",
+      "name": "חומץ שרי",
+      "unit": "גרם",
+      "supplierId": "05b7c454-bdfe-46f5-aa4c-7d35bfbace3f",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "a21b4743-d666-4cb3-8168-d7f5d89b91ac",
+      "name": "ענבים ירוקים",
+      "unit": "גרם",
+      "supplierId": "0e559d07-5d14-46d3-82a3-7e6b5fb9e173",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "7ad8242e-4280-450d-9649-e58f7e430253",
+      "name": "מנגו",
+      "unit": "גרם",
+      "supplierId": "0e559d07-5d14-46d3-82a3-7e6b5fb9e173",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "925fc7e8-29f0-417c-b81d-727cefd5a904",
+      "name": "ליצ׳י",
+      "unit": "גרם",
+      "supplierId": "0e559d07-5d14-46d3-82a3-7e6b5fb9e173",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "36d01e1d-3336-4431-8945-637af8314092",
+      "name": "קרם קוקוס",
+      "unit": "גרם",
+      "supplierId": "4fe8fad4-3267-4b5e-864c-789d060fe69a",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": ""
+    },
+    {
+      "id": "5e76a81e-3819-41c4-91cb-686ed163dd40",
+      "name": "פילדלפיה",
+      "unit": "גרם",
+      "supplierId": "56b9ecb3-4b2b-4d9d-94e5-2bcdc11d51dc",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "99",
+      "price": "0.06934"
+    },
+    {
+      "id": "38347cc6-dd6b-45c6-85d4-c4bae06b9ce3",
+      "name": "שמן שומשום",
+      "unit": "גרם",
+      "supplierId": "4fe8fad4-3267-4b5e-864c-789d060fe69a",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": "0.05"
+    },
+    {
+      "id": "2cbc152f-44cd-4473-9c9b-d4345181e5fa",
+      "name": "עוגיות לוטוס",
+      "unit": "גרם",
+      "supplierId": "4fe8fad4-3267-4b5e-864c-789d060fe69a",
+      "purchaseName": "",
+      "purchaseUnit": "",
+      "yieldPercent": "",
+      "price": "0.0316"
+    }
+  ],
+  "recipes": [
+    {
+      "id": "468cba10-4478-4944-bdd1-6330b89c37ab",
+      "name": "לחם מחמצת",
+      "type": "dish",
+      "baseAmount": "16",
+      "baseUnit": "מנות",
+      "components": [
+        {
+          "kind": "ingredient",
+          "ingredientId": "3c25a8be-6ac3-4515-82a9-6c9b067f7958",
+          "amount": "1"
+        }
+      ],
+      "prepSteps": [],
+      "prepEquipment": [],
+      "eventEquipment": []
+    },
+    {
+      "id": "b9498635-7655-4280-b21d-a2e2ee3afcd5",
+      "name": "ריבת זעתר",
+      "type": "dish",
+      "baseAmount": "320",
+      "baseUnit": "גרם",
+      "components": [
+        {
+          "kind": "ingredient",
+          "ingredientId": "7ed46163-55a8-4e82-9a76-95b8faae6d4f",
+          "amount": "40"
+        },
+        {
+          "kind": "ingredient",
+          "ingredientId": "5a248669-061a-48e7-8c90-78a824a1eabc",
+          "amount": "40"
+        },
+        {
+          "kind": "ingredient",
+          "ingredientId": "5ec4ac03-e6f0-499f-ae5f-d105bf5a8769",
+          "amount": "40"
+        },
+        {
+          "kind": "ingredient",
+          "ingredientId": "a685c27a-438c-42fa-bb1b-ad2d00c5f3f1",
+          "amount": "180"
+        },
+        {
+          "kind": "ingredient",
+          "ingredientId": "4e4a8338-aa09-4b68-bfe8-965009d77bc0",
+          "amount": "15"
+        },
+        {
+          "kind": "ingredient",
+          "ingredientId": "c34c0c26-b3ab-4973-9abb-7883ebf96295",
+          "amount": "5"
+        }
+      ],
+      "prepSteps": [],
+      "prepEquipment": [
+        {
+          "equipId": "22698288-713a-4689-84e6-50e24caecfa7",
+          "qty": 1
+        },
+        {
+          "equipId": "5301efe8-6365-4029-9e69-219e6d56336b",
+          "qty": 1
+        }
+      ],
+      "eventEquipment": []
+    },
+    {
+      "id": "92fe44de-2302-4a03-8265-582279a3a44f",
+      "name": "רוטב ביצה קשה",
+      "type": "prep",
+      "baseAmount": "300",
+      "baseUnit": "גרם",
+      "components": [
+        {
+          "kind": "ingredient",
+          "ingredientId": "3984312f-0363-4d80-927f-9fa56c8fb452",
+          "amount": "50"
+        },
+        {
+          "kind": "ingredient",
+          "ingredientId": "2f33593c-8b24-43ad-90a1-e330250341ae",
+          "amount": "20"
+        },
+        {
+          "kind": "ingredient",
+          "ingredientId": "25f05efe-c406-4dd9-aaf4-6d1f1ac5669c",
+          "amount": "60"
+        },
+        {
+          "kind": "ingredient",
+          "ingredientId": "d051c4a2-cfc4-475d-aefb-a9f11fe80d3d",
+          "amount": "60"
+        },
+        {
+          "kind": "ingredient",
+          "ingredientId": "cebc18cc-87f3-4b59-8928-22e1d76a740c",
+          "amount": "30"
+        },
+        {
+          "kind": "ingredient",
+          "ingredientId": "7d198dc1-9cfd-4b64-91fd-44bdf2280988",
+          "amount": "20"
+        },
+        {
+          "kind": "ingredient",
+          "ingredientId": "68929f12-4b7c-4ae8-a7b3-07d7a3d8f4c4",
+          "amount": "50"
+        }
+      ],
+      "prepSteps": [],
+      "prepEquipment": [],
+      "eventEquipment": []
+    },
+    {
+      "id": "4034cfb4-184c-42aa-9784-065552048733",
+      "name": "עוגת גבינה",
+      "type": "dish",
+      "baseAmount": "40",
+      "baseUnit": "מנות",
+      "components": [
+        {
+          "kind": "ingredient",
+          "ingredientId": "5e76a81e-3819-41c4-91cb-686ed163dd40",
+          "amount": "875"
+        },
+        {
+          "kind": "ingredient",
+          "ingredientId": "bc8519d8-3c44-43cd-a1ea-40b666a1c500",
+          "amount": "220"
+        },
+        {
+          "kind": "ingredient",
+          "ingredientId": "3984312f-0363-4d80-927f-9fa56c8fb452",
+          "amount": "100"
+        },
+        {
+          "kind": "ingredient",
+          "ingredientId": "77852de1-fde9-4f59-958b-9a5697454d2f",
+          "amount": "1"
+        },
+        {
+          "kind": "ingredient",
+          "ingredientId": "fe75cb6e-214a-48e3-9b2e-d774f3384d36",
+          "amount": "50"
+        },
+        {
+          "kind": "ingredient",
+          "ingredientId": "074d6ce5-3c71-4bf6-b569-819720cfaef5",
+          "amount": "300"
+        },
+        {
+          "kind": "ingredient",
+          "ingredientId": "c2b23bee-05f7-4f1e-a870-6ee18d12e573",
+          "amount": "40"
+        },
+        {
+          "kind": "ingredient",
+          "ingredientId": "2cbc152f-44cd-4473-9c9b-d4345181e5fa",
+          "amount": "250"
+        }
+      ],
+      "prepSteps": [],
+      "prepEquipment": [],
+      "eventEquipment": []
+    }
+  ],
+  "events": [
+    {
+      "id": "0d1bec1d-7192-4d11-a624-5008d7d5f153",
+      "name": "ארוחה פתוחה 25.7.2026",
+      "date": "2026-07-25",
+      "location": "אצלנו",
+      "guests": "18",
+      "eventType": "offsite",
+      "menu": [
+        {
+          "recipeId": "468cba10-4478-4944-bdd1-6330b89c37ab",
+          "servings": 18
+        },
+        {
+          "recipeId": "4034cfb4-184c-42aa-9784-065552048733",
+          "servings": 18
+        },
+        {
+          "recipeId": "b9498635-7655-4280-b21d-a2e2ee3afcd5",
+          "servings": "2"
+        }
+      ],
+      "guestSeats": [
+        "595446ed-7700-4aae-aeb7-05a894ac1be5",
+        "7f5d1d04-1b8f-46bd-b820-24ba73069982",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "notes": ""
+    }
+  ],
+  "suppliers": [
+    {
+      "id": "0e559d07-5d14-46d3-82a3-7e6b5fb9e173",
+      "name": "יוכי אספרגוס",
+      "note": ""
+    },
+    {
+      "id": "34e454dd-1546-407f-8822-8aa5621d9648",
+      "name": "אומצה בשוק",
+      "note": ""
+    },
+    {
+      "id": "a3188a21-09b4-416f-bc53-691ce6c7b04a",
+      "name": "סופר",
+      "note": ""
+    },
+    {
+      "id": "287c1ed3-9763-426d-b752-686d9e6d78b6",
+      "name": "רסטרטו",
+      "note": ""
+    },
+    {
+      "id": "e7ece752-8bcb-4ad2-8778-26eec971364f",
+      "name": "מייסטר",
+      "note": ""
+    },
+    {
+      "id": "0ac958c3-06be-4266-a404-cd039cff8483",
+      "name": "ניצת הדובדבן",
+      "note": ""
+    },
+    {
+      "id": "379aa25d-4400-4fa7-a58f-1101917cb167",
+      "name": "בסטה דגים",
+      "note": ""
+    },
+    {
+      "id": "53c938a0-bd2d-46f2-991a-00f1662b5d37",
+      "name": "משק החלב",
+      "note": ""
+    },
+    {
+      "id": "9eda00a6-ac75-4e38-9539-43678331e0b7",
+      "name": "אגתה / דווקא גורמה",
+      "note": ""
+    },
+    {
+      "id": "4fe8fad4-3267-4b5e-864c-789d060fe69a",
+      "name": "שימורי איכות",
+      "note": ""
+    },
+    {
+      "id": "51c7c4b3-3514-49f4-bacb-59a0b1b9874c",
+      "name": "מזרח ומערב",
+      "note": ""
+    },
+    {
+      "id": "f294adcb-987a-43a6-aafe-60f5e4ea0ecf",
+      "name": "חבשוש",
+      "note": ""
+    },
+    {
+      "id": "d96f3ced-f567-4d91-bc24-aadb3df82104",
+      "name": "אלכסנדר",
+      "note": ""
+    },
+    {
+      "id": "6f82d9bf-3130-410c-adee-474d15090f17",
+      "name": "אקרמן",
+      "note": ""
+    },
+    {
+      "id": "56b9ecb3-4b2b-4d9d-94e5-2bcdc11d51dc",
+      "name": "קוקסטוק",
+      "note": ""
+    },
+    {
+      "id": "653c10fd-f2d5-427e-8613-1ef02b0477b1",
+      "name": "הרצל מתיתיהו",
+      "note": ""
+    },
+    {
+      "id": "05b7c454-bdfe-46f5-aa4c-7d35bfbace3f",
+      "name": "אחר",
+      "note": ""
+    }
+  ],
+  "equipment": [
+    {
+      "id": "faa8496c-82a1-4948-a196-8953150156f1",
+      "name": "מייקרופליין",
+      "note": ""
+    },
+    {
+      "id": "312f6baf-8092-41e4-9887-b561a5adb22b",
+      "name": "סכין שף",
+      "note": ""
+    },
+    {
+      "id": "4623753d-b97d-43d7-bd33-c6f5f7cfd41d",
+      "name": "סכין לחם",
+      "note": ""
+    },
+    {
+      "id": "b065834b-897b-4b9f-a6b3-2d1a1ab20db6",
+      "name": "אינדוקציה",
+      "note": ""
+    },
+    {
+      "id": "22698288-713a-4689-84e6-50e24caecfa7",
+      "name": "מטרפה",
+      "note": ""
+    },
+    {
+      "id": "5301efe8-6365-4029-9e69-219e6d56336b",
+      "name": "לקקן קטן",
+      "note": ""
+    },
+    {
+      "id": "53afd65c-da3e-449a-9264-b4d09fb9c754",
+      "name": "לקקן גדול",
+      "note": ""
+    },
+    {
+      "id": "673af062-8c19-4773-aa27-0c0d80dc9cff",
+      "name": "מד חום דיגיטלי",
+      "note": ""
+    }
+  ],
+  "guests": [
+    {
+      "id": "7f5d1d04-1b8f-46bd-b820-24ba73069982",
+      "name": "יובל גולדשטיין",
+      "restrictions": "ללא כוסברה"
+    },
+    {
+      "id": "595446ed-7700-4aae-aeb7-05a894ac1be5",
+      "name": "רוי אורן",
+      "restrictions": ""
+    }
+  ]
+}

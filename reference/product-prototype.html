@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>עוגת גבינה קלאסית — Y | Roy Oren</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@300;400;500;700;900&family=Assistant:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #EFE8D8; --cream-dark: #E3D9C2; --ink: #171410; --ink-soft: #3A342A;
+    --olive: #47502E; --olive-deep: #333B20; --olive-mist: #DCE0C8; --line: rgba(23,20,16,0.14);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--cream); color: var(--ink); font-family: 'Assistant', sans-serif; }
+  h1, h2, h3 { font-family: 'Frank Ruhl Libre', serif; font-weight: 500; }
+  a { color: inherit; text-decoration: none; }
+  button { font-family: inherit; border: none; background: none; cursor: pointer; color: inherit; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
+
+  nav { position: sticky; top: 0; z-index: 100; padding: 20px 0; background: var(--cream); border-bottom: 1px solid var(--line); }
+  nav .wrap { display: flex; justify-content: space-between; align-items: center; }
+  .nav-mark { font-family: 'Frank Ruhl Libre', serif; font-size: 24px; font-weight: 700; }
+  .nav-links { display: flex; gap: 32px; font-size: 15px; font-weight: 500; }
+  .nav-links a.active { color: var(--olive-deep); border-bottom: 1px solid var(--olive-deep); padding-bottom: 3px; }
+  .nav-cart { font-size: 14px; font-weight: 600; border: 1px solid var(--ink); border-radius: 999px; padding: 9px 20px; }
+
+  .breadcrumb { padding: 26px 0 0; font-size: 13px; color: var(--ink-soft); }
+  .breadcrumb a:hover { color: var(--olive-deep); }
+
+  .product-layout {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 70px;
+    padding: 40px 0 110px; align-items: start;
+  }
+
+  .gallery-main {
+    aspect-ratio: 1; border-radius: 8px; margin-bottom: 14px;
+    background: linear-gradient(135deg, var(--ink) 0%, var(--olive-deep) 100%);
+    position: relative; overflow: hidden;
+  }
+  .gallery-main::after {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(circle at 30% 30%, var(--olive-mist), transparent 60%); opacity: 0.7;
+  }
+  .gallery-thumbs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .gallery-thumb {
+    aspect-ratio: 1; border-radius: 6px; cursor: pointer;
+    background: linear-gradient(135deg, var(--cream-dark), var(--olive-mist));
+    border: 2px solid transparent;
+  }
+  .gallery-thumb.active { border-color: var(--ink); }
+
+  .product-tag {
+    display: inline-block; font-size: 12px; letter-spacing: 0.05em; font-weight: 600;
+    background: var(--olive-mist); color: var(--olive-deep); padding: 6px 14px; border-radius: 999px; margin-bottom: 18px;
+  }
+  .product-info h1 { font-size: clamp(30px, 3.4vw, 42px); margin-bottom: 14px; }
+  .price-row { display: flex; align-items: baseline; gap: 10px; margin-bottom: 26px; }
+  .price-main { font-size: 26px; font-weight: 700; }
+  .price-vat-note { font-size: 13px; color: var(--ink-soft); }
+
+  .product-desc { font-size: 15.5px; color: var(--ink-soft); line-height: 1.75; margin-bottom: 30px; max-width: 460px; }
+
+  .info-block { padding: 18px 0; border-top: 1px solid var(--line); }
+  .info-block:last-of-type { border-bottom: 1px solid var(--line); margin-bottom: 30px; }
+  .info-block h4 { font-size: 12px; letter-spacing: 0.08em; color: var(--ink-soft); font-weight: 600; margin-bottom: 8px; text-transform: uppercase; }
+  .info-block p { font-size: 14.5px; }
+  .allergen-tag {
+    display: inline-block; font-size: 12.5px; color: var(--olive-deep); font-weight: 600;
+  }
+
+  .size-select { margin-bottom: 26px; }
+  .size-select h4 { font-size: 12px; letter-spacing: 0.08em; color: var(--ink-soft); font-weight: 600; margin-bottom: 12px; text-transform: uppercase; }
+  .size-chips { display: flex; flex-wrap: wrap; gap: 10px; }
+  .size-chip {
+    padding: 10px 18px; border-radius: 999px; border: 1px solid var(--line);
+    font-size: 13.5px; font-weight: 500; cursor: pointer; transition: all 0.2s ease;
+  }
+  .size-chip.selected { background: var(--ink); color: var(--cream); border-color: var(--ink); }
+
+  .qty-add-row { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+  .qty-control { display: inline-flex; align-items: center; gap: 16px; border: 1px solid var(--line); border-radius: 999px; padding: 8px 10px; }
+  .qty-control button { width: 26px; height: 26px; font-size: 16px; }
+  .add-to-cart-btn {
+    flex: 1; background: var(--ink); color: var(--cream); padding: 15px; border-radius: 999px;
+    font-size: 15px; font-weight: 600; text-align: center;
+  }
+  .add-to-cart-btn:hover { background: var(--olive-deep); }
+  .pickup-note {
+    font-size: 13px; color: var(--olive-deep); background: var(--olive-mist);
+    padding: 10px 16px; border-radius: 8px; display: inline-block;
+  }
+
+  .related-section { padding: 0 0 110px; }
+  .related-section h2 { font-size: 26px; margin-bottom: 30px; }
+  .related-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+  .related-card { display: flex; flex-direction: column; }
+  .related-visual {
+    aspect-ratio: 1; border-radius: 6px; margin-bottom: 14px;
+    background: linear-gradient(135deg, var(--cream-dark), var(--olive-mist));
+  }
+  .related-name { font-family: 'Frank Ruhl Libre', serif; font-size: 16px; margin-bottom: 4px; }
+  .related-price { font-size: 13.5px; color: var(--ink-soft); }
+
+  .out-of-stock-badge {
+    display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.05em;
+    background: rgba(139,58,43,0.1); color: #8B3A2B; padding: 6px 14px; border-radius: 999px; margin-bottom: 14px;
+  }
+  .out-of-stock-text { font-size: 14.5px; color: var(--ink-soft); line-height: 1.6; margin-bottom: 18px; max-width: 380px; }
+  .coupon-row { display: flex; gap: 8px; max-width: 380px; }
+  .coupon-row input {
+    flex: 1; padding: 12px 14px; border-radius: 8px; border: 1px solid var(--line);
+    background: transparent; font-family: inherit; font-size: 14px; color: var(--ink);
+  }
+  .coupon-row button {
+    padding: 0 18px; border-radius: 8px; border: 1px solid var(--ink);
+    font-size: 13.5px; font-weight: 600; transition: all 0.2s ease;
+  }
+  .coupon-row button:hover { background: var(--ink); color: var(--cream); }
+  .stock-demo-toggle {
+    margin-top: 30px; padding-top: 18px; border-top: 1px dashed var(--line);
+    font-size: 12px; color: var(--ink-soft);
+  }
+  .stock-demo-toggle input { accent-color: var(--olive-deep); margin-left: 6px; }
+
+  @media (max-width: 860px) {
+    .nav-links { display: none; }
+    .product-layout { grid-template-columns: 1fr; gap: 30px; }
+    .related-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  /* ---------- FOOTER ---------- */
+  footer { background: var(--olive-deep); color: var(--cream); padding: 90px 0 40px; }
+  .footer-grid { display: grid; grid-template-columns: 1.2fr 0.8fr 1fr 1fr; gap: 50px; padding-bottom: 60px; border-bottom: 1px solid rgba(239,232,216,0.18); }
+  .footer-mark { font-family: 'Frank Ruhl Libre', serif; font-size: 40px; font-weight: 700; margin-bottom: 18px; }
+  .footer-grid p { color: rgba(239,232,216,0.65); font-size: 14px; line-height: 1.7; max-width: 300px; }
+  .footer-col h4 { font-size: 13px; letter-spacing: 0.12em; color: rgba(239,232,216,0.5); margin-bottom: 20px; font-weight: 600; }
+  .footer-col a { display: block; padding: 7px 0; font-size: 15px; color: var(--cream); }
+  .newsletter-form { display: flex; gap: 8px; }
+  .newsletter-form input { flex: 1; min-width: 0; padding: 10px 12px; border-radius: 6px; border: 1px solid rgba(239,232,216,0.3); background: transparent; font-family: inherit; font-size: 13px; color: var(--cream); }
+  .newsletter-form input::placeholder { color: rgba(239,232,216,0.5); }
+  .newsletter-form button { padding: 10px 16px; border-radius: 6px; border: 1px solid var(--cream); background: var(--cream); color: var(--olive-deep); font-size: 13px; font-weight: 600; white-space: nowrap; }
+  .newsletter-form button:hover { background: transparent; color: var(--cream); }
+  .newsletter-msg { font-size: 12px; margin-top: 8px; color: rgba(239,232,216,0.7); }
+  .footer-bottom { display: flex; justify-content: space-between; padding-top: 30px; font-size: 13px; color: rgba(239,232,216,0.45); }
+  @media (max-width: 860px) { .footer-grid { grid-template-columns: 1fr; gap: 30px; } }
+
+  /* ---------- CART DRAWER ---------- */
+  .overlay {
+    position: fixed; inset: 0; background: rgba(23,20,16,0.35);
+    opacity: 0; pointer-events: none; transition: opacity 0.3s ease; z-index: 200;
+  }
+  .overlay.open { opacity: 1; pointer-events: auto; }
+  .drawer {
+    position: fixed; top: 0; left: 0; height: 100%; width: min(420px, 92vw);
+    background: var(--cream); z-index: 201;
+    transform: translateX(-100%);
+    transition: transform 0.35s cubic-bezier(.4,0,.2,1);
+    display: flex; flex-direction: column;
+    box-shadow: 20px 0 60px rgba(0,0,0,0.15);
+  }
+  .drawer.open { transform: translateX(0); }
+  .drawer-head { padding: 28px 30px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; }
+  .drawer-head h3 { font-size: 22px; }
+  .drawer-close { font-size: 22px; line-height: 1; }
+  .drawer-body { flex: 1; overflow-y: auto; padding: 20px 30px; }
+  .drawer-empty { color: var(--ink-soft); font-size: 14px; padding: 40px 0; text-align: center; }
+  .cart-item { display: flex; gap: 14px; padding: 18px 0; border-bottom: 1px solid var(--line); }
+  .cart-item-visual { width: 62px; height: 62px; border-radius: 5px; flex-shrink: 0; background: linear-gradient(135deg, var(--ink), var(--olive-deep)); }
+  .cart-item-info { flex: 1; }
+  .cart-item-name { font-family: 'Frank Ruhl Libre', serif; font-size: 16px; margin-bottom: 4px; }
+  .cart-item-price { font-size: 13px; color: var(--ink-soft); margin-bottom: 10px; }
+  .qty-control { display: inline-flex; align-items: center; gap: 12px; border: 1px solid var(--line); border-radius: 999px; padding: 4px 6px; }
+  .qty-control button { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 15px; }
+  .cart-item-remove { font-size: 12px; color: #8B3A2B; margin-right: 14px; text-decoration: underline; }
+  .cart-item-total { font-size: 14px; font-weight: 600; white-space: nowrap; }
+  .drawer-footer { padding: 24px 30px 30px; border-top: 1px solid var(--line); }
+  .pickup-select { margin-bottom: 20px; }
+  .pickup-select label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--ink-soft); }
+  .pickup-select select { width: 100%; padding: 12px 14px; border-radius: 8px; border: 1px solid var(--line); background: var(--cream); font-family: inherit; font-size: 14px; color: var(--ink); }
+  .totals-row { display: flex; justify-content: space-between; font-size: 14px; color: var(--ink-soft); margin-bottom: 8px; }
+  .totals-row.grand { font-size: 18px; font-weight: 700; color: var(--ink); margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
+  .checkout-btn { display: block; width: 100%; margin-top: 20px; background: var(--ink); color: var(--cream); padding: 16px; border-radius: 999px; font-size: 15px; font-weight: 600; text-align: center; }
+  .checkout-btn:hover { background: var(--olive-deep); }
+  .drawer-note { font-size: 12px; color: var(--ink-soft); margin-top: 14px; text-align: center; }
+
+  .back-to-top {
+    position: fixed; bottom: 28px; left: 28px; z-index: 150;
+    width: 46px; height: 46px; border-radius: 50%;
+    background: var(--ink); color: var(--cream); font-size: 18px;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transform: translateY(10px);
+    transition: all 0.3s ease; box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+  }
+  .back-to-top.visible { opacity: 1; pointer-events: auto; transform: translateY(0); }
+  .back-to-top:hover { background: var(--olive-deep); }
+
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--olive-deep); outline-offset: 2px; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="nav-mark" href="homepage-prototype.html">Y</a>
+    <div class="nav-links">
+      <a class="active" href="shop-prototype.html">חנות</a>
+      <a href="meals-prototype.html">ארוחות</a>
+      <a href="events-prototype.html">אירועים פרטיים</a>
+      <a href="about-prototype.html">אודות</a>
+      <a href="contact-prototype.html">יצירת קשר</a>
+    </div>
+    <button class="nav-cart" id="cartToggle" type="button">עגלה · <span id="navCartCount">0</span></button>
+  </div>
+</nav>
+
+<div class="wrap breadcrumb">
+  <a href="shop-prototype.html">חנות</a> / <a href="shop-prototype.html">קינוחים</a> / עוגת גבינה קלאסית
+</div>
+
+<div class="wrap product-layout">
+  <div>
+    <div class="gallery-main" id="galleryMain"></div>
+    <div class="gallery-thumbs" id="galleryThumbs">
+      <div class="gallery-thumb active"></div>
+      <div class="gallery-thumb"></div>
+      <div class="gallery-thumb"></div>
+      <div class="gallery-thumb"></div>
+    </div>
+  </div>
+
+  <div class="product-info">
+    <span class="product-tag">הכי נמכר</span>
+    <h1>עוגת גבינה קלאסית</h1>
+    <div class="price-row">
+      <span class="price-main" id="priceMain">₪105</span>
+      <span class="price-vat-note">כולל מע"מ</span>
+    </div>
+    <p class="product-desc">עוגת גבינה אפויה בסגנון ניו-יורקי, בסיס פירורי חמאה ותחתית פריכה. מוכנה טרייה להזמנה, ללא חומרים משמרים.</p>
+
+    <div class="info-block">
+      <h4>אלרגנים</h4>
+      <p class="allergen-tag">גלוטן, ביצים, חלב</p>
+    </div>
+    <div class="info-block">
+      <h4>מידע נוסף</h4>
+      <p>לשמירה בקירור · כ-2-3 ימים טריות מרגע האיסוף</p>
+    </div>
+
+    <div id="purchaseBlock">
+      <div class="size-select">
+        <h4>גודל</h4>
+        <div class="size-chips" id="sizeChips">
+          <div class="size-chip" data-price="75">קטנה (16 ס"מ)</div>
+          <div class="size-chip selected" data-price="105">רגילה (22 ס"מ)</div>
+          <div class="size-chip" data-price="145">גדולה (28 ס"מ)</div>
+        </div>
+      </div>
+
+      <div class="qty-add-row">
+        <div class="qty-control">
+          <button id="qtyMinus">−</button>
+          <span id="qtyCount">1</span>
+          <button id="qtyPlus">+</button>
+        </div>
+        <button class="add-to-cart-btn" id="addToCartBtn" type="button">הוסיפו לעגלה</button>
+      </div>
+      <div class="pickup-note">איסוף עצמי מרחוב השוק 34, תל אביב · משלוח מוגבל בקרוב</div>
+    </div>
+
+    <div id="outOfStockBlock" style="display:none;">
+      <div class="out-of-stock-badge">אזל המלאי</div>
+      <p class="out-of-stock-text">המוצר לא זמין כרגע. השאירו מייל ונעדכן אתכם ברגע שהוא חוזר.</p>
+      <div class="coupon-row">
+        <input type="email" placeholder="האימייל שלכם">
+        <button type="button">עדכנו אותי</button>
+      </div>
+    </div>
+
+    <p class="stock-demo-toggle"><label><input type="checkbox" id="stockToggle"> תצוגת הדגמה: מלאי אזל</label></p>
+  </div>
+</div>
+
+<div class="wrap related-section">
+  <h2>אולי גם יעניין אתכם</h2>
+  <div class="related-grid" id="relatedGrid"></div>
+</div>
+
+<div class="overlay" id="overlay"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-head">
+    <h3>העגלה שלך</h3>
+    <button class="drawer-close" id="drawerClose" type="button">✕</button>
+  </div>
+  <div class="drawer-body" id="drawerBody"></div>
+  <div class="drawer-footer" id="drawerFooter" style="display:none;">
+    <div class="pickup-select">
+      <label>תאריך איסוף</label>
+      <select id="pickupDate">
+        <option>יום שלישי, 22.7</option>
+        <option>יום חמישי, 24.7</option>
+        <option>יום ראשון, 27.7</option>
+      </select>
+    </div>
+    <div class="totals-row">
+      <span>סכום ביניים</span>
+      <span id="subtotal">₪0</span>
+    </div>
+    <div class="totals-row">
+      <span>מע"מ (18%)</span>
+      <span id="vat">₪0</span>
+    </div>
+    <div class="totals-row grand">
+      <span>סה"כ לתשלום</span>
+      <span id="grandTotal">₪0</span>
+    </div>
+    <a class="checkout-btn" href="#">המשך לתשלום</a>
+    <p class="drawer-note">קבלה תישלח אוטומטית למייל לאחר התשלום</p>
+  </div>
+</div>
+
+<footer id="contact">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-mark">Y</div>
+        <p>שף פרטי לאירועים וארוחות פתוחות - מכל הלב, מהמטבח שלי</p>
+      </div>
+      <div class="footer-col">
+        <h4>ניווט</h4>
+        <a href="shop-prototype.html">חנות</a>
+        <a href="meals-prototype.html">ארוחות</a>
+        <a href="events-prototype.html">אירועים פרטיים</a>
+      </div>
+      <div class="footer-col">
+        <h4>יצירת קשר</h4>
+        <a href="tel:0543737307">054-3737-307</a>
+        <a href="mailto:roy@ybyroyoren.com">roy@ybyroyoren.com</a>
+        <a href="https://instagram.com/ybyroyoren" target="_blank" rel="noopener">@ybyroyoren</a>
+      </div>
+      <div class="footer-col">
+        <h4>עדכונים</h4>
+        <p style="margin-bottom: 14px;">ארוחות חדשות ומוצרים ישר למייל</p>
+        <form class="newsletter-form" id="newsletterForm">
+          <input type="email" placeholder="האימייל שלכם" required>
+          <button type="submit">הרשמה</button>
+        </form>
+        <p class="newsletter-msg" id="newsletterMsg"></p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Roy Oren</span>
+      <span>עמוד מוצר · טיוטת עיצוב</span>
+    </div>
+  </div>
+</footer>
+
+<button class="back-to-top" id="backToTop" aria-label="חזרה למעלה">↑</button>
+
+<script>
+const RELATED = [
+  { name: 'עוגת שוקולד עמוקה', price: 94 },
+  { name: 'טחינת שקדים גולמית', price: 48 },
+  { name: 'גרנולה ביתית', price: 39 },
+  { name: 'רביולי גבינות', price: 58 },
+];
+document.getElementById('relatedGrid').innerHTML = RELATED.map(p => `
+  <div class="related-card">
+    <div class="related-visual"></div>
+    <div class="related-name">${p.name}</div>
+    <div class="related-price">₪${p.price} כולל מע"מ</div>
+  </div>
+`).join('');
+
+document.getElementById('sizeChips').addEventListener('click', (e) => {
+  const chip = e.target.closest('.size-chip');
+  if (!chip) return;
+  document.querySelectorAll('.size-chip').forEach(c => c.classList.remove('selected'));
+  chip.classList.add('selected');
+  document.getElementById('priceMain').textContent = `₪${chip.dataset.price}`;
+});
+
+document.getElementById('stockToggle').addEventListener('change', (e) => {
+  document.getElementById('purchaseBlock').style.display = e.target.checked ? 'none' : 'block';
+  document.getElementById('outOfStockBlock').style.display = e.target.checked ? 'block' : 'none';
+});
+
+let qty = 1;
+const VAT_RATE = 0.18;
+let cart = {}; // key: "name-price" -> { name, price, qty }
+
+document.getElementById('addToCartBtn').addEventListener('click', () => {
+  const sizeChip = document.querySelector('.size-chip.selected');
+  const sizeLabel = sizeChip ? sizeChip.textContent.trim() : '';
+  const price = sizeChip ? parseInt(sizeChip.dataset.price) : 105;
+  const name = `עוגת גבינה קלאסית — ${sizeLabel}`;
+  const key = 'size-' + price;
+  if (!cart[key]) cart[key] = { name, price, qty: 0 };
+  cart[key].qty += qty;
+  renderCart();
+  openDrawer();
+});
+
+function renderCart() {
+  const body = document.getElementById('drawerBody');
+  const footer = document.getElementById('drawerFooter');
+  const entries = Object.entries(cart);
+  const count = entries.reduce((s, [,item]) => s + item.qty, 0);
+  document.getElementById('navCartCount').textContent = count;
+
+  if (entries.length === 0) {
+    body.innerHTML = '<div class="drawer-empty">העגלה שלך ריקה עדיין</div>';
+    footer.style.display = 'none';
+    return;
+  }
+
+  footer.style.display = 'block';
+  body.innerHTML = '';
+  let subtotal = 0;
+  entries.forEach(([key, item]) => {
+    const lineTotal = item.price * item.qty;
+    subtotal += lineTotal;
+    const row = document.createElement('div');
+    row.className = 'cart-item';
+    row.innerHTML = `
+      <div class="cart-item-visual"></div>
+      <div class="cart-item-info">
+        <div class="cart-item-name">${item.name}</div>
+        <div class="cart-item-price">₪${item.price} ליחידה</div>
+        <div class="qty-control">
+          <button type="button" data-action="minus" data-key="${key}">−</button>
+          <span>${item.qty}</span>
+          <button type="button" data-action="plus" data-key="${key}">+</button>
+        </div>
+      </div>
+      <div>
+        <div class="cart-item-total">₪${lineTotal}</div>
+        <button type="button" class="cart-item-remove" data-remove="${key}">הסר</button>
+      </div>
+    `;
+    body.appendChild(row);
+  });
+
+  body.querySelectorAll('[data-action="plus"]').forEach(b => b.addEventListener('click', () => { cart[b.dataset.key].qty++; renderCart(); }));
+  body.querySelectorAll('[data-action="minus"]').forEach(b => b.addEventListener('click', () => {
+    cart[b.dataset.key].qty--;
+    if (cart[b.dataset.key].qty <= 0) delete cart[b.dataset.key];
+    renderCart();
+  }));
+  body.querySelectorAll('[data-remove]').forEach(b => b.addEventListener('click', () => { delete cart[b.dataset.remove]; renderCart(); }));
+
+  const vat = subtotal * VAT_RATE;
+  const total = subtotal + vat;
+  document.getElementById('subtotal').textContent = `₪${subtotal.toFixed(0)}`;
+  document.getElementById('vat').textContent = `₪${vat.toFixed(0)}`;
+  document.getElementById('grandTotal').textContent = `₪${total.toFixed(0)}`;
+}
+
+function openDrawer() {
+  document.getElementById('drawer').classList.add('open');
+  document.getElementById('overlay').classList.add('open');
+}
+function closeDrawer() {
+  document.getElementById('drawer').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
+}
+document.getElementById('cartToggle').addEventListener('click', openDrawer);
+document.getElementById('drawerClose').addEventListener('click', closeDrawer);
+document.getElementById('overlay').addEventListener('click', closeDrawer);
+renderCart();
+
+document.getElementById('qtyPlus').addEventListener('click', () => {
+  qty++;
+  document.getElementById('qtyCount').textContent = qty;
+});
+document.getElementById('qtyMinus').addEventListener('click', () => {
+  if (qty > 1) qty--;
+  document.getElementById('qtyCount').textContent = qty;
+});
+document.getElementById('galleryThumbs').addEventListener('click', (e) => {
+  const thumb = e.target.closest('.gallery-thumb');
+  if (!thumb) return;
+  document.querySelectorAll('.gallery-thumb').forEach(t => t.classList.remove('active'));
+  thumb.classList.add('active');
+});
+
+document.getElementById('newsletterForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  document.getElementById('newsletterMsg').textContent = 'תודה! נרשמתם בהצלחה.';
+  e.target.reset();
+});
+
+const backToTop = document.getElementById('backToTop');
+window.addEventListener('scroll', () => {
+  backToTop.classList.toggle('visible', window.scrollY > 600);
+});
+backToTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+</script>
+
+</body>
+</html>

@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roy Oren — שף פרטי</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@300;400;500;700;900&family=Assistant:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #EFE8D8;
+    --cream-dark: #E3D9C2;
+    --ink: #171410;
+    --ink-soft: #3A342A;
+    --olive: #47502E;
+    --olive-deep: #333B20;
+    --olive-mist: #DCE0C8;
+    --line: rgba(23,20,16,0.14);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: 'Assistant', sans-serif;
+    font-weight: 400;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, .serif {
+    font-family: 'Frank Ruhl Libre', serif;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+  }
+
+  a { color: inherit; text-decoration: none; }
+
+  .wrap {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 32px;
+  }
+
+  /* ---------- NAV ---------- */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 22px 0;
+    background: linear-gradient(to bottom, rgba(239,232,216,0.96), rgba(239,232,216,0));
+    transition: padding 0.3s ease;
+  }
+  nav .wrap {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .nav-mark {
+    font-family: 'Frank Ruhl Libre', serif;
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+  .nav-links {
+    display: flex;
+    gap: 36px;
+    font-size: 15px;
+    font-weight: 500;
+  }
+  .nav-links a {
+    position: relative;
+    padding-bottom: 4px;
+  }
+  .nav-links a::after {
+    content: '';
+    position: absolute;
+    right: 0; bottom: 0;
+    width: 0; height: 1px;
+    background: var(--olive-deep);
+    transition: width 0.25s ease;
+  }
+  .nav-links a:hover::after { width: 100%; }
+
+  .nav-cart {
+    font-size: 14px;
+    border: 1px solid var(--ink);
+    border-radius: 999px;
+    padding: 8px 20px;
+  }
+
+  /* ---------- HERO ---------- */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-top: 90px;
+    overflow: hidden;
+  }
+
+  .hero-mark {
+    position: absolute;
+    top: 50%;
+    right: -6%;
+    transform: translateY(-52%);
+    font-family: 'Frank Ruhl Libre', serif;
+    font-weight: 900;
+    font-size: 68vw;
+    line-height: 1;
+    color: var(--ink);
+    opacity: 0.045;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .hero-inner {
+    position: relative;
+    z-index: 2;
+  }
+
+  .eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 13px;
+    letter-spacing: 0.16em;
+    color: var(--olive-deep);
+    margin-bottom: 28px;
+    font-weight: 600;
+  }
+  .eyebrow::before {
+    content: '';
+    width: 34px; height: 1px;
+    background: var(--olive-deep);
+  }
+
+  .hero h1 {
+    font-size: clamp(48px, 8vw, 104px);
+    line-height: 0.98;
+    max-width: 920px;
+    color: var(--ink);
+  }
+  .hero h1 em {
+    font-style: italic;
+    color: var(--olive-deep);
+  }
+
+  .hero-sub {
+    max-width: 460px;
+    margin-top: 30px;
+    font-size: 18px;
+    line-height: 1.7;
+    color: var(--ink-soft);
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 18px;
+    margin-top: 46px;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 15px 30px;
+    border-radius: 999px;
+    font-size: 15px;
+    font-weight: 600;
+    transition: all 0.25s ease;
+    cursor: pointer;
+  }
+  .btn-primary {
+    background: var(--ink);
+    color: var(--cream);
+  }
+  .btn-primary:hover { background: var(--olive-deep); }
+  .btn-outline {
+    border: 1px solid var(--ink);
+    color: var(--ink);
+  }
+  .btn-outline:hover {
+    background: var(--ink);
+    color: var(--cream);
+  }
+
+  .hero-tertiary {
+    display: inline-block;
+    margin-top: 24px;
+    font-size: 14px;
+    color: var(--ink-soft);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    text-decoration-color: var(--line);
+  }
+  .hero-tertiary:hover { color: var(--olive-deep); text-decoration-color: var(--olive-deep); }
+
+  .scroll-cue {
+    position: absolute;
+    bottom: 44px;
+    right: 32px;
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    color: var(--ink-soft);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    writing-mode: vertical-rl;
+  }
+  .scroll-cue::after {
+    content: '';
+    width: 1px; height: 40px;
+    background: var(--ink-soft);
+    animation: scrollpulse 2s ease-in-out infinite;
+  }
+  @keyframes scrollpulse {
+    0%, 100% { transform: scaleY(1); opacity: 0.4; }
+    50% { transform: scaleY(0.6); opacity: 1; }
+  }
+
+  /* ---------- SECTION SHARED ---------- */
+  section { padding: 130px 0; position: relative; }
+  .section-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 64px;
+    gap: 40px;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 28px;
+  }
+  .section-head .num {
+    font-size: 13px;
+    letter-spacing: 0.16em;
+    color: var(--olive-deep);
+    font-weight: 600;
+    margin-bottom: 12px;
+    display: block;
+  }
+  .section-head h2 {
+    font-size: clamp(32px, 4vw, 46px);
+  }
+  .section-head p {
+    max-width: 320px;
+    color: var(--ink-soft);
+    font-size: 15px;
+    line-height: 1.6;
+    padding-bottom: 6px;
+  }
+
+  /* ---------- SHOP TEASER ---------- */
+  .shop-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+    background: var(--line);
+    border: 1px solid var(--line);
+  }
+  .product-card {
+    background: var(--cream);
+    padding: 34px 26px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 300px;
+    transition: background 0.3s ease;
+  }
+  .product-card:hover { background: var(--cream-dark); }
+  .product-visual {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 4px;
+    background:
+      radial-gradient(circle at 30% 30%, var(--olive-mist), transparent 60%),
+      linear-gradient(135deg, var(--ink) 0%, var(--olive-deep) 100%);
+    opacity: 0.9;
+    margin-bottom: 20px;
+  }
+  .product-tag {
+    display: inline-block;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: var(--olive-deep);
+    background: var(--olive-mist);
+    padding: 4px 10px;
+    border-radius: 999px;
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+  .product-name {
+    font-family: 'Frank Ruhl Libre', serif;
+    font-size: 19px;
+    margin-bottom: 6px;
+  }
+  .product-price {
+    font-size: 14px;
+    color: var(--ink-soft);
+  }
+
+  /* ---------- MEALS ---------- */
+  .meals-band {
+    background: var(--ink);
+    color: var(--cream);
+  }
+  .meals-band .section-head { border-color: rgba(239,232,216,0.18); }
+  .meals-band .section-head .num { color: var(--olive-mist); }
+  .meals-band .section-head p { color: rgba(239,232,216,0.65); }
+
+  .meal-list { display: flex; flex-direction: column; }
+  .meal-row {
+    display: grid;
+    grid-template-columns: 140px 1fr auto auto;
+    align-items: center;
+    gap: 28px;
+    padding: 28px 0;
+    border-bottom: 1px solid rgba(239,232,216,0.16);
+  }
+  .meal-date {
+    font-family: 'Frank Ruhl Libre', serif;
+    font-size: 15px;
+    color: var(--olive-mist);
+    letter-spacing: 0.03em;
+  }
+  .meal-title { font-family: 'Frank Ruhl Libre', serif; font-size: 24px; }
+  .meal-seats {
+    font-size: 13px;
+    color: rgba(239,232,216,0.6);
+    justify-self: start;
+  }
+  .meal-seats b { color: var(--cream); font-weight: 600; }
+  .meals-reassure {
+    margin-top: 26px;
+    font-size: 13px;
+    color: rgba(239,232,216,0.55);
+  }
+  .meal-cta {
+    border: 1px solid rgba(239,232,216,0.5);
+    border-radius: 999px;
+    padding: 10px 24px;
+    font-size: 14px;
+    white-space: nowrap;
+    transition: all 0.25s ease;
+  }
+  .meal-row:hover .meal-cta {
+    background: var(--cream);
+    color: var(--ink);
+    border-color: var(--cream);
+  }
+
+  /* ---------- PRIVATE EVENTS ---------- */
+  .events-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 90px;
+    align-items: center;
+  }
+  .events-visual {
+    aspect-ratio: 4/5;
+    border-radius: 4px;
+    background:
+      radial-gradient(circle at 70% 20%, rgba(239,232,216,0.4), transparent 55%),
+      linear-gradient(160deg, var(--olive) 0%, var(--ink) 100%);
+    position: relative;
+  }
+  .events-visual::after {
+    content: 'Y';
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Frank Ruhl Libre', serif;
+    font-weight: 900;
+    font-size: 180px;
+    color: rgba(239,232,216,0.12);
+  }
+  .events-text h2 {
+    font-size: clamp(30px, 3.6vw, 42px);
+    margin-bottom: 24px;
+    line-height: 1.15;
+  }
+  .events-text p {
+    color: var(--ink-soft);
+    line-height: 1.75;
+    font-size: 16px;
+    max-width: 440px;
+    margin-bottom: 36px;
+  }
+  .events-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-bottom: 40px;
+  }
+  .events-list li {
+    list-style: none;
+    padding: 16px 0;
+    border-top: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    font-size: 15px;
+  }
+  .events-list li:last-child { border-bottom: 1px solid var(--line); }
+  .events-list span:first-child { font-weight: 600; }
+  .events-list span:last-child { color: var(--ink-soft); }
+
+  .events-note {
+    margin-top: 16px;
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+
+  /* ---------- GALLERY ---------- */
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    margin-bottom: 30px;
+  }
+  .gallery-item {
+    aspect-ratio: 1;
+    border-radius: 4px;
+    background: linear-gradient(150deg, var(--cream-dark), var(--olive-mist));
+  }
+  .gallery-item:nth-child(2) { background: linear-gradient(150deg, var(--olive-mist), var(--ink)); opacity: 0.85; }
+  .gallery-item:nth-child(4) { background: linear-gradient(150deg, var(--ink), var(--olive)); opacity: 0.85; }
+  .gallery-tall { aspect-ratio: 4/5; }
+  .instagram-link {
+    display: inline-block;
+    font-size: 15px;
+    font-weight: 600;
+    border-bottom: 1px solid var(--ink);
+    padding-bottom: 3px;
+  }
+  .instagram-link:hover { color: var(--olive-deep); border-color: var(--olive-deep); }
+
+  /* ---------- ABOUT STRIP ---------- */
+  .about-strip {
+    display: grid;
+    grid-template-columns: 0.9fr 1.4fr;
+    gap: 90px;
+    align-items: center;
+  }
+  .about-strip .quote {
+    font-family: 'Frank Ruhl Libre', serif;
+    font-style: italic;
+    font-size: clamp(24px, 2.6vw, 32px);
+    line-height: 1.45;
+    color: var(--ink);
+  }
+  .about-strip .quote::before { content: '"'; color: var(--olive-deep); }
+  .about-strip .quote::after { content: '"'; color: var(--olive-deep); }
+  .about-meta {
+    margin-top: 26px;
+    font-size: 14px;
+    color: var(--ink-soft);
+    letter-spacing: 0.04em;
+  }
+  .about-visual {
+    aspect-ratio: 5/4;
+    border-radius: 4px;
+    background: linear-gradient(100deg, var(--cream-dark), var(--olive-mist));
+  }
+
+  /* ---------- FINAL CTA ---------- */
+  .final-cta {
+    padding: 100px 0;
+    text-align: center;
+    border-top: 1px solid var(--line);
+  }
+  .final-cta-inner h2 {
+    font-size: clamp(34px, 4.5vw, 54px);
+    margin-bottom: 40px;
+  }
+  .final-cta .hero-actions {
+    justify-content: center;
+    margin-top: 0;
+  }
+
+  /* ---------- FOOTER ---------- */
+  footer {
+    background: var(--olive-deep);
+    color: var(--cream);
+    padding: 90px 0 40px;
+  }
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr 1fr 1fr;
+    gap: 50px;
+    padding-bottom: 60px;
+    border-bottom: 1px solid rgba(239,232,216,0.18);
+  }
+  .footer-mark {
+    font-family: 'Frank Ruhl Libre', serif;
+    font-size: 40px;
+    font-weight: 700;
+    margin-bottom: 18px;
+  }
+  .footer-grid p { color: rgba(239,232,216,0.65); font-size: 14px; line-height: 1.7; max-width: 300px; }
+  .footer-col h4 {
+    font-size: 13px;
+    letter-spacing: 0.12em;
+    color: rgba(239,232,216,0.5);
+    margin-bottom: 20px;
+    font-weight: 600;
+  }
+  .footer-col a {
+    display: block;
+    padding: 7px 0;
+    font-size: 15px;
+    color: var(--cream);
+  }
+  .newsletter-form { display: flex; gap: 8px; }
+  .newsletter-form input {
+    flex: 1; min-width: 0; padding: 10px 12px; border-radius: 6px;
+    border: 1px solid rgba(239,232,216,0.3); background: transparent;
+    font-family: inherit; font-size: 13px; color: var(--cream);
+  }
+  .newsletter-form input::placeholder { color: rgba(239,232,216,0.5); }
+  .newsletter-form button {
+    padding: 10px 16px; border-radius: 6px; border: 1px solid var(--cream);
+    background: var(--cream); color: var(--olive-deep); font-size: 13px; font-weight: 600;
+    white-space: nowrap;
+  }
+  .newsletter-form button:hover { background: transparent; color: var(--cream); }
+  .newsletter-msg { font-size: 12px; margin-top: 8px; color: rgba(239,232,216,0.7); }
+
+  .footer-bottom {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 30px;
+    font-size: 13px;
+    color: rgba(239,232,216,0.45);
+  }
+
+  @media (max-width: 860px) {
+    .nav-links { display: none; }
+    .shop-grid { grid-template-columns: repeat(2, 1fr); }
+    .events-split, .about-strip, .footer-grid { grid-template-columns: 1fr; gap: 40px; }
+    .gallery-grid { grid-template-columns: repeat(2, 1fr); }
+    .gallery-tall { aspect-ratio: 1; }
+    .meal-row { grid-template-columns: 1fr; gap: 8px; text-align: right; }
+    .meal-cta { justify-self: start; margin-top: 10px; }
+    section { padding: 80px 0; }
+  }
+
+  .back-to-top {
+    position: fixed; bottom: 28px; left: 28px; z-index: 150;
+    width: 46px; height: 46px; border-radius: 50%;
+    background: var(--ink); color: var(--cream); font-size: 18px;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transform: translateY(10px);
+    transition: all 0.3s ease; box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+  }
+  .back-to-top.visible { opacity: 1; pointer-events: auto; transform: translateY(0); }
+  .back-to-top:hover { background: var(--olive-deep); }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+
+  a:focus-visible, .btn:focus-visible {
+    outline: 2px solid var(--olive-deep);
+    outline-offset: 3px;
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <div class="nav-mark">Y</div>
+    <div class="nav-links">
+      <a href="shop-prototype.html">חנות</a>
+      <a href="meals-prototype.html">ארוחות</a>
+      <a href="events-prototype.html">אירועים פרטיים</a>
+      <a href="about-prototype.html">אודות</a>
+      <a href="contact-prototype.html">יצירת קשר</a>
+    </div>
+    <div class="nav-cart">עגלה · 0</div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-mark">Y</div>
+  <div class="wrap hero-inner">
+    <div class="eyebrow">שף פרטי · Roy Oren</div>
+    <h1>ארוחה טובה<br>מתחילה <em>בשולחן שלך</em>.</h1>
+    <p class="hero-sub">הארוחה הפתוחה הקרובה מתמלאת — נשארו מקומות אחרונים. מוצרים ביתיים ואירועים פרטיים מחכים בהמשך.</p>
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="meals-prototype.html">שריינו מקום לארוחה הקרובה</a>
+      <a class="btn btn-outline" href="shop-prototype.html">לחנות המוצרים</a>
+    </div>
+    <a class="hero-tertiary" href="events-prototype.html">מתכננים אירוע פרטי? לחצו כאן ←</a>
+  </div>
+  <div class="scroll-cue">גלול/י</div>
+</section>
+
+<footer id="contact">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-mark">Y</div>
+        <p>שף פרטי לאירועים וארוחות פתוחות - מכל הלב, מהמטבח שלי</p>
+      </div>
+      <div class="footer-col">
+        <h4>ניווט</h4>
+        <a href="shop-prototype.html">חנות</a>
+        <a href="meals-prototype.html">ארוחות</a>
+        <a href="events-prototype.html">אירועים פרטיים</a>
+      </div>
+      <div class="footer-col">
+        <h4>יצירת קשר</h4>
+        <a href="tel:0543737307">054-3737-307</a>
+        <a href="mailto:roy@ybyroyoren.com">roy@ybyroyoren.com</a>
+        <a href="https://instagram.com/ybyroyoren" target="_blank" rel="noopener">@ybyroyoren</a>
+      </div>
+      <div class="footer-col">
+        <h4>עדכונים</h4>
+        <p style="margin-bottom: 14px;">ארוחות חדשות ומוצרים ישר למייל</p>
+        <form class="newsletter-form" id="newsletterForm">
+          <input type="email" placeholder="האימייל שלכם" required>
+          <button type="submit">הרשמה</button>
+        </form>
+        <p class="newsletter-msg" id="newsletterMsg"></p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Roy Oren</span>
+      <span>עמוד בית · טיוטת עיצוב</span>
+    </div>
+  </div>
+</footer>
+
+<button class="back-to-top" id="backToTop" aria-label="חזרה למעלה">↑</button>
+
+<script>
+document.getElementById('newsletterForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  document.getElementById('newsletterMsg').textContent = 'תודה! נרשמתם בהצלחה.';
+  e.target.reset();
+});
+
+const backToTop = document.getElementById('backToTop');
+window.addEventListener('scroll', () => {
+  backToTop.classList.toggle('visible', window.scrollY > 600);
+});
+backToTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+</script>
+
+</body>
+</html>

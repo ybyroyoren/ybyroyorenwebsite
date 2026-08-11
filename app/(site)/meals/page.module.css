@@ -1,0 +1,57 @@
+.pageHead {
+  padding: 70px 0 50px;
+}
+
+.eyebrow {
+  font-size: 13px;
+  letter-spacing: 0.16em;
+  color: var(--olive-deep);
+  font-weight: 600;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.eyebrow::before {
+  content: "";
+  width: 30px;
+  height: 1px;
+  background: var(--olive-deep);
+}
+
+.pageHead h1 {
+  font-size: clamp(38px, 5vw, 58px);
+  margin-bottom: 14px;
+}
+
+.pageHead p {
+  max-width: 500px;
+  color: var(--ink-soft);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.venueNote {
+  margin-top: 22px;
+  font-size: 13.5px;
+  color: var(--olive-deep);
+  background: var(--olive-mist);
+  padding: 10px 16px;
+  border-radius: 8px;
+  display: inline-block;
+}
+
+.carouselWrap {
+  margin-bottom: 20px;
+}
+
+.section {
+  padding-bottom: 130px;
+}
+
+.empty {
+  padding: 60px 0;
+  color: var(--ink-soft);
+  text-align: center;
+}
