@@ -149,6 +149,9 @@ export async function finalizeOrder(orderId: string, growPaymentId: string): Pro
   if (order.greeting_card_fee > 0) {
     receiptItems.push({ description: "כרטיס ברכה", quantity: 1, unitPrice: order.greeting_card_fee });
   }
+  if (order.discount > 0) {
+    receiptItems.push({ description: "הנחה (קופון)", quantity: 1, unitPrice: -order.discount });
+  }
 
   let receiptDocId: string | null = null;
   try {

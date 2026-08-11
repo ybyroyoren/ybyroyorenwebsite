@@ -1,8 +1,11 @@
 import "server-only";
 
-// חשבונית ירוקה / Green Invoice integration — issues a קבלה (receipt) after a
-// payment succeeds. Uses Green Invoice's documented REST API:
-// https://api.greeninvoice.co.il/api/v1
+// חשבונית ירוקה / Green Invoice integration — issues a חשבונית מס/קבלה
+// (tax invoice + receipt, type 320) after a payment succeeds. Roy is עוסק
+// מורשה (VAT-registered), and payment happens at the same moment as the
+// sale, so 320 is the legally correct document — not 300, which is a plain
+// "חשבון עסקה" (proforma/transaction record), not a real tax receipt. Uses
+// Green Invoice's documented REST API: https://api.greeninvoice.co.il/api/v1
 
 const API_BASE = "https://api.greeninvoice.co.il/api/v1";
 
@@ -69,7 +72,7 @@ export async function issueReceipt(params: IssueReceiptParams): Promise<IssueRec
       Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({
-      type: 300, // קבלה — Receipt
+      type: 320, // חשבונית מס/קבלה — Tax Invoice + Receipt
       lang: "he",
       currency: "ILS",
       vatType: 0,
