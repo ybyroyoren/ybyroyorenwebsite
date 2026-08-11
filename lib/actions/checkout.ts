@@ -28,8 +28,7 @@ export async function submitCheckout(
   const sessionId = await getCartSessionId();
 
   let orderId: string;
-  let items: Awaited<ReturnType<typeof createPendingOrder>>["items"];
-  let greetingCardFee: number;
+  let total: number;
   try {
     const result = await createPendingOrder({
       sessionId,
@@ -42,24 +41,20 @@ export async function submitCheckout(
       greetingCardMessage,
     });
     orderId = result.orderId;
-    items = result.items;
-    greetingCardFee = result.greetingCardFee;
+    total = result.total;
   } catch (err) {
     return { error: err instanceof Error ? err.message : "משהו השתבש, נסו שוב" };
   }
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
-  const paymentItems = items.map((item) => ({
-    name: item.sizeLabel ? `${item.productName} — ${item.sizeLabel}` : item.productName,
-    price: item.priceBeforeVat,
-    quantity: item.qty,
-  }));
-  if (greetingCardFee > 0) {
-    paymentItems.push({ name: "כרטיס ברכה", price: greetingCardFee, quantity: 1 });
-  }
 
+  // Grow's vatType:1 extracts an implied VAT portion from whatever price it's
+  // given rather than adding VAT on top — so a single line for the final,
+  // already-VAT-inclusive total is what guarantees the customer is charged
+  // exactly what they were quoted (itemized breakdown + discounts would each
+  // need separate VAT-inclusive math that could drift by a few agorot).
   const payment = await createPaymentRequest({
-    items: paymentItems,
+    items: [{ name: `הזמנה מהחנות — Y by Roy Oren`, price: total, quantity: 1 }],
     description: `הזמנה מהחנות — ${orderId}`,
     customerName,
     customerEmail,
