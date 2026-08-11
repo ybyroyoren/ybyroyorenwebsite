@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requireAdmin } from "@/lib/admin-auth";
 import { getEvents } from "@/lib/kitchen/data";
+import { AdminSearchGrid } from "@/components/admin/kitchen/AdminSearch";
 import styles from "../../../admin.module.css";
 import kitchenStyles from "../kitchen.module.css";
 
@@ -29,35 +30,41 @@ export default async function KitchenEventsPage() {
         )}
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 14, marginTop: 16 }}>
-        {events.map((ev) => (
-          <div key={ev.id} className={`${styles.card} ${kitchenStyles.eventCard}`}>
-            <Link
-              href={`/admin/kitchen/events/${ev.id}/summary`}
-              className={kitchenStyles.eventCardOpen}
-              aria-label={`פתיחת הפתק — ${ev.name}`}
-            />
-            <span className={ev.eventType === "offsite" ? styles.badgePending : styles.badgePaid}>
-              {ev.eventType === "offsite" ? "אירוע חוץ" : "אצלנו"}
-            </span>
-            <h2 style={{ marginTop: 10 }}>{ev.name}</h2>
-            <div className={kitchenStyles.eventMeta}>
-              <span>{formatEventDate(ev.date)}</span>
-              <span>{ev.guestCount} סועדים</span>
-              <span>{ev.menu.length} פריטי תפריט</span>
-              {ev.eventType === "offsite" && ev.location && <span>{ev.location}</span>}
-            </div>
-            {isOwner && (
-              <div className={kitchenStyles.eventCardActions}>
-                <Link href={`/admin/kitchen/events/${ev.id}`} className={styles.btnSecondary}>
-                  עריכה
-                </Link>
+      <AdminSearchGrid
+        placeholder="חיפוש אירוע..."
+        emptyMessage="אין אירועים עדיין."
+        minColumnWidth={280}
+        items={events.map((ev) => ({
+          key: ev.id,
+          searchText: [ev.name, ev.location].filter(Boolean).join(" "),
+          node: (
+            <div className={`${styles.card} ${kitchenStyles.eventCard}`}>
+              <Link
+                href={`/admin/kitchen/events/${ev.id}/summary`}
+                className={kitchenStyles.eventCardOpen}
+                aria-label={`פתיחת הפתק — ${ev.name}`}
+              />
+              <span className={ev.eventType === "offsite" ? styles.badgePending : styles.badgePaid}>
+                {ev.eventType === "offsite" ? "אירוע חוץ" : "אצלנו"}
+              </span>
+              <h2 style={{ marginTop: 10 }}>{ev.name}</h2>
+              <div className={kitchenStyles.eventMeta}>
+                <span>{formatEventDate(ev.date)}</span>
+                <span>{ev.guestCount} סועדים</span>
+                <span>{ev.menu.length} פריטי תפריט</span>
+                {ev.eventType === "offsite" && ev.location && <span>{ev.location}</span>}
               </div>
-            )}
-          </div>
-        ))}
-        {events.length === 0 && <p className={styles.muted}>אין אירועים עדיין.</p>}
-      </div>
+              {isOwner && (
+                <div className={kitchenStyles.eventCardActions}>
+                  <Link href={`/admin/kitchen/events/${ev.id}`} className={styles.btnSecondary}>
+                    עריכה
+                  </Link>
+                </div>
+              )}
+            </div>
+          ),
+        }))}
+      />
     </>
   );
 }

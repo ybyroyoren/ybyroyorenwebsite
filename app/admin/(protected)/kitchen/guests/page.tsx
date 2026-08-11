@@ -4,6 +4,7 @@ import { getEvents, getGuestsList, getKitchenGraph } from "@/lib/kitchen/data";
 import { createGuest, deleteGuest, updateGuest } from "@/lib/actions/admin/kitchen-basics";
 import { GuestRow } from "@/components/admin/kitchen/GuestRow";
 import { GuestNameCell, type GuestHistoryEvent } from "@/components/admin/kitchen/GuestNameCell";
+import { AdminSearchTable } from "@/components/admin/kitchen/AdminSearch";
 import { sortArrow, sortHref, sortRows } from "@/lib/sortLink";
 import styles from "../../../admin.module.css";
 
@@ -66,52 +67,40 @@ export default async function KitchenGuestsPage({
         </div>
       )}
 
-      <div className={styles.card}>
-        <table className={styles.table}>
-          <thead>
+      <AdminSearchTable
+        placeholder="חיפוש סועד/ת..."
+        emptyMessage="אין סועדים עדיין."
+        colSpan={4}
+        head={
+          <tr>
+            <th>
+              <Link href={sortHref(sp, "name")}>שם{sortArrow(sp, "name")}</Link>
+            </th>
+            <th>
+              <Link href={sortHref(sp, "phone")}>טלפון{sortArrow(sp, "phone")}</Link>
+            </th>
+            <th>
+              <Link href={sortHref(sp, "restrictions")}>הגבלות תזונה{sortArrow(sp, "restrictions")}</Link>
+            </th>
+            {isOwner && <th></th>}
+          </tr>
+        }
+        rows={guests.map((g) => ({
+          key: g.id,
+          searchText: [g.name, g.phone, g.restrictions].filter(Boolean).join(" "),
+          node: isOwner ? (
+            <GuestRow guest={g} history={historyFor(g.id)} updateAction={updateGuest} deleteAction={deleteGuest} />
+          ) : (
             <tr>
-              <th>
-                <Link href={sortHref(sp, "name")}>שם{sortArrow(sp, "name")}</Link>
-              </th>
-              <th>
-                <Link href={sortHref(sp, "phone")}>טלפון{sortArrow(sp, "phone")}</Link>
-              </th>
-              <th>
-                <Link href={sortHref(sp, "restrictions")}>הגבלות תזונה{sortArrow(sp, "restrictions")}</Link>
-              </th>
-              {isOwner && <th></th>}
+              <td>
+                <GuestNameCell name={g.name} history={historyFor(g.id)} />
+              </td>
+              <td>{g.phone || "—"}</td>
+              <td>{g.restrictions || "—"}</td>
             </tr>
-          </thead>
-          <tbody>
-            {guests.map((g) =>
-              isOwner ? (
-                <GuestRow
-                  key={g.id}
-                  guest={g}
-                  history={historyFor(g.id)}
-                  updateAction={updateGuest}
-                  deleteAction={deleteGuest}
-                />
-              ) : (
-                <tr key={g.id}>
-                  <td>
-                    <GuestNameCell name={g.name} history={historyFor(g.id)} />
-                  </td>
-                  <td>{g.phone || "—"}</td>
-                  <td>{g.restrictions || "—"}</td>
-                </tr>
-              )
-            )}
-            {guests.length === 0 && (
-              <tr>
-                <td colSpan={4} className={styles.muted}>
-                  אין סועדים עדיין.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+          ),
+        }))}
+      />
     </>
   );
 }

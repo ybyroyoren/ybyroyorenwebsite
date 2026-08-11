@@ -3,6 +3,7 @@ import { requireAdmin } from "@/lib/admin-auth";
 import { getIngredients, getSuppliers } from "@/lib/kitchen/data";
 import { createIngredient, deleteIngredient, updateIngredient } from "@/lib/actions/admin/kitchen-basics";
 import { IngredientRow } from "@/components/admin/kitchen/IngredientRow";
+import { AdminSearchTable } from "@/components/admin/kitchen/AdminSearch";
 import { sortArrow, sortHref, sortRows } from "@/lib/sortLink";
 import styles from "../../../admin.module.css";
 
@@ -78,68 +79,63 @@ export default async function KitchenIngredientsPage({
         </div>
       )}
 
-      <div className={styles.card} style={{ overflowX: "auto" }}>
-        <table className={styles.table}>
-          <thead>
+      <AdminSearchTable
+        placeholder="חיפוש מרכיב, ספק..."
+        emptyMessage="אין מרכיבים עדיין."
+        colSpan={8}
+        head={
+          <tr>
+            <th>
+              <Link href={sortHref(sp, "name")}>שם{sortArrow(sp, "name")}</Link>
+            </th>
+            <th>
+              <Link href={sortHref(sp, "unit")}>יחידה{sortArrow(sp, "unit")}</Link>
+            </th>
+            <th>
+              <Link href={sortHref(sp, "supplier")}>ספק{sortArrow(sp, "supplier")}</Link>
+            </th>
+            <th>
+              <Link href={sortHref(sp, "purchaseName")}>שם רכישה{sortArrow(sp, "purchaseName")}</Link>
+            </th>
+            <th>
+              <Link href={sortHref(sp, "purchaseUnit")}>יח&apos; רכישה{sortArrow(sp, "purchaseUnit")}</Link>
+            </th>
+            <th>
+              <Link href={sortHref(sp, "yieldPercent")}>תפוקה %{sortArrow(sp, "yieldPercent")}</Link>
+            </th>
+            {isOwner && (
+              <th>
+                <Link href={sortHref(sp, "price")}>מחיר{sortArrow(sp, "price")}</Link>
+              </th>
+            )}
+            {isOwner && <th></th>}
+          </tr>
+        }
+        rows={ingredients.map((ing) => ({
+          key: ing.id,
+          searchText: [ing.name, ing.unit, supplierName(ing.supplierId), ing.purchaseName, ing.purchaseUnit]
+            .filter(Boolean)
+            .join(" "),
+          node: isOwner ? (
+            <IngredientRow
+              ingredient={ing}
+              suppliers={suppliers}
+              isOwner={isOwner}
+              updateAction={updateIngredient}
+              deleteAction={deleteIngredient}
+            />
+          ) : (
             <tr>
-              <th>
-                <Link href={sortHref(sp, "name")}>שם{sortArrow(sp, "name")}</Link>
-              </th>
-              <th>
-                <Link href={sortHref(sp, "unit")}>יחידה{sortArrow(sp, "unit")}</Link>
-              </th>
-              <th>
-                <Link href={sortHref(sp, "supplier")}>ספק{sortArrow(sp, "supplier")}</Link>
-              </th>
-              <th>
-                <Link href={sortHref(sp, "purchaseName")}>שם רכישה{sortArrow(sp, "purchaseName")}</Link>
-              </th>
-              <th>
-                <Link href={sortHref(sp, "purchaseUnit")}>יח&apos; רכישה{sortArrow(sp, "purchaseUnit")}</Link>
-              </th>
-              <th>
-                <Link href={sortHref(sp, "yieldPercent")}>תפוקה %{sortArrow(sp, "yieldPercent")}</Link>
-              </th>
-              {isOwner && (
-                <th>
-                  <Link href={sortHref(sp, "price")}>מחיר{sortArrow(sp, "price")}</Link>
-                </th>
-              )}
-              {isOwner && <th></th>}
+              <td>{ing.name}</td>
+              <td>{ing.unit}</td>
+              <td>{supplierName(ing.supplierId)}</td>
+              <td>{ing.purchaseName || "—"}</td>
+              <td>{ing.purchaseUnit || "—"}</td>
+              <td>{ing.yieldPercent ?? "—"}</td>
             </tr>
-          </thead>
-          <tbody>
-            {ingredients.map((ing) =>
-              isOwner ? (
-                <IngredientRow
-                  key={ing.id}
-                  ingredient={ing}
-                  suppliers={suppliers}
-                  isOwner={isOwner}
-                  updateAction={updateIngredient}
-                  deleteAction={deleteIngredient}
-                />
-              ) : (
-                <tr key={ing.id}>
-                  <td>{ing.name}</td>
-                  <td>{ing.unit}</td>
-                  <td>{supplierName(ing.supplierId)}</td>
-                  <td>{ing.purchaseName || "—"}</td>
-                  <td>{ing.purchaseUnit || "—"}</td>
-                  <td>{ing.yieldPercent ?? "—"}</td>
-                </tr>
-              )
-            )}
-            {ingredients.length === 0 && (
-              <tr>
-                <td colSpan={8} className={styles.muted}>
-                  אין מרכיבים עדיין.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+          ),
+        }))}
+      />
     </>
   );
 }

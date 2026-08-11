@@ -3,6 +3,7 @@ import { requireAdmin } from "@/lib/admin-auth";
 import { getKitchenGraph } from "@/lib/kitchen/data";
 import { recipeBaseCost, recipeCostPerBaseUnit } from "@/lib/kitchen/algorithms";
 import { formatCurrency } from "@/lib/pricing";
+import { AdminSearchGrid } from "@/components/admin/kitchen/AdminSearch";
 import styles from "../../../admin.module.css";
 
 const TYPE_LABEL = { dish: "מנה סופית", prep: "הכנה" };
@@ -25,8 +26,10 @@ export default async function KitchenRecipesPage() {
       </div>
       {!isOwner && <p className={styles.muted}>צפייה בלבד.</p>}
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 14, marginTop: 16 }}>
-        {recipes.map((r) => {
+      <AdminSearchGrid
+        placeholder="חיפוש מתכון..."
+        emptyMessage="אין מתכונים עדיין."
+        items={recipes.map((r) => {
           const baseCost = isOwner ? recipeBaseCost(r.id, recipesById, ingredientsById) : 0;
           const perUnitCost = isOwner ? recipeCostPerBaseUnit(r.id, recipesById, ingredientsById) : 0;
           const card = (
@@ -45,16 +48,19 @@ export default async function KitchenRecipesPage() {
               )}
             </div>
           );
-          return isOwner ? (
-            <Link key={r.id} href={`/admin/kitchen/recipes/${r.id}`} style={{ display: "block" }}>
-              {card}
-            </Link>
-          ) : (
-            <div key={r.id}>{card}</div>
-          );
+          return {
+            key: r.id,
+            searchText: r.name,
+            node: isOwner ? (
+              <Link href={`/admin/kitchen/recipes/${r.id}`} style={{ display: "block" }}>
+                {card}
+              </Link>
+            ) : (
+              <div>{card}</div>
+            ),
+          };
         })}
-        {recipes.length === 0 && <p className={styles.muted}>אין מתכונים עדיין.</p>}
-      </div>
+      />
     </>
   );
 }

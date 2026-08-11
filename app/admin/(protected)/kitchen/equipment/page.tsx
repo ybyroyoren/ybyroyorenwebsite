@@ -3,6 +3,7 @@ import { requireAdmin } from "@/lib/admin-auth";
 import { getEquipmentList } from "@/lib/kitchen/data";
 import { createEquipment, deleteEquipment, updateEquipment } from "@/lib/actions/admin/kitchen-basics";
 import { EquipmentRow } from "@/components/admin/kitchen/EquipmentRow";
+import { AdminSearchTable } from "@/components/admin/kitchen/AdminSearch";
 import { sortArrow, sortHref, sortRows } from "@/lib/sortLink";
 import styles from "../../../admin.module.css";
 
@@ -43,40 +44,34 @@ export default async function KitchenEquipmentPage({
         </div>
       )}
 
-      <div className={styles.card}>
-        <table className={styles.table}>
-          <thead>
+      <AdminSearchTable
+        placeholder="חיפוש ציוד..."
+        emptyMessage="אין ציוד עדיין."
+        colSpan={3}
+        head={
+          <tr>
+            <th>
+              <Link href={sortHref(sp, "name")}>שם{sortArrow(sp, "name")}</Link>
+            </th>
+            <th>
+              <Link href={sortHref(sp, "note")}>הערה{sortArrow(sp, "note")}</Link>
+            </th>
+            {isOwner && <th></th>}
+          </tr>
+        }
+        rows={equipment.map((e) => ({
+          key: e.id,
+          searchText: [e.name, e.note].filter(Boolean).join(" "),
+          node: isOwner ? (
+            <EquipmentRow equipment={e} updateAction={updateEquipment} deleteAction={deleteEquipment} />
+          ) : (
             <tr>
-              <th>
-                <Link href={sortHref(sp, "name")}>שם{sortArrow(sp, "name")}</Link>
-              </th>
-              <th>
-                <Link href={sortHref(sp, "note")}>הערה{sortArrow(sp, "note")}</Link>
-              </th>
-              {isOwner && <th></th>}
+              <td>{e.name}</td>
+              <td>{e.note || "—"}</td>
             </tr>
-          </thead>
-          <tbody>
-            {equipment.map((e) =>
-              isOwner ? (
-                <EquipmentRow key={e.id} equipment={e} updateAction={updateEquipment} deleteAction={deleteEquipment} />
-              ) : (
-                <tr key={e.id}>
-                  <td>{e.name}</td>
-                  <td>{e.note || "—"}</td>
-                </tr>
-              )
-            )}
-            {equipment.length === 0 && (
-              <tr>
-                <td colSpan={3} className={styles.muted}>
-                  אין ציוד עדיין.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+          ),
+        }))}
+      />
     </>
   );
 }

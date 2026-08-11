@@ -270,6 +270,32 @@
   color: var(--ink-soft);
 }
 
+.searchBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  margin-bottom: 18px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--cream);
+  color: var(--ink-soft);
+  max-width: 320px;
+}
+
+.searchBar input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.searchBar input:focus-visible {
+  outline: none;
+}
+
 .field input,
 .field select,
 .field textarea {

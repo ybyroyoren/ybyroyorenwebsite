@@ -3,6 +3,7 @@ import { requireAdmin } from "@/lib/admin-auth";
 import { getSuppliers } from "@/lib/kitchen/data";
 import { createSupplier, deleteSupplier, updateSupplier } from "@/lib/actions/admin/kitchen-basics";
 import { SupplierRow } from "@/components/admin/kitchen/SupplierRow";
+import { AdminSearchTable } from "@/components/admin/kitchen/AdminSearch";
 import { sortArrow, sortHref, sortRows } from "@/lib/sortLink";
 import styles from "../../../admin.module.css";
 
@@ -53,48 +54,42 @@ export default async function KitchenSuppliersPage({
         </div>
       )}
 
-      <div className={styles.card}>
-        <table className={styles.table}>
-          <thead>
+      <AdminSearchTable
+        placeholder="חיפוש ספק..."
+        emptyMessage="אין ספקים עדיין."
+        colSpan={5}
+        head={
+          <tr>
+            <th>
+              <Link href={sortHref(sp, "name")}>שם{sortArrow(sp, "name")}</Link>
+            </th>
+            <th>
+              <Link href={sortHref(sp, "phone")}>טלפון{sortArrow(sp, "phone")}</Link>
+            </th>
+            <th>
+              <Link href={sortHref(sp, "email")}>אימייל{sortArrow(sp, "email")}</Link>
+            </th>
+            <th>
+              <Link href={sortHref(sp, "note")}>הערה{sortArrow(sp, "note")}</Link>
+            </th>
+            {isOwner && <th></th>}
+          </tr>
+        }
+        rows={suppliers.map((s) => ({
+          key: s.id,
+          searchText: [s.name, s.phone, s.email, s.note].filter(Boolean).join(" "),
+          node: isOwner ? (
+            <SupplierRow supplier={s} updateAction={updateSupplier} deleteAction={deleteSupplier} />
+          ) : (
             <tr>
-              <th>
-                <Link href={sortHref(sp, "name")}>שם{sortArrow(sp, "name")}</Link>
-              </th>
-              <th>
-                <Link href={sortHref(sp, "phone")}>טלפון{sortArrow(sp, "phone")}</Link>
-              </th>
-              <th>
-                <Link href={sortHref(sp, "email")}>אימייל{sortArrow(sp, "email")}</Link>
-              </th>
-              <th>
-                <Link href={sortHref(sp, "note")}>הערה{sortArrow(sp, "note")}</Link>
-              </th>
-              {isOwner && <th></th>}
+              <td>{s.name}</td>
+              <td>{s.phone || "—"}</td>
+              <td>{s.email || "—"}</td>
+              <td>{s.note || "—"}</td>
             </tr>
-          </thead>
-          <tbody>
-            {suppliers.map((s) =>
-              isOwner ? (
-                <SupplierRow key={s.id} supplier={s} updateAction={updateSupplier} deleteAction={deleteSupplier} />
-              ) : (
-                <tr key={s.id}>
-                  <td>{s.name}</td>
-                  <td>{s.phone || "—"}</td>
-                  <td>{s.email || "—"}</td>
-                  <td>{s.note || "—"}</td>
-                </tr>
-              )
-            )}
-            {suppliers.length === 0 && (
-              <tr>
-                <td colSpan={5} className={styles.muted}>
-                  אין ספקים עדיין.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+          ),
+        }))}
+      />
     </>
   );
 }
