@@ -1,6 +1,6 @@
 import { requireAdminSection } from "@/lib/admin-auth";
 import { supabaseAdmin } from "@/lib/supabase/server";
-import { updateInquiryStatus } from "@/lib/actions/admin/events";
+import { deleteInquiry, updateInquiryStatus } from "@/lib/actions/admin/events";
 import styles from "../../admin.module.css";
 
 const EVENT_TYPE_LABELS: Record<string, string> = {
@@ -38,7 +38,8 @@ const STATUS_LABELS: Record<string, string> = {
 const DONE_STATUSES = new Set(["paid_closed", "closed"]);
 
 export default async function AdminEventsPage() {
-  await requireAdminSection("events");
+  const admin = await requireAdminSection("events");
+  const isOwner = admin.role === "owner";
   const db = supabaseAdmin();
   const { data: inquiries } = await db
     .from("event_inquiries")
@@ -94,22 +95,32 @@ export default async function AdminEventsPage() {
             )}
           </dl>
 
-          <form action={updateInquiryStatus} className={styles.form} style={{ marginTop: 12 }}>
-            <input type="hidden" name="id" value={inq.id} />
-            <div className={styles.field}>
-              <label>סטטוס</label>
-              <select name="status" defaultValue={inq.status}>
-                {Object.entries(STATUS_LABELS).map(([value, label]) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <button type="submit" className={styles.btnSecondary}>
-              עדכון סטטוס
-            </button>
-          </form>
+          <div style={{ display: "flex", gap: 10, alignItems: "flex-end", flexWrap: "wrap", marginTop: 12 }}>
+            <form action={updateInquiryStatus} className={styles.form}>
+              <input type="hidden" name="id" value={inq.id} />
+              <div className={styles.field}>
+                <label>סטטוס</label>
+                <select name="status" defaultValue={inq.status}>
+                  {Object.entries(STATUS_LABELS).map(([value, label]) => (
+                    <option key={value} value={value}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <button type="submit" className={styles.btnSecondary}>
+                עדכון סטטוס
+              </button>
+            </form>
+            {isOwner && (
+              <form action={deleteInquiry}>
+                <input type="hidden" name="id" value={inq.id} />
+                <button type="submit" className={styles.btnDanger}>
+                  מחיקת פנייה
+                </button>
+              </form>
+            )}
+          </div>
         </div>
       ))}
 

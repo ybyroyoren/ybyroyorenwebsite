@@ -25,3 +25,15 @@ export async function updateInquiryStatus(formData: FormData): Promise<void> {
   await db.from("event_inquiries").update({ status }).eq("id", id);
   revalidatePath("/admin/events");
 }
+
+export async function deleteInquiry(formData: FormData): Promise<void> {
+  const admin = await requireAdmin();
+  if (admin.role !== "owner") return;
+  const db = supabaseAdmin();
+
+  const id = String(formData.get("id") ?? "");
+  if (!id) return;
+
+  await db.from("event_inquiries").delete().eq("id", id);
+  revalidatePath("/admin/events");
+}
