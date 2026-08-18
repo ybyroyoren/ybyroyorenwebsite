@@ -6,6 +6,7 @@ import { localizedProduct } from "@/lib/localizedProduct";
 import { resolveLocale, localePath } from "@/lib/i18n";
 import { getDict } from "@/lib/dictionary";
 import { ProductPurchase } from "@/components/shop/ProductPurchase";
+import { ProductGallery } from "@/components/shop/ProductGallery";
 import { formatCurrency, priceIncludingVat } from "@/lib/pricing";
 import styles from "./page.module.css";
 
@@ -41,24 +42,7 @@ export default async function ProductPage({
       </div>
 
       <div className={`wrap ${styles.layout}`}>
-        <div>
-          <div className={`${styles.galleryMain} ${product.imageUrls[0] ? styles.hasPhoto : ""}`}>
-            {product.imageUrls[0] && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img className={styles.galleryPhoto} src={product.imageUrls[0]} alt={p.name} />
-            )}
-          </div>
-          {product.imageUrls.length > 1 && (
-            <div className={styles.galleryThumbs}>
-              {product.imageUrls.slice(1).map((url) => (
-                <div key={url} className={styles.galleryThumb}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={url} alt={p.name} />
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        <ProductGallery imageUrls={product.imageUrls} alt={p.name} locale={locale} />
 
         <div className={styles.info}>
           <h1>{p.name}</h1>

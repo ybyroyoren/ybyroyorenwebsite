@@ -75,6 +75,8 @@ const dictionary = {
       addToCart: "הוסיפו לעגלה",
       added: "נוסף ✓",
       outOfStock: "אזל המלאי",
+      prevPhoto: "התמונה הקודמת",
+      nextPhoto: "התמונה הבאה",
     },
     product: {
       allergensHeading: "אלרגנים",
@@ -377,6 +379,8 @@ const dictionary = {
       addToCart: "Add to cart",
       added: "Added ✓",
       outOfStock: "Out of stock",
+      prevPhoto: "Previous photo",
+      nextPhoto: "Next photo",
     },
     product: {
       allergensHeading: "Allergens",

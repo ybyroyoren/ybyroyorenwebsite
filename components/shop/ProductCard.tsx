@@ -21,12 +21,14 @@ export function ProductCard({
 }) {
   const cart = useCart();
   const [sizeIndex, setSizeIndex] = useState(0);
+  const [photoIndex, setPhotoIndex] = useState(0);
   const [justAdded, setJustAdded] = useState(false);
   const t = getDict(locale).shop;
   const p = localizedProduct(product, locale);
 
   const size = product.sizes[sizeIndex];
   const inStock = size?.stockStatus === "in_stock";
+  const photos = product.imageUrls;
 
   async function handleAdd() {
     if (!size || !inStock) return;
@@ -35,14 +37,35 @@ export function ProductCard({
     setTimeout(() => setJustAdded(false), 1200);
   }
 
+  function changePhoto(e: React.MouseEvent, delta: 1 | -1) {
+    e.preventDefault();
+    e.stopPropagation();
+    setPhotoIndex((i) => (i + delta + photos.length) % photos.length);
+  }
+
   return (
     <div className={styles.card}>
-      <div className={`${styles.visual} ${product.imageUrls[0] ? styles.hasPhoto : ""}`}>
-        {product.imageUrls[0] && (
+      <div className={`${styles.visual} ${photos[0] ? styles.hasPhoto : ""}`}>
+        {photos[0] && (
           // eslint-disable-next-line @next/next/no-img-element
-          <img className={styles.photo} src={product.imageUrls[0]} alt={p.name} />
+          <img className={styles.photo} src={photos[photoIndex]} alt={p.name} />
         )}
         <span className={styles.tag}>{categoryLabel}</span>
+        {photos.length > 1 && (
+          <>
+            <button type="button" className={`${styles.photoNav} ${styles.photoPrev}`} onClick={(e) => changePhoto(e, -1)} aria-label={t.prevPhoto}>
+              ‹
+            </button>
+            <button type="button" className={`${styles.photoNav} ${styles.photoNext}`} onClick={(e) => changePhoto(e, 1)} aria-label={t.nextPhoto}>
+              ›
+            </button>
+            <div className={styles.photoDots}>
+              {photos.map((url, i) => (
+                <span key={url} className={`${styles.photoDot} ${i === photoIndex ? styles.photoDotActive : ""}`} />
+              ))}
+            </div>
+          </>
+        )}
       </div>
       <div className={styles.info}>
         <div>
