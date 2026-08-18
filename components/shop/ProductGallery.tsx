@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { getDict, type Locale } from "@/lib/dictionary";
+import { useSwipe } from "@/lib/useSwipe";
 import styles from "@/app/(site)/[locale]/shop/[slug]/page.module.css";
 
 export function ProductGallery({
@@ -16,17 +17,23 @@ export function ProductGallery({
   const [activeIndex, setActiveIndex] = useState(0);
   const t = getDict(locale).shop;
 
-  if (imageUrls.length === 0) {
-    return <div className={styles.galleryMain} />;
-  }
-
   function changePhoto(delta: 1 | -1) {
     setActiveIndex((i) => (i + delta + imageUrls.length) % imageUrls.length);
   }
 
+  const swipe = useSwipe(changePhoto);
+
+  if (imageUrls.length === 0) {
+    return <div className={styles.galleryMain} />;
+  }
+
   return (
     <div>
-      <div className={`${styles.galleryMain} ${styles.hasPhoto}`}>
+      <div
+        className={`${styles.galleryMain} ${styles.hasPhoto}`}
+        onTouchStart={imageUrls.length > 1 ? swipe.onTouchStart : undefined}
+        onTouchEnd={imageUrls.length > 1 ? swipe.onTouchEnd : undefined}
+      >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img className={styles.galleryPhoto} src={imageUrls[activeIndex]} alt={alt} />
         {imageUrls.length > 1 && (

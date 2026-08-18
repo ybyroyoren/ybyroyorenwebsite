@@ -8,6 +8,7 @@ import { formatCurrency, priceIncludingVat } from "@/lib/pricing";
 import { getDict, type Locale } from "@/lib/dictionary";
 import { localePath } from "@/lib/i18n";
 import { localizedProduct } from "@/lib/localizedProduct";
+import { useSwipe } from "@/lib/useSwipe";
 import styles from "./ProductCard.module.css";
 
 export function ProductCard({
@@ -43,9 +44,15 @@ export function ProductCard({
     setPhotoIndex((i) => (i + delta + photos.length) % photos.length);
   }
 
+  const swipe = useSwipe((delta) => setPhotoIndex((i) => (i + delta + photos.length) % photos.length));
+
   return (
     <div className={styles.card}>
-      <div className={`${styles.visual} ${photos[0] ? styles.hasPhoto : ""}`}>
+      <div
+        className={`${styles.visual} ${photos[0] ? styles.hasPhoto : ""}`}
+        onTouchStart={photos.length > 1 ? swipe.onTouchStart : undefined}
+        onTouchEnd={photos.length > 1 ? swipe.onTouchEnd : undefined}
+      >
         {photos[0] && (
           // eslint-disable-next-line @next/next/no-img-element
           <img className={styles.photo} src={photos[photoIndex]} alt={p.name} />
