@@ -10,6 +10,9 @@
   overflow-x: auto;
   scroll-behavior: smooth;
   scrollbar-width: none;
+  touch-action: pan-x;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
 }
 
 .track::-webkit-scrollbar {
@@ -21,6 +24,7 @@
   aspect-ratio: 9 / 16;
   border-radius: 8px;
   overflow: hidden;
+  scroll-snap-align: start;
 }
 
 .slideNarrow {

@@ -61,8 +61,12 @@
   }
 
   .media {
-    order: -1;
-    max-width: 320px;
+    width: 100vw;
+    max-width: 100vw;
+    margin-left: 50%;
+    transform: translateX(-50%);
+    border-radius: 0;
+    box-shadow: none;
   }
 }
 
