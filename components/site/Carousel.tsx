@@ -8,10 +8,12 @@ import styles from "./Carousel.module.css";
 export function Carousel({
   images,
   narrow,
+  single,
   locale = "he",
 }: {
   images: MediaItem[];
   narrow?: boolean;
+  single?: boolean;
   locale?: Locale;
 }) {
   const trackRef = useRef<HTMLDivElement>(null);
@@ -27,7 +29,10 @@ export function Carousel({
     <div className={styles.carousel}>
       <div className={styles.track} ref={trackRef}>
         {images.map((img) => (
-          <div key={img.id} className={`${styles.slide} ${narrow ? styles.slideNarrow : ""}`}>
+          <div
+            key={img.id}
+            className={`${styles.slide} ${single ? styles.slideSingle : narrow ? styles.slideNarrow : ""}`}
+          >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={img.url} alt="" />
           </div>

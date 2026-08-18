@@ -6,14 +6,24 @@ import type { ProductView } from "@/lib/products";
 import { useCart } from "@/components/cart/CartContext";
 import { formatCurrency, priceIncludingVat } from "@/lib/pricing";
 import { getDict, type Locale } from "@/lib/dictionary";
+import { localePath } from "@/lib/i18n";
+import { localizedProduct } from "@/lib/localizedProduct";
 import styles from "./ProductCard.module.css";
 
-export function ProductCard({ product, locale }: { product: ProductView; locale: Locale }) {
+export function ProductCard({
+  product,
+  locale,
+  categoryLabel,
+}: {
+  product: ProductView;
+  locale: Locale;
+  categoryLabel: string;
+}) {
   const cart = useCart();
   const [sizeIndex, setSizeIndex] = useState(0);
   const [justAdded, setJustAdded] = useState(false);
   const t = getDict(locale).shop;
-  const CATEGORY_LABELS: Record<string, string> = t.categories;
+  const p = localizedProduct(product, locale);
 
   const size = product.sizes[sizeIndex];
   const inStock = size?.stockStatus === "in_stock";
@@ -30,18 +40,18 @@ export function ProductCard({ product, locale }: { product: ProductView; locale:
       <div className={`${styles.visual} ${product.imageUrls[0] ? styles.hasPhoto : ""}`}>
         {product.imageUrls[0] && (
           // eslint-disable-next-line @next/next/no-img-element
-          <img className={styles.photo} src={product.imageUrls[0]} alt={product.name} />
+          <img className={styles.photo} src={product.imageUrls[0]} alt={p.name} />
         )}
-        <span className={styles.tag}>{CATEGORY_LABELS[product.category] ?? product.category}</span>
+        <span className={styles.tag}>{categoryLabel}</span>
       </div>
       <div className={styles.info}>
         <div>
-          <Link className={styles.name} href={`/shop/${product.slug}`}>
-            {product.name}
+          <Link className={styles.name} href={localePath(locale, `/shop/${product.slug}`)}>
+            {p.name}
           </Link>
-          <div className={styles.desc}>{product.description}</div>
+          <div className={styles.desc}>{p.description}</div>
           <div className={styles.allergens}>
-            {t.allergensLabel}: {product.allergens}
+            {t.allergensLabel}: {p.allergens}
           </div>
         </div>
       </div>

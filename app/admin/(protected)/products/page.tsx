@@ -1,8 +1,11 @@
 import { requireAdminSection } from "@/lib/admin-auth";
 import { supabaseAdmin } from "@/lib/supabase/server";
+import { getCategories } from "@/lib/categories";
 import {
   addProductSize,
+  createCategory,
   createProduct,
+  deleteCategory,
   deleteProduct,
   deleteProductSize,
   removeProductImage,
@@ -13,25 +16,21 @@ import {
 } from "@/lib/actions/admin/products";
 import styles from "../../admin.module.css";
 
-const CATEGORIES = [
-  { value: "desserts", label: "קינוחים" },
-  { value: "spreads", label: "ממרחים" },
-  { value: "frozen", label: "קפואים" },
-  { value: "pasta", label: "פסטה" },
-];
-
 export default async function AdminProductsPage() {
   const admin = await requireAdminSection("products");
   const isOwner = admin.role === "owner";
 
   // Includes inactive products too (unlike the public getActiveProducts()).
   const db = supabaseAdmin();
-  const { data: rows } = await db
-    .from("products")
-    .select(
-      "id, slug, name, description, category, allergens, active, lead_time_days, image_urls, product_sizes(id, label, price_before_vat, stock_status)"
-    )
-    .order("sort_order", { ascending: true });
+  const [{ data: rows }, categories] = await Promise.all([
+    db
+      .from("products")
+      .select(
+        "id, slug, name, name_en, description, description_en, category, allergens, allergens_en, active, lead_time_days, image_urls, product_sizes(id, label, price_before_vat, stock_status)"
+      )
+      .order("sort_order", { ascending: true }),
+    getCategories(),
+  ]);
 
   const products = rows ?? [];
 
@@ -42,29 +41,86 @@ export default async function AdminProductsPage() {
 
       {isOwner && (
         <div className={styles.card}>
+          <h2>קטגוריות</h2>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>עברית</th>
+                <th>אנגלית</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {categories.map((c) => (
+                <tr key={c.id}>
+                  <td>{c.labelHe}</td>
+                  <td>{c.labelEn}</td>
+                  <td>
+                    <form action={deleteCategory}>
+                      <input type="hidden" name="id" value={c.id} />
+                      <button type="submit" className={styles.btnDanger}>
+                        מחיקה
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <p className={styles.sectionNote}>לא ניתן למחוק קטגוריה שיש בה מוצרים.</p>
+          <form action={createCategory} className={styles.form} style={{ marginTop: 16 }}>
+            <div className={styles.field}>
+              <label>שם הקטגוריה (עברית)</label>
+              <input name="labelHe" type="text" required />
+            </div>
+            <div className={styles.field}>
+              <label>שם הקטגוריה (אנגלית)</label>
+              <input name="labelEn" type="text" required />
+            </div>
+            <button type="submit" className={styles.btn}>
+              הוספת קטגוריה
+            </button>
+          </form>
+        </div>
+      )}
+
+      {isOwner && (
+        <div className={styles.card}>
           <h2>מוצר חדש</h2>
           <form action={createProduct} className={styles.form}>
             <div className={styles.field}>
-              <label>שם</label>
+              <label>שם (עברית)</label>
               <input name="name" type="text" required />
+            </div>
+            <div className={styles.field}>
+              <label>שם (אנגלית)</label>
+              <input name="nameEn" type="text" />
             </div>
             <div className={styles.field}>
               <label>קטגוריה</label>
               <select name="category" required>
-                {CATEGORIES.map((c) => (
-                  <option key={c.value} value={c.value}>
-                    {c.label}
+                {categories.map((c) => (
+                  <option key={c.id} value={c.slug}>
+                    {c.labelHe}
                   </option>
                 ))}
               </select>
             </div>
             <div className={styles.field}>
-              <label>תיאור</label>
+              <label>תיאור (עברית)</label>
               <input name="description" type="text" />
             </div>
             <div className={styles.field}>
-              <label>אלרגנים</label>
+              <label>תיאור (אנגלית)</label>
+              <input name="descriptionEn" type="text" />
+            </div>
+            <div className={styles.field}>
+              <label>אלרגנים (עברית)</label>
               <input name="allergens" type="text" />
+            </div>
+            <div className={styles.field}>
+              <label>אלרגנים (אנגלית)</label>
+              <input name="allergensEn" type="text" />
             </div>
             <div className={styles.field}>
               <label>גודל ראשון</label>
@@ -91,26 +147,38 @@ export default async function AdminProductsPage() {
             <form action={updateProduct} className={styles.form}>
               <input type="hidden" name="id" value={product.id} />
               <div className={styles.field}>
-                <label>שם</label>
+                <label>שם (עברית)</label>
                 <input name="name" type="text" defaultValue={product.name} required />
+              </div>
+              <div className={styles.field}>
+                <label>שם (אנגלית)</label>
+                <input name="nameEn" type="text" defaultValue={product.name_en ?? ""} />
               </div>
               <div className={styles.field}>
                 <label>קטגוריה</label>
                 <select name="category" defaultValue={product.category}>
-                  {CATEGORIES.map((c) => (
-                    <option key={c.value} value={c.value}>
-                      {c.label}
+                  {categories.map((c) => (
+                    <option key={c.id} value={c.slug}>
+                      {c.labelHe}
                     </option>
                   ))}
                 </select>
               </div>
               <div className={styles.field}>
-                <label>תיאור</label>
+                <label>תיאור (עברית)</label>
                 <input name="description" type="text" defaultValue={product.description} />
               </div>
               <div className={styles.field}>
-                <label>אלרגנים</label>
+                <label>תיאור (אנגלית)</label>
+                <input name="descriptionEn" type="text" defaultValue={product.description_en ?? ""} />
+              </div>
+              <div className={styles.field}>
+                <label>אלרגנים (עברית)</label>
                 <input name="allergens" type="text" defaultValue={product.allergens} />
+              </div>
+              <div className={styles.field}>
+                <label>אלרגנים (אנגלית)</label>
+                <input name="allergensEn" type="text" defaultValue={product.allergens_en ?? ""} />
               </div>
               <div className={styles.field}>
                 <label>ימי הכנה מראש</label>

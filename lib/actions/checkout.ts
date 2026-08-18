@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { getCartSessionId } from "@/lib/session";
 import { createPendingOrder } from "@/lib/orders";
 import { createPaymentRequest } from "@/lib/grow";
+import { localePath } from "@/lib/i18n";
 
 export interface CheckoutState {
   error: string | null;
@@ -20,6 +21,7 @@ export async function submitCheckout(
   const notes = String(formData.get("notes") ?? "");
   const couponCode = String(formData.get("couponCode") ?? "");
   const greetingCardMessage = String(formData.get("greetingCardMessage") ?? "").trim().slice(0, 200);
+  const locale = formData.get("locale") === "en" ? "en" : "he";
 
   if (!customerName || !customerEmail || !customerPhone || !pickupDate) {
     return { error: "נא למלא את כל השדות הנדרשים" };
@@ -59,8 +61,8 @@ export async function submitCheckout(
     customerName,
     customerEmail,
     customerPhone,
-    successUrl: `${siteUrl}/checkout/success?orderId=${orderId}`,
-    failUrl: `${siteUrl}/checkout?failed=1`,
+    successUrl: `${siteUrl}${localePath(locale, "/checkout/success")}?orderId=${orderId}`,
+    failUrl: `${siteUrl}${localePath(locale, "/checkout")}?failed=1`,
     referenceId: `order:${orderId}`,
   });
 

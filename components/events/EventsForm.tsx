@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { getDict, type Locale } from "@/lib/dictionary";
-import styles from "@/app/(site)/events/page.module.css";
+import styles from "@/app/(site)/[locale]/events/page.module.css";
 
 const HOURS = Array.from({ length: 16 }, (_, i) => `${String(i + 8).padStart(2, "0")}:00`);
 

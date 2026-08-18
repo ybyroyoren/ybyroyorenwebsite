@@ -64,13 +64,7 @@ const dictionary = {
       sub: "כל המוצרים מיוצרים אצלנו לפי הזמנה. בחרו, הוסיפו לעגלה ובחרו תאריך איסוף בסוף התהליך.",
       pickupNote: "איסוף עצמי מרחוב השוק 34, תל אביב · משלוח מוגבל בקרוב",
       empty: "אין מוצרים בקטגוריה הזו כרגע.",
-      categories: {
-        all: "הכל",
-        desserts: "קינוחים",
-        spreads: "ממרחים",
-        frozen: "קפואים",
-        pasta: "פסטה",
-      },
+      allCategories: "הכל",
       sort: {
         default: "מיון: לפי המלצה",
         asc: "מחיר: מהנמוך לגבוה",
@@ -152,6 +146,16 @@ const dictionary = {
         errorMissingContact: "נא למלא שם, אימייל וטלפון",
         errorMissingDinerName: "שם מלא נדרש לכל סועד",
         errorGeneric: "משהו השתבש, נסו שוב",
+      },
+      success: {
+        paidHeading: "המקום שלך שוריין!",
+        pendingHeading: "ההרשמה ממתינה לאישור תשלום",
+        thanks: (name: string) => `תודה, ${name}.`,
+        mealLine: (title: string, date: string) => `${title} — ${date}`,
+        seatsCount: (n: number) => `מספר סועדים: ${n}`,
+        depositPaid: (amount: string) => `מקדמה ששולמה: ${amount}`,
+        balanceNote: "היתרה תשולם במקום בערב הארוחה. ביטול חינם עד 96 שעות לפני הארוחה.",
+        backToMeals: "לחזרה לארוחות",
       },
     },
     events: {
@@ -362,13 +366,7 @@ const dictionary = {
       sub: "All products are made to order, here at our kitchen. Choose, add to cart, and pick a pickup date at checkout.",
       pickupNote: "Self pickup from 34 HaShuk St, Tel Aviv · Delivery coming soon",
       empty: "No products in this category right now.",
-      categories: {
-        all: "All",
-        desserts: "Desserts",
-        spreads: "Spreads",
-        frozen: "Frozen",
-        pasta: "Pasta",
-      },
+      allCategories: "All",
       sort: {
         default: "Sort: Recommended",
         asc: "Price: low to high",
@@ -450,6 +448,16 @@ const dictionary = {
         errorMissingContact: "Please fill in name, email, and phone",
         errorMissingDinerName: "Full name is required for every diner",
         errorGeneric: "Something went wrong, please try again",
+      },
+      success: {
+        paidHeading: "Your seat is reserved!",
+        pendingHeading: "Registration awaiting payment confirmation",
+        thanks: (name: string) => `Thank you, ${name}.`,
+        mealLine: (title: string, date: string) => `${title} — ${date}`,
+        seatsCount: (n: number) => `Number of diners: ${n}`,
+        depositPaid: (amount: string) => `Deposit paid: ${amount}`,
+        balanceNote: "The remaining balance is paid on-site the evening of the meal. Free cancellation up to 96 hours before the meal.",
+        backToMeals: "Back to meals",
       },
     },
     events: {

@@ -5,6 +5,11 @@ import styles from "../../admin.module.css";
 
 const SECTIONS: { location: MediaLocation; title: string; note: string }[] = [
   {
+    location: "home_carousel",
+    title: "קרוסלת תמונות — עמוד הבית",
+    note: "מוצגות לצד הכותרת הראשית בעמוד הבית.",
+  },
+  {
     location: "meals_carousel",
     title: "קרוסלת תמונות — ארוחות פתוחות",
     note: "מוצגות בראש עמוד הארוחות הפתוחות.",

@@ -21,9 +21,12 @@ export async function createProduct(formData: FormData): Promise<void> {
   const db = supabaseAdmin();
 
   const name = String(formData.get("name") ?? "").trim();
+  const nameEn = String(formData.get("nameEn") ?? "").trim();
   const category = String(formData.get("category") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
+  const descriptionEn = String(formData.get("descriptionEn") ?? "").trim();
   const allergens = String(formData.get("allergens") ?? "").trim();
+  const allergensEn = String(formData.get("allergensEn") ?? "").trim();
   const sizeLabel = String(formData.get("sizeLabel") ?? "").trim();
   const sizePrice = Number(formData.get("sizePrice") ?? 0);
   const leadTimeDays = Number(formData.get("leadTimeDays") ?? 0);
@@ -34,10 +37,13 @@ export async function createProduct(formData: FormData): Promise<void> {
     .from("products")
     .insert({
       name,
+      name_en: nameEn || null,
       slug: slugify(name),
       category,
       description,
+      description_en: descriptionEn || null,
       allergens,
+      allergens_en: allergensEn || null,
       lead_time_days: Math.max(0, leadTimeDays),
     })
     .select("id")
@@ -66,9 +72,12 @@ export async function updateProduct(formData: FormData): Promise<void> {
     .from("products")
     .update({
       name: String(formData.get("name") ?? "").trim(),
+      name_en: String(formData.get("nameEn") ?? "").trim() || null,
       category: String(formData.get("category") ?? "").trim(),
       description: String(formData.get("description") ?? "").trim(),
+      description_en: String(formData.get("descriptionEn") ?? "").trim() || null,
       allergens: String(formData.get("allergens") ?? "").trim(),
+      allergens_en: String(formData.get("allergensEn") ?? "").trim() || null,
       active: formData.get("active") === "on",
       lead_time_days: Math.max(0, Number(formData.get("leadTimeDays") ?? 0)),
     })
@@ -149,6 +158,54 @@ export async function deleteProductSize(formData: FormData): Promise<void> {
   revalidatePath("/admin/products");
 }
 
+export async function createCategory(formData: FormData): Promise<void> {
+  const admin = await requireAdmin();
+  if (admin.role !== "owner") return;
+  const db = supabaseAdmin();
+
+  const labelHe = String(formData.get("labelHe") ?? "").trim();
+  const labelEn = String(formData.get("labelEn") ?? "").trim();
+  if (!labelHe || !labelEn) return;
+
+  const { count } = await db.from("categories").select("id", { count: "exact", head: true });
+
+  await db.from("categories").insert({
+    slug: slugify(labelHe),
+    label_he: labelHe,
+    label_en: labelEn,
+    sort_order: count ?? 0,
+  });
+
+  revalidatePath("/admin/products");
+  revalidatePath("/shop");
+  revalidatePath("/en/shop");
+}
+
+export async function deleteCategory(formData: FormData): Promise<void> {
+  const admin = await requireAdmin();
+  if (admin.role !== "owner") return;
+  const db = supabaseAdmin();
+
+  const id = String(formData.get("id") ?? "");
+  if (!id) return;
+
+  const { data: category } = await db.from("categories").select("slug").eq("id", id).maybeSingle();
+  if (!category) return;
+
+  // A category still holding products can't be deleted — the FK would
+  // reject it anyway, but this gives a clean no-op instead of a DB error.
+  const { count } = await db
+    .from("products")
+    .select("id", { count: "exact", head: true })
+    .eq("category", category.slug);
+  if (count && count > 0) return;
+
+  await db.from("categories").delete().eq("id", id);
+  revalidatePath("/admin/products");
+  revalidatePath("/shop");
+  revalidatePath("/en/shop");
+}
+
 export async function uploadProductImage(formData: FormData): Promise<void> {
   const admin = await requireAdmin();
   if (admin.role !== "owner") return;
@@ -174,6 +231,7 @@ export async function uploadProductImage(formData: FormData): Promise<void> {
 
   revalidatePath("/admin/products");
   revalidatePath("/shop");
+  revalidatePath("/en/shop");
 }
 
 export async function removeProductImage(formData: FormData): Promise<void> {
@@ -201,4 +259,5 @@ export async function removeProductImage(formData: FormData): Promise<void> {
 
   revalidatePath("/admin/products");
   revalidatePath("/shop");
+  revalidatePath("/en/shop");
 }

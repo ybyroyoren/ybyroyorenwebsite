@@ -5,7 +5,8 @@ import { useCart } from "@/components/cart/CartContext";
 import { CheckoutSummary } from "./CheckoutSummary";
 import { CheckoutForm } from "./CheckoutForm";
 import { getDict, type Locale } from "@/lib/dictionary";
-import styles from "@/app/(site)/checkout/page.module.css";
+import { localePath } from "@/lib/i18n";
+import styles from "@/app/(site)/[locale]/checkout/page.module.css";
 
 export function CheckoutContent({ locale }: { locale: Locale }) {
   const cart = useCart();
@@ -15,7 +16,7 @@ export function CheckoutContent({ locale }: { locale: Locale }) {
     return (
       <div className={styles.empty}>
         <p>{t.emptyCart}</p>
-        <Link href="/shop">{t.backToShop}</Link>
+        <Link href={localePath(locale, "/shop")}>{t.backToShop}</Link>
       </div>
     );
   }

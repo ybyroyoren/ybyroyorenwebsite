@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCart } from "@/components/cart/CartContext";
 import { getDict, type Locale } from "@/lib/dictionary";
+import { localePath } from "@/lib/i18n";
 import { LanguageToggle } from "./LanguageToggle";
 import styles from "./Nav.module.css";
 
@@ -15,11 +16,11 @@ export function Nav({ locale }: { locale: Locale }) {
   const t = getDict(locale).nav;
 
   const NAV_LINKS = [
-    { href: "/shop", label: t.shop },
-    { href: "/meals", label: t.meals },
-    { href: "/events", label: t.events },
-    { href: "/about", label: t.about },
-    { href: "/contact", label: t.contact },
+    { href: localePath(locale, "/shop"), label: t.shop },
+    { href: localePath(locale, "/meals"), label: t.meals },
+    { href: localePath(locale, "/events"), label: t.events },
+    { href: localePath(locale, "/about"), label: t.about },
+    { href: localePath(locale, "/contact"), label: t.contact },
   ];
 
   useEffect(() => {
@@ -29,7 +30,7 @@ export function Nav({ locale }: { locale: Locale }) {
   return (
     <nav className={styles.nav}>
       <div className={`wrap ${styles.inner}`}>
-        <Link className={styles.mark} href="/">
+        <Link className={styles.mark} href={localePath(locale, "/")}>
           Y
         </Link>
         <div className={styles.links}>
@@ -44,7 +45,9 @@ export function Nav({ locale }: { locale: Locale }) {
           ))}
         </div>
         <div className={styles.rightGroup}>
-          <LanguageToggle locale={locale} className={styles.langToggle} />
+          <Suspense fallback={null}>
+            <LanguageToggle locale={locale} className={styles.langToggle} />
+          </Suspense>
           <button type="button" className={styles.cartButton} onClick={cart.open}>
             <span>{t.cart}</span>
             <span className={styles.cartCount}>{cart.count}</span>

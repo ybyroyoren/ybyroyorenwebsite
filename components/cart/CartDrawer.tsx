@@ -5,6 +5,7 @@ import Link from "next/link";
 import { GREETING_CARD_MAX_LENGTH, useCart } from "./CartContext";
 import { formatCurrency } from "@/lib/pricing";
 import { getDict, type Locale } from "@/lib/dictionary";
+import { localePath } from "@/lib/i18n";
 import styles from "./CartDrawer.module.css";
 
 export function CartDrawer({ locale }: { locale: Locale }) {
@@ -150,7 +151,7 @@ export function CartDrawer({ locale }: { locale: Locale }) {
               <span>{formatCurrency(cart.totals.total)}</span>
             </div>
 
-            <Link href="/checkout" className={styles.checkoutBtn} onClick={cart.close}>
+            <Link href={localePath(locale, "/checkout")} className={styles.checkoutBtn} onClick={cart.close}>
               {t.checkoutBtn}
             </Link>
             <p className={styles.note}>{t.note}</p>

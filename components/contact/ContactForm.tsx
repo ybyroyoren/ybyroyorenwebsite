@@ -3,7 +3,7 @@
 import { useActionState } from "react";
 import { submitContactForm, type ContactState } from "@/lib/actions/contact";
 import { getDict, type Locale } from "@/lib/dictionary";
-import styles from "@/app/(site)/contact/page.module.css";
+import styles from "@/app/(site)/[locale]/contact/page.module.css";
 
 const initialState: ContactState = { status: "idle", message: "" };
 

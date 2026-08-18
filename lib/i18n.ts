@@ -1,17 +1,18 @@
-import "server-only";
-import { cookies } from "next/headers";
-import { type Locale, getDict } from "@/lib/dictionary";
-import { LOCALE_COOKIE } from "@/lib/i18n-client";
+import { notFound } from "next/navigation";
+import { LOCALES, type Locale } from "@/lib/dictionary";
 
-export { LOCALE_COOKIE };
-export const DEFAULT_LOCALE: Locale = "he";
+export type { Locale };
 
-export async function getLocale(): Promise<Locale> {
-  const store = await cookies();
-  return store.get(LOCALE_COOKIE)?.value === "en" ? "en" : DEFAULT_LOCALE;
+// The [locale] route segment gives us this as a plain string — narrow it to
+// a real Locale, or 404 for anything else (there's no third locale).
+export function resolveLocale(value: string): Locale {
+  if ((LOCALES as readonly string[]).includes(value)) return value as Locale;
+  notFound();
 }
 
-export async function getLocaleDict() {
-  const locale = await getLocale();
-  return { locale, dict: getDict(locale) };
+// Hebrew is unprefixed at the root ("/shop"); English lives under "/en"
+// ("/en/shop"). Use this for every internal Link so navigation stays within
+// the current language. `path` must start with "/".
+export function localePath(locale: Locale, path: string): string {
+  return locale === "en" ? `/en${path}` : path;
 }

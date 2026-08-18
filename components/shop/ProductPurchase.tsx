@@ -5,7 +5,7 @@ import type { ProductView } from "@/lib/products";
 import { useCart } from "@/components/cart/CartContext";
 import { formatCurrency, priceIncludingVat } from "@/lib/pricing";
 import { getDict, type Locale } from "@/lib/dictionary";
-import styles from "@/app/(site)/shop/[slug]/page.module.css";
+import styles from "@/app/(site)/[locale]/shop/[slug]/page.module.css";
 
 export function ProductPurchase({ product, locale }: { product: ProductView; locale: Locale }) {
   const cart = useCart();

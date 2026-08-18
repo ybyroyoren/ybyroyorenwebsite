@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createPendingRegistration, type DinerInput } from "@/lib/meals";
 import { createPaymentRequest } from "@/lib/grow";
+import { localePath } from "@/lib/i18n";
 
 interface RegisterBody {
   mealId: string;
@@ -8,6 +9,7 @@ interface RegisterBody {
   customerEmail: string;
   customerPhone: string;
   diners: DinerInput[];
+  locale?: string;
 }
 
 export async function POST(request: Request) {
@@ -44,14 +46,15 @@ export async function POST(request: Request) {
   }
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const locale = body.locale === "en" ? "en" : "he";
   const payment = await createPaymentRequest({
     items: [{ name: `מקדמה — ${body.diners.length} סועדים`, price: depositTotal, quantity: 1 }],
     description: `מקדמה לארוחה פתוחה — ${registrationId}`,
     customerName: body.customerName,
     customerEmail: body.customerEmail,
     customerPhone: body.customerPhone,
-    successUrl: `${siteUrl}/meals/success?registrationId=${registrationId}`,
-    failUrl: `${siteUrl}/meals?failed=1`,
+    successUrl: `${siteUrl}${localePath(locale, "/meals/success")}?registrationId=${registrationId}`,
+    failUrl: `${siteUrl}${localePath(locale, "/meals")}?failed=1`,
     referenceId: `meal:${registrationId}`,
   });
 

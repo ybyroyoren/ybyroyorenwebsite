@@ -2,9 +2,16 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { getDict, type Locale } from "@/lib/dictionary";
+import { localePath } from "@/lib/i18n";
 import styles from "./ShopFilters.module.css";
 
-export function ShopFilters({ locale }: { locale: Locale }) {
+export function ShopFilters({
+  locale,
+  categories,
+}: {
+  locale: Locale;
+  categories: { slug: string; label: string }[];
+}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const activeCategory = searchParams.get("cat") ?? "all";
@@ -12,11 +19,8 @@ export function ShopFilters({ locale }: { locale: Locale }) {
   const t = getDict(locale).shop;
 
   const CATEGORIES = [
-    { value: "all", label: t.categories.all },
-    { value: "desserts", label: t.categories.desserts },
-    { value: "spreads", label: t.categories.spreads },
-    { value: "frozen", label: t.categories.frozen },
-    { value: "pasta", label: t.categories.pasta },
+    { value: "all", label: t.allCategories },
+    ...categories.map((c) => ({ value: c.slug, label: c.label })),
   ];
 
   function updateParam(key: string, value: string) {
@@ -27,7 +31,8 @@ export function ShopFilters({ locale }: { locale: Locale }) {
       params.set(key, value);
     }
     const query = params.toString();
-    router.push(query ? `/shop?${query}` : "/shop");
+    const shopPath = localePath(locale, "/shop");
+    router.push(query ? `${shopPath}?${query}` : shopPath);
   }
 
   return (

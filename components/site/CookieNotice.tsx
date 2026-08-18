@@ -2,6 +2,7 @@
 
 import { setLocalStorageValue, useLocalStorageValue } from "@/lib/useLocalStorage";
 import { getDict, type Locale } from "@/lib/dictionary";
+import { localePath } from "@/lib/i18n";
 import styles from "./CookieNotice.module.css";
 
 const STORAGE_KEY = "cookie_notice_dismissed";
@@ -16,7 +17,7 @@ export function CookieNotice({ locale }: { locale: Locale }) {
     <div className={styles.bar} role="region" aria-label={t.ariaLabel}>
       <p className={styles.text}>
         {t.textBefore}
-        <a href="/cookie-policy">{t.linkText}</a>
+        <a href={localePath(locale, "/cookie-policy")}>{t.linkText}</a>
         {t.textAfter}
       </p>
       <button

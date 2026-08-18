@@ -1,7 +1,7 @@
 import "server-only";
 import { supabaseAdmin } from "@/lib/supabase/server";
 
-export type MediaLocation = "meals_carousel" | "events_carousel" | "about_hero";
+export type MediaLocation = "meals_carousel" | "events_carousel" | "about_hero" | "home_carousel";
 
 export interface MediaItem {
   id: string;

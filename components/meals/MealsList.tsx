@@ -95,6 +95,7 @@ export function MealsList({ meals, locale }: { meals: MealView[]; locale: Locale
           customerEmail,
           customerPhone,
           diners,
+          locale,
         }),
       });
       const data = await res.json();

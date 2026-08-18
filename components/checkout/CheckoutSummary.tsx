@@ -3,7 +3,7 @@
 import { useCart } from "@/components/cart/CartContext";
 import { formatCurrency } from "@/lib/pricing";
 import { getDict, type Locale } from "@/lib/dictionary";
-import styles from "@/app/(site)/checkout/page.module.css";
+import styles from "@/app/(site)/[locale]/checkout/page.module.css";
 
 export function CheckoutSummary({ locale }: { locale: Locale }) {
   const cart = useCart();

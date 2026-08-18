@@ -12,9 +12,12 @@ export interface ProductView {
   id: string;
   slug: string;
   name: string;
+  nameEn: string | null;
   description: string;
+  descriptionEn: string | null;
   category: string;
   allergens: string;
+  allergensEn: string | null;
   imageUrls: string[];
   leadTimeDays: number;
   sizes: ProductSizeView[];
@@ -24,9 +27,12 @@ interface ProductRow {
   id: string;
   slug: string;
   name: string;
+  name_en: string | null;
   description: string;
+  description_en: string | null;
   category: string;
   allergens: string;
+  allergens_en: string | null;
   image_urls: string[];
   lead_time_days: number;
   product_sizes: {
@@ -38,14 +44,20 @@ interface ProductRow {
   }[];
 }
 
+const PRODUCT_SELECT =
+  "id, slug, name, name_en, description, description_en, category, allergens, allergens_en, image_urls, lead_time_days, product_sizes(id, label, price_before_vat, stock_status, sort_order)";
+
 function mapProduct(row: ProductRow): ProductView {
   return {
     id: row.id,
     slug: row.slug,
     name: row.name,
+    nameEn: row.name_en,
     description: row.description,
+    descriptionEn: row.description_en,
     category: row.category,
     allergens: row.allergens,
+    allergensEn: row.allergens_en,
     imageUrls: row.image_urls,
     leadTimeDays: row.lead_time_days,
     sizes: [...row.product_sizes]
@@ -63,9 +75,7 @@ export async function getActiveProducts(): Promise<ProductView[]> {
   const db = supabaseAdmin();
   const { data, error } = await db
     .from("products")
-    .select(
-      "id, slug, name, description, category, allergens, image_urls, lead_time_days, sort_order, product_sizes(id, label, price_before_vat, stock_status, sort_order)"
-    )
+    .select(`${PRODUCT_SELECT}, sort_order`)
     .eq("active", true)
     .order("sort_order", { ascending: true });
 
@@ -90,9 +100,7 @@ export async function getProductBySlug(slug: string): Promise<ProductView | null
   const db = supabaseAdmin();
   const { data, error } = await db
     .from("products")
-    .select(
-      "id, slug, name, description, category, allergens, image_urls, lead_time_days, product_sizes(id, label, price_before_vat, stock_status, sort_order)"
-    )
+    .select(PRODUCT_SELECT)
     .eq("slug", safeDecodeSlug(slug))
     .eq("active", true)
     .maybeSingle();

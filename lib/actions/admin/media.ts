@@ -6,7 +6,7 @@ import { supabaseAdmin } from "@/lib/supabase/server";
 import { deleteImage, uploadImage } from "@/lib/storage";
 import type { MediaLocation } from "@/lib/media";
 
-const VALID_LOCATIONS: MediaLocation[] = ["meals_carousel", "events_carousel", "about_hero"];
+const VALID_LOCATIONS: MediaLocation[] = ["meals_carousel", "events_carousel", "about_hero", "home_carousel"];
 
 export async function uploadMedia(formData: FormData): Promise<void> {
   const admin = await requireAdmin();
@@ -34,8 +34,13 @@ export async function uploadMedia(formData: FormData): Promise<void> {
 
   revalidatePath("/admin/media");
   revalidatePath("/meals");
+  revalidatePath("/en/meals");
   revalidatePath("/events");
+  revalidatePath("/en/events");
   revalidatePath("/about");
+  revalidatePath("/en/about");
+  revalidatePath("/");
+  revalidatePath("/en");
 }
 
 export async function deleteMedia(formData: FormData): Promise<void> {
@@ -52,6 +57,11 @@ export async function deleteMedia(formData: FormData): Promise<void> {
 
   revalidatePath("/admin/media");
   revalidatePath("/meals");
+  revalidatePath("/en/meals");
   revalidatePath("/events");
+  revalidatePath("/en/events");
   revalidatePath("/about");
+  revalidatePath("/en/about");
+  revalidatePath("/");
+  revalidatePath("/en");
 }

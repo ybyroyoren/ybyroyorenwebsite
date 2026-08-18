@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { setLocalStorageValue, useLocalStorageValue } from "@/lib/useLocalStorage";
 import { getDict, type Locale } from "@/lib/dictionary";
+import { localePath } from "@/lib/i18n";
 import styles from "./AccessibilityWidget.module.css";
 
 const COOKIE_NOTICE_KEY = "cookie_notice_dismissed";
@@ -143,7 +144,7 @@ export function AccessibilityWidget({ locale }: { locale: Locale }) {
             {t.reset}
           </button>
 
-          <a href="/accessibility-statement" className={styles.statementLink}>
+          <a href={localePath(locale, "/accessibility-statement")} className={styles.statementLink}>
             {t.statementLink}
           </a>
         </div>

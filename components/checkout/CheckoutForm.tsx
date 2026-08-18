@@ -4,7 +4,7 @@ import { useActionState } from "react";
 import { submitCheckout, type CheckoutState } from "@/lib/actions/checkout";
 import { useCart } from "@/components/cart/CartContext";
 import { getDict, type Locale } from "@/lib/dictionary";
-import styles from "@/app/(site)/checkout/page.module.css";
+import styles from "@/app/(site)/[locale]/checkout/page.module.css";
 
 const initialState: CheckoutState = { error: null };
 
@@ -16,6 +16,7 @@ export function CheckoutForm({ locale }: { locale: Locale }) {
 
   return (
     <form className={styles.form} action={action}>
+      <input type="hidden" name="locale" value={locale} />
       <input type="hidden" name="couponCode" value={cart.couponCode} />
       <input
         type="hidden"

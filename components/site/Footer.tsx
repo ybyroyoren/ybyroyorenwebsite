@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { NewsletterForm } from "./NewsletterForm";
 import { getDict, type Locale } from "@/lib/dictionary";
+import { localePath } from "@/lib/i18n";
 import styles from "./Footer.module.css";
 
 export function Footer({ locale }: { locale: Locale }) {
   const t = getDict(locale).footer;
+  const p = (path: string) => localePath(locale, path);
 
   return (
     <footer className={styles.footer} id="contact">
@@ -16,9 +18,9 @@ export function Footer({ locale }: { locale: Locale }) {
           </div>
           <div className={styles.col}>
             <h4>{t.navHeading}</h4>
-            <Link href="/shop">{t.navShop}</Link>
-            <Link href="/meals">{t.navMeals}</Link>
-            <Link href="/events">{t.navEvents}</Link>
+            <Link href={p("/shop")}>{t.navShop}</Link>
+            <Link href={p("/meals")}>{t.navMeals}</Link>
+            <Link href={p("/events")}>{t.navEvents}</Link>
           </div>
           <div className={styles.col}>
             <h4>{t.contactHeading}</h4>
@@ -45,11 +47,11 @@ export function Footer({ locale }: { locale: Locale }) {
           </div>
         </div>
         <div className={styles.legal}>
-          <Link href="/privacy-policy">{t.legal.privacy}</Link>
-          <Link href="/cookie-policy">{t.legal.cookies}</Link>
-          <Link href="/returns-policy">{t.legal.returns}</Link>
-          <Link href="/shipping-policy">{t.legal.shipping}</Link>
-          <Link href="/accessibility-statement">{t.legal.accessibility}</Link>
+          <Link href={p("/privacy-policy")}>{t.legal.privacy}</Link>
+          <Link href={p("/cookie-policy")}>{t.legal.cookies}</Link>
+          <Link href={p("/returns-policy")}>{t.legal.returns}</Link>
+          <Link href={p("/shipping-policy")}>{t.legal.shipping}</Link>
+          <Link href={p("/accessibility-statement")}>{t.legal.accessibility}</Link>
         </div>
         <div className={styles.bottom}>
           <div className={styles.bottomText}>
