@@ -7,12 +7,14 @@
 // prepared food.
 import type { Metadata } from "next";
 import { LegalLayout } from "@/components/legal/LegalLayout";
+import { getLocale } from "@/lib/i18n";
 
 export const metadata: Metadata = { title: "מדיניות החזרות וביטולים" };
 
-export default function ReturnsPolicyPage() {
+export default async function ReturnsPolicyPage() {
+  const locale = await getLocale();
   return (
-    <LegalLayout eyebrow="מדיניות" title="מדיניות החזרות, ביטולים והחלפות" updated="20.07.2026">
+    <LegalLayout eyebrow="מדיניות" title="מדיניות החזרות, ביטולים והחלפות" updated="20.07.2026" locale={locale}>
       <h2>מוצרי החנות (עוגות, ממרחים, קפואים, פסטה)</h2>
       <p>
         כל המוצרים בחנות מיוצרים טריים לפי הזמנה. בשל אופיים כמזון מתכלה, <strong>אין אפשרות

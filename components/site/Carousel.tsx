@@ -2,10 +2,20 @@
 
 import { useRef } from "react";
 import type { MediaItem } from "@/lib/media";
+import { getDict, type Locale } from "@/lib/dictionary";
 import styles from "./Carousel.module.css";
 
-export function Carousel({ images, narrow }: { images: MediaItem[]; narrow?: boolean }) {
+export function Carousel({
+  images,
+  narrow,
+  locale = "he",
+}: {
+  images: MediaItem[];
+  narrow?: boolean;
+  locale?: Locale;
+}) {
   const trackRef = useRef<HTMLDivElement>(null);
+  const t = getDict(locale).common;
 
   if (images.length === 0) return null;
 
@@ -25,10 +35,10 @@ export function Carousel({ images, narrow }: { images: MediaItem[]; narrow?: boo
       </div>
       {images.length > 1 && (
         <>
-          <button type="button" className={`${styles.nav} ${styles.prev}`} onClick={() => scroll(1)} aria-label="הקודם">
+          <button type="button" className={`${styles.nav} ${styles.prev}`} onClick={() => scroll(1)} aria-label={t.prev}>
             ‹
           </button>
-          <button type="button" className={`${styles.nav} ${styles.next}`} onClick={() => scroll(-1)} aria-label="הבא">
+          <button type="button" className={`${styles.nav} ${styles.next}`} onClick={() => scroll(-1)} aria-label={t.next}>
             ›
           </button>
         </>

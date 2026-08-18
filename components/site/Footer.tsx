@@ -1,31 +1,34 @@
 import Link from "next/link";
 import { NewsletterForm } from "./NewsletterForm";
+import { getDict, type Locale } from "@/lib/dictionary";
 import styles from "./Footer.module.css";
 
-export function Footer() {
+export function Footer({ locale }: { locale: Locale }) {
+  const t = getDict(locale).footer;
+
   return (
     <footer className={styles.footer} id="contact">
       <div className="wrap">
         <div className={styles.grid}>
           <div>
             <div className={styles.mark}>Y</div>
-            <p>שף פרטי לאירועים וארוחות פתוחות - מכל הלב, מהמטבח שלי</p>
+            <p>{t.tagline}</p>
           </div>
           <div className={styles.col}>
-            <h4>ניווט</h4>
-            <Link href="/shop">חנות</Link>
-            <Link href="/meals">ארוחות</Link>
-            <Link href="/events">אירועים פרטיים</Link>
+            <h4>{t.navHeading}</h4>
+            <Link href="/shop">{t.navShop}</Link>
+            <Link href="/meals">{t.navMeals}</Link>
+            <Link href="/events">{t.navEvents}</Link>
           </div>
           <div className={styles.col}>
-            <h4>יצירת קשר</h4>
+            <h4>{t.contactHeading}</h4>
             <a href="tel:0543737307">054-3737-307</a>
             <a href="mailto:roy@ybyroyoren.com">roy@ybyroyoren.com</a>
             <a
               href="https://instagram.com/ybyroyoren"
               target="_blank"
               rel="noopener"
-              aria-label="Instagram"
+              aria-label={t.instagramLabel}
               className={styles.iconLink}
             >
               <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8">
@@ -36,24 +39,24 @@ export function Footer() {
             </a>
           </div>
           <div className={styles.col}>
-            <h4>עדכונים</h4>
-            <p style={{ marginBottom: 14 }}>ארוחות חדשות ומוצרים ישר למייל</p>
-            <NewsletterForm />
+            <h4>{t.updatesHeading}</h4>
+            <p style={{ marginBottom: 14 }}>{t.updatesSub}</p>
+            <NewsletterForm locale={locale} />
           </div>
         </div>
         <div className={styles.legal}>
-          <Link href="/privacy-policy">מדיניות פרטיות</Link>
-          <Link href="/cookie-policy">מדיניות עוגיות</Link>
-          <Link href="/returns-policy">מדיניות החזרות</Link>
-          <Link href="/shipping-policy">מדיניות משלוחים</Link>
-          <Link href="/accessibility-statement">הצהרת נגישות</Link>
+          <Link href="/privacy-policy">{t.legal.privacy}</Link>
+          <Link href="/cookie-policy">{t.legal.cookies}</Link>
+          <Link href="/returns-policy">{t.legal.returns}</Link>
+          <Link href="/shipping-policy">{t.legal.shipping}</Link>
+          <Link href="/accessibility-statement">{t.legal.accessibility}</Link>
         </div>
         <div className={styles.bottom}>
           <div className={styles.bottomText}>
-            <span>© 2026 Roy Oren</span>
-            <span>Y by Roy Oren</span>
+            <span>{t.copyright}</span>
+            <span>{t.brand}</span>
           </div>
-          <Link href="/admin/login" aria-label="כניסת מנהלים" className={styles.iconLink}>
+          <Link href="/admin/login" aria-label={t.adminLink} className={styles.iconLink}>
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8">
               <rect x="5" y="10.5" width="14" height="9" rx="2" />
               <path d="M8 10.5V7a4 4 0 0 1 8 0v3.5" />

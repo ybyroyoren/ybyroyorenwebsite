@@ -4,11 +4,13 @@ import { useState } from "react";
 import Link from "next/link";
 import { GREETING_CARD_MAX_LENGTH, useCart } from "./CartContext";
 import { formatCurrency } from "@/lib/pricing";
+import { getDict, type Locale } from "@/lib/dictionary";
 import styles from "./CartDrawer.module.css";
 
-export function CartDrawer() {
+export function CartDrawer({ locale }: { locale: Locale }) {
   const cart = useCart();
   const [couponCode, setCouponCode] = useState("");
+  const t = getDict(locale).cart;
 
   return (
     <>
@@ -18,7 +20,7 @@ export function CartDrawer() {
       />
       <div className={`${styles.drawer} ${cart.isOpen ? styles.open : ""}`}>
         <div className={styles.head}>
-          <h3>העגלה שלך</h3>
+          <h3>{t.title}</h3>
           <button type="button" className={styles.close} onClick={cart.close}>
             ✕
           </button>
@@ -26,7 +28,7 @@ export function CartDrawer() {
 
         <div className={styles.body}>
           {cart.items.length === 0 ? (
-            <div className={styles.empty}>העגלה שלך ריקה עדיין</div>
+            <div className={styles.empty}>{t.empty}</div>
           ) : (
             cart.items.map((item) => {
               const unitIncl = item.priceBeforeVat * 1.18;
@@ -40,7 +42,7 @@ export function CartDrawer() {
                   <div className={styles.itemInfo}>
                     <div className={styles.itemName}>{displayName}</div>
                     <div className={styles.itemPrice}>
-                      {formatCurrency(item.priceBeforeVat)} לפני מע&quot;מ · {formatCurrency(unitIncl)} כולל מע&quot;מ
+                      {formatCurrency(item.priceBeforeVat)} {t.beforeVat} · {formatCurrency(unitIncl)} {t.inclVat}
                     </div>
                     <div className={styles.qtyControl}>
                       <button
@@ -68,7 +70,7 @@ export function CartDrawer() {
                       onClick={() => cart.removeItem(item.id)}
                       disabled={cart.isLoading}
                     >
-                      הסר
+                      {t.remove}
                     </button>
                   </div>
                 </div>
@@ -82,12 +84,12 @@ export function CartDrawer() {
             <div className={styles.couponRow}>
               <input
                 type="text"
-                placeholder="הזינו קוד קופון"
+                placeholder={t.couponPlaceholder}
                 value={couponCode}
                 onChange={(e) => setCouponCode(e.target.value)}
               />
               <button type="button" onClick={() => cart.applyCoupon(couponCode)}>
-                החל
+                {t.couponApply}
               </button>
             </div>
             {cart.couponMessage && (
@@ -106,7 +108,7 @@ export function CartDrawer() {
                 checked={cart.greetingCardEnabled}
                 onChange={(e) => cart.setGreetingCardEnabled(e.target.checked)}
               />
-              הוספת כרטיס ברכה (+{formatCurrency(8)})
+              {t.giftToggle} (+{formatCurrency(8)})
             </label>
             {cart.greetingCardEnabled && (
               <div className={styles.giftBlock}>
@@ -114,7 +116,7 @@ export function CartDrawer() {
                   value={cart.greetingCardMessage}
                   onChange={(e) => cart.setGreetingCardMessage(e.target.value)}
                   maxLength={GREETING_CARD_MAX_LENGTH}
-                  placeholder="מה נרשום על הכרטיס?"
+                  placeholder={t.giftPlaceholder}
                   rows={3}
                 />
                 <span className={styles.giftCount}>
@@ -124,34 +126,34 @@ export function CartDrawer() {
             )}
 
             <div className={styles.totalsRow}>
-              <span>סכום ביניים</span>
+              <span>{t.subtotal}</span>
               <span>{formatCurrency(cart.totals.subtotal)}</span>
             </div>
             {cart.totals.discount > 0 && (
               <div className={styles.totalsRow}>
-                <span>הנחה</span>
+                <span>{t.discount}</span>
                 <span>-{formatCurrency(cart.totals.discount)}</span>
               </div>
             )}
             {cart.totals.extraFee > 0 && (
               <div className={styles.totalsRow}>
-                <span>כרטיס ברכה</span>
+                <span>{t.giftCardFee}</span>
                 <span>{formatCurrency(cart.totals.extraFee)}</span>
               </div>
             )}
             <div className={styles.totalsRow}>
-              <span>מע&quot;מ (18%)</span>
+              <span>{t.vat}</span>
               <span>{formatCurrency(cart.totals.vat)}</span>
             </div>
             <div className={`${styles.totalsRow} ${styles.grand}`}>
-              <span>סה&quot;כ לתשלום</span>
+              <span>{t.total}</span>
               <span>{formatCurrency(cart.totals.total)}</span>
             </div>
 
             <Link href="/checkout" className={styles.checkoutBtn} onClick={cart.close}>
-              המשך לתשלום
+              {t.checkoutBtn}
             </Link>
-            <p className={styles.note}>קבלה תישלח אוטומטית למייל לאחר התשלום</p>
+            <p className={styles.note}>{t.note}</p>
           </div>
         )}
       </div>

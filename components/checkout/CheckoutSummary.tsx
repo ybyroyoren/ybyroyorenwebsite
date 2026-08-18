@@ -2,14 +2,16 @@
 
 import { useCart } from "@/components/cart/CartContext";
 import { formatCurrency } from "@/lib/pricing";
+import { getDict, type Locale } from "@/lib/dictionary";
 import styles from "@/app/(site)/checkout/page.module.css";
 
-export function CheckoutSummary() {
+export function CheckoutSummary({ locale }: { locale: Locale }) {
   const cart = useCart();
+  const t = getDict(locale).checkout;
 
   return (
     <div className={styles.summary}>
-      <h2>סיכום הזמנה</h2>
+      <h2>{t.summaryHeading}</h2>
       {cart.items.map((item) => {
         const displayName = item.sizeLabel ? `${item.productName} — ${item.sizeLabel}` : item.productName;
         return (
@@ -23,32 +25,32 @@ export function CheckoutSummary() {
       })}
       {cart.greetingCardEnabled && cart.greetingCardMessage.trim() && (
         <div className={styles.line}>
-          <span>כרטיס ברכה: &quot;{cart.greetingCardMessage.trim()}&quot;</span>
+          <span>{t.giftCardLine(cart.greetingCardMessage.trim())}</span>
         </div>
       )}
 
       <div className={styles.totalsRow}>
-        <span>סכום ביניים</span>
+        <span>{t.subtotal}</span>
         <span>{formatCurrency(cart.totals.subtotal)}</span>
       </div>
       {cart.totals.discount > 0 && (
         <div className={styles.totalsRow}>
-          <span>הנחה</span>
+          <span>{t.discount}</span>
           <span>-{formatCurrency(cart.totals.discount)}</span>
         </div>
       )}
       {cart.totals.extraFee > 0 && (
         <div className={styles.totalsRow}>
-          <span>כרטיס ברכה</span>
+          <span>{t.giftCardFee}</span>
           <span>{formatCurrency(cart.totals.extraFee)}</span>
         </div>
       )}
       <div className={styles.totalsRow}>
-        <span>מע&quot;מ (18%)</span>
+        <span>{t.vat}</span>
         <span>{formatCurrency(cart.totals.vat)}</span>
       </div>
       <div className={`${styles.totalsRow} ${styles.grand}`}>
-        <span>סה&quot;כ לתשלום</span>
+        <span>{t.total}</span>
         <span>{formatCurrency(cart.totals.total)}</span>
       </div>
     </div>

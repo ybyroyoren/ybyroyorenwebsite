@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { getActiveProducts } from "@/lib/products";
+import { getLocale } from "@/lib/i18n";
+import { getDict } from "@/lib/dictionary";
 import { ShopFilters } from "@/components/shop/ShopFilters";
 import { ProductCard } from "@/components/shop/ProductCard";
 import styles from "./page.module.css";
@@ -12,7 +14,8 @@ export default async function ShopPage({
   searchParams: Promise<{ cat?: string; sort?: string }>;
 }) {
   const { cat = "all", sort = "default" } = await searchParams;
-  const products = await getActiveProducts();
+  const [products, locale] = await Promise.all([getActiveProducts(), getLocale()]);
+  const t = getDict(locale).shop;
 
   let filtered = cat === "all" ? products : products.filter((p) => p.category === cat);
 
@@ -27,22 +30,20 @@ export default async function ShopPage({
   return (
     <>
       <div className={`wrap ${styles.pageHead}`}>
-        <div className={styles.eyebrow}>חנות</div>
-        <h1>מהמטבח שלי, ישר אליכם</h1>
-        <p>כל המוצרים מיוצרים אצלנו לפי הזמנה. בחרו, הוסיפו לעגלה ובחרו תאריך איסוף בסוף התהליך.</p>
-        <div className={styles.pickupNote}>
-          איסוף עצמי מרחוב השוק 34, תל אביב · משלוח מוגבל בקרוב
-        </div>
+        <div className={styles.eyebrow}>{t.eyebrow}</div>
+        <h1>{t.heading}</h1>
+        <p>{t.sub}</p>
+        <div className={styles.pickupNote}>{t.pickupNote}</div>
       </div>
 
       <div className="wrap">
-        <ShopFilters />
+        <ShopFilters locale={locale} />
         {filtered.length === 0 ? (
-          <div className={styles.empty}>אין מוצרים בקטגוריה הזו כרגע.</div>
+          <div className={styles.empty}>{t.empty}</div>
         ) : (
           <div className={styles.grid}>
             {filtered.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard key={product.id} product={product} locale={locale} />
             ))}
           </div>
         )}

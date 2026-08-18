@@ -2,12 +2,14 @@
 // business owner. Recommended for legal review before relying on it.
 import type { Metadata } from "next";
 import { LegalLayout } from "@/components/legal/LegalLayout";
+import { getLocale } from "@/lib/i18n";
 
 export const metadata: Metadata = { title: "מדיניות עוגיות" };
 
-export default function CookiePolicyPage() {
+export default async function CookiePolicyPage() {
+  const locale = await getLocale();
   return (
-    <LegalLayout eyebrow="מדיניות" title="מדיניות עוגיות (Cookies)" updated="20.07.2026">
+    <LegalLayout eyebrow="מדיניות" title="מדיניות עוגיות (Cookies)" updated="20.07.2026" locale={locale}>
       <h2>מה זו עוגייה</h2>
       <p>
         עוגייה (cookie) היא קובץ טקסט קטן שנשמר בדפדפן שלכם בעת גלישה באתר, ומשמש לזכור מידע בין

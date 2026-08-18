@@ -1,32 +1,15 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { getDict, type Locale } from "@/lib/dictionary";
 import styles from "@/app/(site)/events/page.module.css";
-
-const EVENT_TYPES = [
-  { value: "family", label: "ערב משפחתי" },
-  { value: "corporate", label: "אירוע חברה" },
-  { value: "wedding", label: "חתונה" },
-  { value: "birthday", label: "יום הולדת" },
-  { value: "holiday", label: "ארוחת חג" },
-  { value: "bachelor", label: "מסיבת רווקים/ות" },
-  { value: "barmitzvah", label: "בר מצווה" },
-  { value: "other", label: "אחר" },
-];
 
 const HOURS = Array.from({ length: 16 }, (_, i) => `${String(i + 8).padStart(2, "0")}:00`);
 
 type Location = "venue" | "other" | null;
 type Format = "buffet" | "seated" | "other" | null;
 
-function guestRange(location: Location, format: Format): { min: number; max: number | null; label: string | null } {
-  if (location === "venue" && format === "seated") return { min: 10, max: 24, label: "אצלנו, בישיבה" };
-  if (location === "venue" && format === "buffet") return { min: 10, max: 60, label: "אצלנו, עמידה" };
-  if (location === "other" && format === "seated") return { min: 10, max: 30, label: "אירוע חוץ, סביב שולחן" };
-  return { min: 10, max: null, label: null };
-}
-
-export function EventsForm() {
+export function EventsForm({ locale }: { locale: Locale }) {
   const [eventType, setEventType] = useState<string | null>(null);
   const [location, setLocation] = useState<Location>(null);
   const [format, setFormat] = useState<Format>(null);
@@ -35,6 +18,25 @@ export function EventsForm() {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const f = getDict(locale).events.form;
+
+  const EVENT_TYPES = [
+    { value: "family", label: f.eventTypes.family },
+    { value: "corporate", label: f.eventTypes.corporate },
+    { value: "wedding", label: f.eventTypes.wedding },
+    { value: "birthday", label: f.eventTypes.birthday },
+    { value: "holiday", label: f.eventTypes.holiday },
+    { value: "bachelor", label: f.eventTypes.bachelor },
+    { value: "barmitzvah", label: f.eventTypes.barmitzvah },
+    { value: "other", label: f.eventTypes.other },
+  ];
+
+  function guestRange(loc: Location, fmt: Format): { min: number; max: number | null; label: string | null } {
+    if (loc === "venue" && fmt === "seated") return { min: 10, max: 24, label: f.guestRangeLabelVenueSeated };
+    if (loc === "venue" && fmt === "buffet") return { min: 10, max: 60, label: f.guestRangeLabelVenueBuffet };
+    if (loc === "other" && fmt === "seated") return { min: 10, max: 30, label: f.guestRangeLabelOtherSeated };
+    return { min: 10, max: null, label: null };
+  }
 
   const range = useMemo(() => guestRange(location, format), [location, format]);
 
@@ -50,27 +52,21 @@ export function EventsForm() {
   }
 
   const guestNote = range.max
-    ? `טווח מותר: ${range.min} עד ${range.max} סועדים (${range.label}) · מינימום חיוב על ${range.min}` +
-      (location === "other" && guests > 30
-        ? " · לאירועים מעל 30 סועדים נדרשת השכרת ציוד מחברה חיצונית; העלות מועברת ללקוח כפי שהיא, בנוסף למחיר האירוע."
-        : "")
-    : `מינימום חיוב: ${range.min} סועדים, גם אם מגיעים פחות`;
+    ? f.guestRangeWithMax(range.min, range.max, range.label ?? "") +
+      (location === "other" && guests > 30 ? f.guestRangeExtraStaff : "")
+    : f.guestRangeNoMax(range.min);
 
   if (submitted) {
-    return (
-      <p className={styles.successMsg}>
-        תודה! הפנייה נקלטה ואחזור אליכם בדרך כלל תוך יום עסקים אחד.
-      </p>
-    );
+    return <p className={styles.successMsg}>{f.successMsg}</p>;
   }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
 
-    if (!eventType) return setError("נא לבחור סוג אירוע");
-    if (!location) return setError("נא לבחור מיקום אירוע");
-    if (!format) return setError("נא לבחור סגנון הגשה");
+    if (!eventType) return setError(f.errorEventType);
+    if (!location) return setError(f.errorLocation);
+    if (!format) return setError(f.errorFormat);
 
     const form = e.currentTarget;
     const data = new FormData(form);
@@ -98,12 +94,12 @@ export function EventsForm() {
       });
       const result = await res.json();
       if (!res.ok || !result.ok) {
-        setError(result.error ?? "משהו השתבש, נסו שוב");
+        setError(result.error ?? f.errorGeneric);
         return;
       }
       setSubmitted(true);
     } catch {
-      setError("משהו השתבש, נסו שוב");
+      setError(f.errorGeneric);
     } finally {
       setSubmitting(false);
     }
@@ -113,7 +109,7 @@ export function EventsForm() {
     <form className={styles.form} onSubmit={handleSubmit}>
       <div className={styles.field}>
         <label>
-          סוג האירוע <span className={styles.req}>*</span>
+          {f.eventTypeLabel} <span className={styles.req}>*</span>
         </label>
         <div className={styles.chips}>
           {EVENT_TYPES.map((t) => (
@@ -132,13 +128,13 @@ export function EventsForm() {
       <div className={styles.fieldRow}>
         <div className={styles.field}>
           <label htmlFor="fullName">
-            שם מלא <span className={styles.req}>*</span>
+            {f.fullNameLabel} <span className={styles.req}>*</span>
           </label>
           <input id="fullName" name="fullName" type="text" required />
         </div>
         <div className={styles.field}>
           <label htmlFor="phone">
-            טלפון <span className={styles.req}>*</span>
+            {f.phoneLabel} <span className={styles.req}>*</span>
           </label>
           <input id="phone" name="phone" type="tel" required />
         </div>
@@ -146,18 +142,18 @@ export function EventsForm() {
 
       <div className={styles.field}>
         <label htmlFor="email">
-          אימייל <span className={styles.req}>*</span>
+          {f.emailLabel} <span className={styles.req}>*</span>
         </label>
         <input id="email" name="email" type="email" required />
       </div>
 
       <div className={styles.fieldRow}>
         <div className={styles.field}>
-          <label htmlFor="date">תאריך רצוי</label>
+          <label htmlFor="date">{f.dateLabel}</label>
           <input id="date" name="date" type="date" />
         </div>
         <div className={styles.field}>
-          <label htmlFor="startTime">שעת התחלה</label>
+          <label htmlFor="startTime">{f.startTimeLabel}</label>
           <select id="startTime" name="startTime" defaultValue={HOURS[0]}>
             {HOURS.map((h) => (
               <option key={h} value={h}>
@@ -170,7 +166,7 @@ export function EventsForm() {
 
       <div className={styles.field}>
         <label>
-          מיקום האירוע <span className={styles.req}>*</span>
+          {f.locationLabel} <span className={styles.req}>*</span>
         </label>
         <div className={styles.chips}>
           <button
@@ -178,32 +174,30 @@ export function EventsForm() {
             className={`${styles.chip} ${location === "venue" ? styles.selected : ""}`}
             onClick={() => setLocation("venue")}
           >
-            אצלנו, בחלל האירוח
+            {f.locationVenue}
           </button>
           <button
             type="button"
             className={`${styles.chip} ${location === "other" ? styles.selected : ""}`}
             onClick={() => setLocation("other")}
           >
-            בלוקיישן אחר
+            {f.locationOther}
           </button>
         </div>
         {location === "other" && (
           <input
             type="text"
             name="locationDetail"
-            placeholder="פרטי המיקום (כתובת / סוג המקום)"
+            placeholder={f.locationDetailPlaceholder}
             style={{ marginTop: 6 }}
           />
         )}
-        {location === "venue" && (
-          <p className={styles.fieldNote}>📍 חלל האירוח שלנו: רחוב השוק 34, תל אביב</p>
-        )}
+        {location === "venue" && <p className={styles.fieldNote}>{f.venueNote}</p>}
       </div>
 
       <div className={styles.field}>
         <label>
-          סגנון ההגשה <span className={styles.req}>*</span>
+          {f.formatLabel} <span className={styles.req}>*</span>
         </label>
         <div className={styles.chips}>
           <button
@@ -211,21 +205,21 @@ export function EventsForm() {
             className={`${styles.chip} ${format === "buffet" ? styles.selected : ""}`}
             onClick={() => setFormat("buffet")}
           >
-            בופה (עמידה, דרינקים וביסים)
+            {f.formatBuffet}
           </button>
           <button
             type="button"
             className={`${styles.chip} ${format === "seated" ? styles.selected : ""}`}
             onClick={() => setFormat("seated")}
           >
-            ארוחת שף מלאה, סביב שולחן
+            {f.formatSeated}
           </button>
           <button
             type="button"
             className={`${styles.chip} ${format === "other" ? styles.selected : ""}`}
             onClick={() => setFormat("other")}
           >
-            אחר
+            {f.formatOther}
           </button>
         </div>
         {format === "seated" && (
@@ -235,21 +229,21 @@ export function EventsForm() {
               className={`${styles.chip} ${service === "plated" ? styles.selected : ""}`}
               onClick={() => setService("plated")}
             >
-              הגשה אישית לצלחת
+              {f.servicePlated}
             </button>
             <button
               type="button"
               className={`${styles.chip} ${service === "family" ? styles.selected : ""}`}
               onClick={() => setService("family")}
             >
-              הגשה למרכז השולחן
+              {f.serviceFamily}
             </button>
           </div>
         )}
       </div>
 
       <div className={styles.field}>
-        <label>מספר אורחים משוער</label>
+        <label>{f.guestsLabel}</label>
         <div className={styles.guestStepper}>
           <button type="button" onClick={() => setGuestsClamped(guests - 1)}>
             −
@@ -268,30 +262,23 @@ export function EventsForm() {
       </div>
 
       <div className={styles.field}>
-        <label htmlFor="details">ספרו לי קצת על האירוע</label>
-        <textarea
-          id="details"
-          name="details"
-          placeholder="תפריט חלומי, אילוצי תזונה, תקציב משוער, כל מה שחשוב לדעת..."
-        />
+        <label htmlFor="details">{f.detailsLabel}</label>
+        <textarea id="details" name="details" placeholder={f.detailsPlaceholder} />
       </div>
 
       <label className={styles.checkboxRow}>
         <input type="checkbox" name="newsletter" />
-        <span>אשמח לקבל עדכונים על ארוחות פתוחות ומוצרים חדשים</span>
+        <span>{f.newsletterLabel}</span>
       </label>
 
-      <p className={styles.fieldNote}>
-        בכל אירוע פרטי נוספת עלות קבועה של ₪600 לצוות ניקיון ושטיפת כלים. באירועי חוץ, החלל
-        מוחזר נקי לחלוטין בסיום.
-      </p>
+      <p className={styles.fieldNote}>{f.cleaningFeeNote}</p>
 
       {error && <p style={{ color: "var(--danger)", fontSize: 13.5 }}>{error}</p>}
 
       <button type="submit" className={styles.submitBtn} disabled={submitting}>
-        {submitting ? "שולח..." : "שליחת פנייה"}
+        {submitting ? f.submitting : f.submit}
       </button>
-      <p className={styles.footnote}>אחזור אליכם בדרך כלל תוך יום עסקים אחד</p>
+      <p className={styles.footnote}>{f.footnote}</p>
     </form>
   );
 }

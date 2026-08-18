@@ -1,30 +1,32 @@
 import Link from "next/link";
+import { getLocale } from "@/lib/i18n";
+import { getDict } from "@/lib/dictionary";
 import styles from "./page.module.css";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const locale = await getLocale();
+  const t = getDict(locale).home;
+
   return (
     <section className={styles.hero}>
       <div className={styles.heroMark}>Y</div>
       <div className={`wrap ${styles.inner}`}>
-        <div className={styles.eyebrow}>שף פרטי - קייטרינג - חנות מוצרים - Y by Roy Oren</div>
-        <h1>Y - בית ליצירה קולינרית</h1>
-        <p className={styles.sub}>
-          ארוחות אינטימיות, אירועים גדולים, ארוחות פתוחות אצלנו בחלל האירוח או חנות מוצרים מעשה
-          ידינו. אנחנו פה בשבילכם.
-        </p>
+        <div className={styles.eyebrow}>{t.eyebrow}</div>
+        <h1>{t.heading}</h1>
+        <p className={styles.sub}>{t.sub}</p>
         <div className={styles.actions}>
           <Link className={`${styles.btn} ${styles.btnPrimary}`} href="/meals">
-            שריינו מקום לארוחה הקרובה
+            {t.ctaMeals}
           </Link>
           <Link className={`${styles.btn} ${styles.btnOutline}`} href="/shop">
-            לחנות המוצרים
+            {t.ctaShop}
           </Link>
         </div>
         <Link className={styles.tertiary} href="/events">
-          מתכננים אירוע פרטי? לחצו כאן ←
+          {t.ctaEvents}
         </Link>
       </div>
-      <div className={styles.scrollCue}>גלול/י</div>
+      <div className={styles.scrollCue}>{t.scrollCue}</div>
     </section>
   );
 }

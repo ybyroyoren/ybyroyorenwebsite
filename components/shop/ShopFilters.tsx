@@ -1,21 +1,23 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
+import { getDict, type Locale } from "@/lib/dictionary";
 import styles from "./ShopFilters.module.css";
 
-const CATEGORIES = [
-  { value: "all", label: "הכל" },
-  { value: "desserts", label: "קינוחים" },
-  { value: "spreads", label: "ממרחים" },
-  { value: "frozen", label: "קפואים" },
-  { value: "pasta", label: "פסטה" },
-];
-
-export function ShopFilters() {
+export function ShopFilters({ locale }: { locale: Locale }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const activeCategory = searchParams.get("cat") ?? "all";
   const activeSort = searchParams.get("sort") ?? "default";
+  const t = getDict(locale).shop;
+
+  const CATEGORIES = [
+    { value: "all", label: t.categories.all },
+    { value: "desserts", label: t.categories.desserts },
+    { value: "spreads", label: t.categories.spreads },
+    { value: "frozen", label: t.categories.frozen },
+    { value: "pasta", label: t.categories.pasta },
+  ];
 
   function updateParam(key: string, value: string) {
     const params = new URLSearchParams(searchParams.toString());
@@ -47,9 +49,9 @@ export function ShopFilters() {
         value={activeSort}
         onChange={(e) => updateParam("sort", e.target.value)}
       >
-        <option value="default">מיון: לפי המלצה</option>
-        <option value="asc">מחיר: מהנמוך לגבוה</option>
-        <option value="desc">מחיר: מהגבוה לנמוך</option>
+        <option value="default">{t.sort.default}</option>
+        <option value="asc">{t.sort.asc}</option>
+        <option value="desc">{t.sort.desc}</option>
       </select>
     </div>
   );

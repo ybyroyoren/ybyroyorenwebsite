@@ -1,33 +1,30 @@
 import type { Metadata } from "next";
 import { getMediaByLocation } from "@/lib/media";
+import { getLocale } from "@/lib/i18n";
+import { getDict } from "@/lib/dictionary";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = { title: "אודות" };
 
 export default async function AboutPage() {
-  const [heroImage] = await getMediaByLocation("about_hero");
+  const [[heroImage], locale] = await Promise.all([getMediaByLocation("about_hero"), getLocale()]);
+  const t = getDict(locale).about;
 
   return (
     <div className={`wrap ${styles.hero}`}>
       <div>
-        <div className={styles.eyebrow}>אודות</div>
+        <div className={styles.eyebrow}>{t.eyebrow}</div>
         <h1>
-          רוי אורן,
+          {t.heading[0]}
           <br />
-          שף פרטי
+          {t.heading[1]}
         </h1>
-        <p>
-          עזבתי קריירת הייטק כדי ללמוד בישול ואפייה מקצועיים בבתי הספר של אלן דוקאס בפריז
-          ובאיסאנז&apos;ו שבצרפת, ולעבור סטאז&apos; תחת השף Massimo Bottura ב-Osteria Francescana
-          באיטליה. אני מאמין שדיוק הטעם קודם לכול - מנות דגל שמתפתחות ומשתפרות עם הזמן, לצד
-          המצאות חדשות שפיתחתי וניסיתי במטבח שלי. למה אנחנו נקראים Y? תגיעו לאחד האירועים שלנו
-          ותשמעו את הסיפור ממני.
-        </p>
+        <p>{t.body}</p>
       </div>
       <div className={`${styles.visual} ${heroImage ? styles.hasPhoto : ""}`}>
         {heroImage && (
           // eslint-disable-next-line @next/next/no-img-element
-          <img className={styles.photo} src={heroImage.url} alt="רוי אורן" />
+          <img className={styles.photo} src={heroImage.url} alt={t.photoAlt} />
         )}
       </div>
     </div>

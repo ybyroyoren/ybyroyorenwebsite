@@ -1,0 +1,22 @@
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+  padding: 8px 14px;
+  color: var(--ink);
+  transition: all 0.2s ease;
+}
+
+.toggle:hover {
+  background: var(--ink);
+  color: var(--cream);
+}
+
+.toggle:disabled {
+  opacity: 0.6;
+}

@@ -5,17 +5,8 @@ import type { MealView, DinerInput } from "@/lib/meals";
 import { seatsLabel, seatsDisplayPct, isLowSeats } from "@/lib/seats";
 import { formatCurrency } from "@/lib/pricing";
 import { formatMealDateParts, formatMealDateFull } from "@/lib/date";
+import { getDict, type Locale } from "@/lib/dictionary";
 import styles from "./MealsList.module.css";
-
-const RESTRICTION_OPTIONS = [
-  "צמחוני",
-  "טבעוני",
-  "ללא גלוטן",
-  "ללא לקטוז",
-  "אלרגיה לאגוזים",
-  "אלרגיה לדגים/פירות ים",
-  "אחר — פירוט בהערות",
-];
 
 const DEPOSIT_PER_SEAT = 100;
 
@@ -23,7 +14,7 @@ function emptyDiner(): DinerInput {
   return { fullName: "", dietaryRestrictions: [], notes: "" };
 }
 
-export function MealsList({ meals }: { meals: MealView[] }) {
+export function MealsList({ meals, locale }: { meals: MealView[]; locale: Locale }) {
   const [selectedMeal, setSelectedMeal] = useState<MealView | null>(null);
   const [seatsCount, setSeatsCount] = useState(1);
   const [diners, setDiners] = useState<DinerInput[]>([emptyDiner()]);
@@ -32,6 +23,9 @@ export function MealsList({ meals }: { meals: MealView[] }) {
   const [customerPhone, setCustomerPhone] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const t = getDict(locale).meals;
+  const d = t.drawer;
+  const RESTRICTION_OPTIONS = d.restrictions;
 
   function openMeal(meal: MealView) {
     setSelectedMeal(meal);
@@ -81,11 +75,11 @@ export function MealsList({ meals }: { meals: MealView[] }) {
   async function submit() {
     if (!selectedMeal) return;
     if (!customerName.trim() || !customerEmail.trim() || !customerPhone.trim()) {
-      setError("נא למלא שם, אימייל וטלפון");
+      setError(d.errorMissingContact);
       return;
     }
-    if (diners.some((d) => !d.fullName.trim())) {
-      setError("שם מלא נדרש לכל סועד");
+    if (diners.some((diner) => !diner.fullName.trim())) {
+      setError(d.errorMissingDinerName);
       return;
     }
 
@@ -105,12 +99,12 @@ export function MealsList({ meals }: { meals: MealView[] }) {
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error ?? "משהו השתבש, נסו שוב");
+        setError(data.error ?? d.errorGeneric);
         return;
       }
       window.location.href = data.paymentUrl;
     } catch {
-      setError("משהו השתבש, נסו שוב");
+      setError(d.errorGeneric);
     } finally {
       setSubmitting(false);
     }
@@ -125,7 +119,7 @@ export function MealsList({ meals }: { meals: MealView[] }) {
       {meals.map((meal) => {
         const isFull = meal.remainingSeats <= 0;
         const pct = seatsDisplayPct(meal.remainingSeats, meal.totalSeats, meal.takenSeats);
-        const { day, num, month } = formatMealDateParts(meal.date);
+        const { day, num, month } = formatMealDateParts(meal.date, locale);
         return (
           <div
             key={meal.id}
@@ -146,19 +140,19 @@ export function MealsList({ meals }: { meals: MealView[] }) {
                 <div className={styles.seatsBarFill} style={{ width: `${pct}%` }} />
               </div>
               <div className={`${styles.seatsText} ${isLowSeats(meal.remainingSeats) ? styles.low : ""}`}>
-                {seatsLabel(meal.remainingSeats)}
+                {seatsLabel(meal.remainingSeats, locale)}
               </div>
             </div>
             <div className={styles.ctaCol}>
               <div className={styles.price}>
-                מחיר לסועד
+                {t.pricePerSeat}
                 <br />
                 <b>{formatCurrency(meal.pricePerSeat)}</b>
               </div>
               {isFull ? (
-                <span className={styles.fullBadge}>אין מקומות פנויים</span>
+                <span className={styles.fullBadge}>{t.full}</span>
               ) : (
-                <span className={styles.btn}>פרטים והרשמה</span>
+                <span className={styles.btn}>{t.detailsCta}</span>
               )}
             </div>
           </div>
@@ -171,7 +165,7 @@ export function MealsList({ meals }: { meals: MealView[] }) {
           <>
             <div className={styles.drawerHead}>
               <div>
-                <div className={styles.dayTag}>{formatMealDateFull(selectedMeal.date)}</div>
+                <div className={styles.dayTag}>{formatMealDateFull(selectedMeal.date, locale)}</div>
                 <h3>{selectedMeal.title}</h3>
               </div>
               <button type="button" className={styles.close} onClick={closeDrawer}>
@@ -179,15 +173,12 @@ export function MealsList({ meals }: { meals: MealView[] }) {
               </button>
             </div>
             <div className={styles.drawerBody}>
-              <p className={styles.summary}>
-                ארוחה בת 10 מנות, מוגשות אישית. כל הגבלה או העדפת תזונה מקבלת מענה אישי לכל סועד —
-                פשוט ציינו אותה למטה.
-              </p>
+              <p className={styles.summary}>{d.summary}</p>
 
               <div className={styles.seatsPicker}>
                 <div className={styles.seatsPickerLabel}>
-                  מספר סועדים
-                  <small>{seatsLabel(selectedMeal.remainingSeats)}</small>
+                  {d.seatsPickerLabel}
+                  <small>{seatsLabel(selectedMeal.remainingSeats, locale)}</small>
                 </div>
                 <div className={styles.qtyControl}>
                   <button type="button" onClick={() => changeSeats(-1)}>
@@ -203,38 +194,35 @@ export function MealsList({ meals }: { meals: MealView[] }) {
               <div className={styles.contactFields}>
                 <input
                   type="text"
-                  placeholder="שם מלא (איש/אשת קשר)"
+                  placeholder={d.namePlaceholder}
                   value={customerName}
                   onChange={(e) => setCustomerName(e.target.value)}
                 />
                 <input
                   type="email"
-                  placeholder="אימייל"
+                  placeholder={d.emailPlaceholder}
                   value={customerEmail}
                   onChange={(e) => setCustomerEmail(e.target.value)}
                 />
                 <input
                   type="tel"
-                  placeholder="טלפון"
+                  placeholder={d.phonePlaceholder}
                   value={customerPhone}
                   onChange={(e) => setCustomerPhone(e.target.value)}
                 />
               </div>
 
-              <p className={styles.allergyWarning}>
-                ⚠ שימו לב: אורח/ת עם אלרגיה למאכל מכל סוג מחויב/ת להגיע עם תרופה מתאימה בעצמו/ה —
-                המקום אינו סטרילי.
-              </p>
+              <p className={styles.allergyWarning}>{d.allergyWarning}</p>
 
               <div className={styles.dinersList}>
                 {diners.map((diner, i) => (
                   <div key={i} className={styles.dinerRow}>
                     <div className={styles.dinerRowLabel}>
-                      סועד/ת {i + 1} <span className={styles.dinerRowRequired}>— שם מלא חובה</span>
+                      {d.dinerLabel(i + 1)} <span className={styles.dinerRowRequired}>{d.dinerRequired}</span>
                     </div>
                     <input
                       type="text"
-                      placeholder="שם מלא"
+                      placeholder={d.dinerNamePlaceholder}
                       value={diner.fullName}
                       onChange={(e) => updateDiner(i, { fullName: e.target.value })}
                     />
@@ -252,7 +240,7 @@ export function MealsList({ meals }: { meals: MealView[] }) {
                     </div>
                     <input
                       type="text"
-                      placeholder="הערות נוספות (למשל: לא אוהב/ת עגבניה)"
+                      placeholder={d.dinerNotesPlaceholder}
                       value={diner.notes}
                       onChange={(e) => updateDiner(i, { notes: e.target.value })}
                     />
@@ -262,20 +250,18 @@ export function MealsList({ meals }: { meals: MealView[] }) {
             </div>
             <div className={styles.drawerFooter}>
               <div className={styles.totalsRow}>
-                <span>מחיר לסועד</span>
+                <span>{t.pricePerSeat}</span>
                 <span>{formatCurrency(selectedMeal.pricePerSeat)}</span>
               </div>
               <div className={styles.totalsRow}>
-                <span>סה&quot;כ לארוחה</span>
+                <span>{d.totalForMeal}</span>
                 <span>{formatCurrency(mealTotal)}</span>
               </div>
               <div className={`${styles.totalsRow} ${styles.grand}`}>
-                <span>מקדמה לתשלום עכשיו (₪100 לסועד)</span>
+                <span>{d.depositNow}</span>
                 <span>{formatCurrency(depositTotal)}</span>
               </div>
-              <div className={styles.balanceNote}>
-                היתרה ({formatCurrency(balance)}) תשולם במקום בערב הארוחה
-              </div>
+              <div className={styles.balanceNote}>{d.balanceNote(formatCurrency(balance))}</div>
               {error && <p className={styles.error}>{error}</p>}
               <button
                 type="button"
@@ -283,11 +269,9 @@ export function MealsList({ meals }: { meals: MealView[] }) {
                 onClick={submit}
                 disabled={submitting}
               >
-                {submitting ? "מעבד..." : "שריינו מקום ושלמו מקדמה"}
+                {submitting ? d.submitting : d.registerBtn}
               </button>
-              <p className={styles.cancelNote}>
-                ביטול חינם עד 96 שעות (4 ימים) לפני הארוחה — המקדמה מוחזרת במלואה
-              </p>
+              <p className={styles.cancelNote}>{d.cancelNote}</p>
             </div>
           </>
         )}

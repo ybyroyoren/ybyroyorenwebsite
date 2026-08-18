@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getActiveProducts, getProductBySlug } from "@/lib/products";
+import { getLocale } from "@/lib/i18n";
+import { getDict } from "@/lib/dictionary";
 import { ProductPurchase } from "@/components/shop/ProductPurchase";
 import { formatCurrency, priceIncludingVat } from "@/lib/pricing";
 import styles from "./page.module.css";
@@ -18,8 +20,9 @@ export async function generateMetadata({
 
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const product = await getProductBySlug(slug);
+  const [product, locale] = await Promise.all([getProductBySlug(slug), getLocale()]);
   if (!product) notFound();
+  const t = getDict(locale);
 
   const allProducts = await getActiveProducts();
   const related = allProducts.filter((p) => p.id !== product.id).slice(0, 4);
@@ -27,7 +30,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   return (
     <>
       <div className={`wrap ${styles.breadcrumb}`}>
-        <Link href="/shop">חנות</Link> / {product.name}
+        <Link href="/shop">{t.shop.eyebrow}</Link> / {product.name}
       </div>
 
       <div className={`wrap ${styles.layout}`}>
@@ -55,17 +58,17 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           <p className={styles.desc}>{product.description}</p>
 
           <div className={styles.infoBlock}>
-            <h4>אלרגנים</h4>
+            <h4>{t.product.allergensHeading}</h4>
             <p className={styles.allergenTag}>{product.allergens}</p>
           </div>
 
-          <ProductPurchase product={product} />
+          <ProductPurchase product={product} locale={locale} />
         </div>
       </div>
 
       {related.length > 0 && (
         <div className={`wrap ${styles.relatedSection}`}>
-          <h2>אולי גם יעניין אתכם</h2>
+          <h2>{t.product.relatedHeading}</h2>
           <div className={styles.relatedGrid}>
             {related.map((p) => (
               <Link key={p.id} href={`/shop/${p.slug}`} className={styles.relatedCard}>
@@ -78,7 +81,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                 <div className={styles.relatedName}>{p.name}</div>
                 {p.sizes[0] && (
                   <div className={styles.relatedPrice}>
-                    {formatCurrency(priceIncludingVat(p.sizes[0].priceBeforeVat))} כולל מע&quot;מ
+                    {formatCurrency(priceIncludingVat(p.sizes[0].priceBeforeVat))} {t.shop.inclVat}
                   </div>
                 )}
               </Link>

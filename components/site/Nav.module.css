@@ -87,6 +87,14 @@
     display: none;
   }
 
+  .rightGroup {
+    gap: 8px;
+  }
+
+  .cartButton {
+    padding: 8px 14px;
+  }
+
   .menuButton {
     display: flex;
   }

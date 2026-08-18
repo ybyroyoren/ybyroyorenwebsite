@@ -1,40 +1,45 @@
 import type { Metadata } from "next";
+import { getLocale } from "@/lib/i18n";
+import { getDict } from "@/lib/dictionary";
 import { ContactForm } from "@/components/contact/ContactForm";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = { title: "יצירת קשר" };
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const locale = await getLocale();
+  const t = getDict(locale).contact;
+
   return (
     <div className={styles.layout}>
       <div className={styles.introCol}>
-        <div className={styles.eyebrow}>יצירת קשר</div>
-        <h1>נשמח לשמוע מכם</h1>
-        <p>שאלה על מוצר, בקשה מיוחדת, או סתם רוצים להגיד שלום — אפשר לפנות ישירות או למלא את הטופס.</p>
+        <div className={styles.eyebrow}>{t.eyebrow}</div>
+        <h1>{t.heading}</h1>
+        <p>{t.sub}</p>
 
         <div className={styles.methods}>
           <div className={styles.row}>
-            <span className={styles.label}>טלפון</span>
+            <span className={styles.label}>{t.phoneLabel}</span>
             <a className={styles.value} href="tel:0543737307">
               054-3737-307
             </a>
           </div>
           <div className={styles.row}>
-            <span className={styles.label}>אימייל</span>
+            <span className={styles.label}>{t.emailLabel}</span>
             <a className={styles.value} href="mailto:roy@ybyroyoren.com">
               roy@ybyroyoren.com
             </a>
           </div>
           <div className={styles.row}>
-            <span className={styles.label}>אינסטגרם</span>
+            <span className={styles.label}>{t.instagramLabel}</span>
             <a className={styles.value} href="https://instagram.com/ybyroyoren" target="_blank" rel="noopener">
               @ybyroyoren
             </a>
           </div>
           <div className={styles.row}>
-            <span className={styles.label}>כתובת</span>
+            <span className={styles.label}>{t.addressLabel}</span>
             <span className={styles.value} style={{ fontSize: 16 }}>
-              רחוב השוק 34, תל אביב
+              {t.address}
             </span>
           </div>
         </div>
@@ -53,19 +58,19 @@ export default function ContactPage() {
               target="_blank"
               rel="noopener"
             >
-              פתיחה בגוגל מפות
+              {t.openInMaps}
             </a>
             <a href="https://waze.com/ul?q=רחוב השוק 34 תל אביב" target="_blank" rel="noopener">
-              פתיחה ב-Waze
+              {t.openInWaze}
             </a>
           </div>
         </div>
       </div>
 
       <div className={styles.formCol}>
-        <h2>השאירו הודעה</h2>
-        <p className={styles.formSub}>אחזור אליכם בדרך כלל תוך יום עסקים אחד</p>
-        <ContactForm />
+        <h2>{t.formHeading}</h2>
+        <p className={styles.formSub}>{t.formSub}</p>
+        <ContactForm locale={locale} />
       </div>
     </div>
   );

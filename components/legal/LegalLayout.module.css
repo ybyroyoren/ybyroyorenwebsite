@@ -31,6 +31,17 @@
   margin-bottom: 46px;
 }
 
+.englishNotice {
+  max-width: 760px;
+  background: var(--olive-mist);
+  color: var(--olive-deep);
+  font-size: 13.5px;
+  line-height: 1.6;
+  padding: 14px 16px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+}
+
 .body {
   max-width: 760px;
   color: var(--ink-soft);

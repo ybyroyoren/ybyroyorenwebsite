@@ -1,12 +1,14 @@
 // Seat-display logic for open meals — spec §5.
 // The stored/queried numbers (meal_availability view) are always exact; only
 // the customer-facing label and meter width are tiered.
+import { getDict, type Locale } from "@/lib/dictionary";
 
-export function seatsLabel(remaining: number): string {
-  if (remaining <= 0) return "מלא";
-  if (remaining <= 7) return `נשארו ${remaining} מקומות`;
-  if (remaining <= 13) return "נשארו מעט מקומות פנויים";
-  return "פנוי";
+export function seatsLabel(remaining: number, locale: Locale = "he"): string {
+  const t = getDict(locale).meals.seatsLabel;
+  if (remaining <= 0) return t.full;
+  if (remaining <= 7) return t.remaining(remaining);
+  if (remaining <= 13) return t.fewLeft;
+  return t.available;
 }
 
 export function seatsDisplayPct(remaining: number, totalSeats: number, takenSeats: number): number {

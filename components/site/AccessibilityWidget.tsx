@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { setLocalStorageValue, useLocalStorageValue } from "@/lib/useLocalStorage";
+import { getDict, type Locale } from "@/lib/dictionary";
 import styles from "./AccessibilityWidget.module.css";
 
 const COOKIE_NOTICE_KEY = "cookie_notice_dismissed";
@@ -34,13 +35,14 @@ function parsePrefs(raw: string | null): A11yPrefs {
   }
 }
 
-export function AccessibilityWidget() {
+export function AccessibilityWidget({ locale }: { locale: Locale }) {
   const [open, setOpen] = useState(false);
   const raw = useLocalStorageValue(STORAGE_KEY);
   const prefs = parsePrefs(raw);
   const cookieNoticeVisible = !useLocalStorageValue(COOKIE_NOTICE_KEY);
   const buttonBottom = cookieNoticeVisible ? 92 : 28;
   const panelBottom = buttonBottom + 56;
+  const t = getDict(locale).a11y;
 
   // Synchronizes React state -> the DOM (globals.css reads these attributes).
   useEffect(() => {
@@ -71,7 +73,7 @@ export function AccessibilityWidget() {
         type="button"
         className={styles.button}
         style={{ bottom: buttonBottom }}
-        aria-label="תפריט נגישות"
+        aria-label={t.buttonLabel}
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
       >
@@ -83,23 +85,23 @@ export function AccessibilityWidget() {
           className={styles.panel}
           style={{ bottom: panelBottom }}
           role="dialog"
-          aria-label="תפריט נגישות"
+          aria-label={t.buttonLabel}
         >
           <div className={styles.panelHead}>
-            <h2>נגישות</h2>
-            <button type="button" className={styles.close} aria-label="סגירה" onClick={() => setOpen(false)}>
+            <h2>{t.heading}</h2>
+            <button type="button" className={styles.close} aria-label={t.close} onClick={() => setOpen(false)}>
               ✕
             </button>
           </div>
 
           <div className={styles.row}>
-            <span>גודל טקסט</span>
+            <span>{t.fontSize}</span>
             <div className={styles.fontControls}>
-              <button type="button" onClick={() => cycleFontSize(-1)} aria-label="הקטנת טקסט">
-                א-
+              <button type="button" onClick={() => cycleFontSize(-1)} aria-label={t.decreaseFont}>
+                {t.fontSmaller}
               </button>
-              <button type="button" onClick={() => cycleFontSize(1)} aria-label="הגדלת טקסט">
-                א+
+              <button type="button" onClick={() => cycleFontSize(1)} aria-label={t.increaseFont}>
+                {t.fontLarger}
               </button>
             </div>
           </div>
@@ -111,7 +113,7 @@ export function AccessibilityWidget() {
             onClick={() => toggle("contrast")}
             aria-pressed={prefs.contrast}
           >
-            <span>ניגודיות גבוהה</span>
+            <span>{t.highContrast}</span>
             <span className={`${styles.switch} ${prefs.contrast ? styles.switchOn : ""}`} />
           </button>
 
@@ -122,7 +124,7 @@ export function AccessibilityWidget() {
             onClick={() => toggle("underlineLinks")}
             aria-pressed={prefs.underlineLinks}
           >
-            <span>הדגשת קישורים</span>
+            <span>{t.underlineLinks}</span>
             <span className={`${styles.switch} ${prefs.underlineLinks ? styles.switchOn : ""}`} />
           </button>
 
@@ -133,16 +135,16 @@ export function AccessibilityWidget() {
             onClick={() => toggle("stopAnimations")}
             aria-pressed={prefs.stopAnimations}
           >
-            <span>עצירת אנימציות</span>
+            <span>{t.stopAnimations}</span>
             <span className={`${styles.switch} ${prefs.stopAnimations ? styles.switchOn : ""}`} />
           </button>
 
           <button type="button" className={styles.reset} onClick={() => update(DEFAULT_PREFS)}>
-            איפוס הגדרות
+            {t.reset}
           </button>
 
           <a href="/accessibility-statement" className={styles.statementLink}>
-            הצהרת נגישות
+            {t.statementLink}
           </a>
         </div>
       )}

@@ -2,12 +2,14 @@
 // business owner. Recommended for legal review before relying on it.
 import type { Metadata } from "next";
 import { LegalLayout } from "@/components/legal/LegalLayout";
+import { getLocale } from "@/lib/i18n";
 
 export const metadata: Metadata = { title: "מדיניות משלוחים ואיסוף" };
 
-export default function ShippingPolicyPage() {
+export default async function ShippingPolicyPage() {
+  const locale = await getLocale();
   return (
-    <LegalLayout eyebrow="מדיניות" title="מדיניות משלוחים ואיסוף" updated="20.07.2026">
+    <LegalLayout eyebrow="מדיניות" title="מדיניות משלוחים ואיסוף" updated="20.07.2026" locale={locale}>
       <h2>איסוף עצמי</h2>
       <p>
         כרגע כל ההזמנות מהחנות נאספות עצמאית מרחוב השוק 34, תל אביב, בתאריך שנבחר בעת התשלום.

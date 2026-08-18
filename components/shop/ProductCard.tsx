@@ -5,19 +5,15 @@ import Link from "next/link";
 import type { ProductView } from "@/lib/products";
 import { useCart } from "@/components/cart/CartContext";
 import { formatCurrency, priceIncludingVat } from "@/lib/pricing";
+import { getDict, type Locale } from "@/lib/dictionary";
 import styles from "./ProductCard.module.css";
 
-const CATEGORY_LABELS: Record<string, string> = {
-  desserts: "קינוחים",
-  spreads: "ממרחים",
-  frozen: "קפואים",
-  pasta: "פסטה",
-};
-
-export function ProductCard({ product }: { product: ProductView }) {
+export function ProductCard({ product, locale }: { product: ProductView; locale: Locale }) {
   const cart = useCart();
   const [sizeIndex, setSizeIndex] = useState(0);
   const [justAdded, setJustAdded] = useState(false);
+  const t = getDict(locale).shop;
+  const CATEGORY_LABELS: Record<string, string> = t.categories;
 
   const size = product.sizes[sizeIndex];
   const inStock = size?.stockStatus === "in_stock";
@@ -44,7 +40,9 @@ export function ProductCard({ product }: { product: ProductView }) {
             {product.name}
           </Link>
           <div className={styles.desc}>{product.description}</div>
-          <div className={styles.allergens}>אלרגנים: {product.allergens}</div>
+          <div className={styles.allergens}>
+            {t.allergensLabel}: {product.allergens}
+          </div>
         </div>
       </div>
 
@@ -68,7 +66,7 @@ export function ProductCard({ product }: { product: ProductView }) {
         {size && (
           <span className={styles.price}>
             {formatCurrency(priceIncludingVat(size.priceBeforeVat))}{" "}
-            <span className={styles.priceVat}>כולל מע&quot;מ</span>
+            <span className={styles.priceVat}>{t.inclVat}</span>
           </span>
         )}
         {inStock ? (
@@ -78,10 +76,10 @@ export function ProductCard({ product }: { product: ProductView }) {
             onClick={handleAdd}
             disabled={cart.isLoading}
           >
-            {justAdded ? "נוסף ✓" : "הוסיפו לעגלה"}
+            {justAdded ? t.added : t.addToCart}
           </button>
         ) : (
-          <span className={styles.outOfStock}>אזל המלאי</span>
+          <span className={styles.outOfStock}>{t.outOfStock}</span>
         )}
       </div>
     </div>

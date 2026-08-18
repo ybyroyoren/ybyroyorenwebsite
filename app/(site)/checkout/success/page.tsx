@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { finalizeOrder, getOrderById } from "@/lib/orders";
 import { formatCurrency } from "@/lib/pricing";
+import { getLocale } from "@/lib/i18n";
+import { getDict } from "@/lib/dictionary";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = { title: "ההזמנה התקבלה" };
@@ -15,6 +17,9 @@ export default async function CheckoutSuccessPage({
   const { orderId, simulated } = await searchParams;
   if (!orderId) notFound();
 
+  const locale = await getLocale();
+  const t = getDict(locale).checkout.success;
+
   let order = await getOrderById(orderId);
   if (!order) notFound();
 
@@ -24,14 +29,14 @@ export default async function CheckoutSuccessPage({
 
   return (
     <div className={styles.wrap}>
-      <h1>{order.status === "paid" ? "ההזמנה התקבלה!" : "ההזמנה ממתינה לאישור תשלום"}</h1>
-      <p>תודה, {order.customerName}.</p>
-      <p>מספר הזמנה: {order.id}</p>
-      <p>תאריך איסוף: {order.pickupDate}</p>
-      <p>סה&quot;כ: {formatCurrency(order.total)}</p>
-      <p>קבלה נשלחה אוטומטית למייל. איסוף עצמי מרחוב השוק 34, תל אביב.</p>
+      <h1>{order.status === "paid" ? t.paidHeading : t.pendingHeading}</h1>
+      <p>{t.thanks(order.customerName)}</p>
+      <p>{t.orderNumber(order.id)}</p>
+      <p>{t.pickupDate(order.pickupDate)}</p>
+      <p>{t.total(formatCurrency(order.total))}</p>
+      <p>{t.receiptNote}</p>
       <Link href="/shop" className={styles.back}>
-        לחזרה לחנות
+        {t.backToShop}
       </Link>
     </div>
   );

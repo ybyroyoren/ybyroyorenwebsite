@@ -2,32 +2,34 @@
 
 import { useActionState } from "react";
 import { submitContactForm, type ContactState } from "@/lib/actions/contact";
+import { getDict, type Locale } from "@/lib/dictionary";
 import styles from "@/app/(site)/contact/page.module.css";
 
 const initialState: ContactState = { status: "idle", message: "" };
 
-export function ContactForm() {
+export function ContactForm({ locale }: { locale: Locale }) {
   const [state, action, pending] = useActionState(submitContactForm, initialState);
+  const f = getDict(locale).contact.form;
 
   return (
     <form className={styles.form} action={action}>
       <div className={styles.fieldRow}>
         <div className={styles.field}>
-          <label htmlFor="name">שם מלא</label>
+          <label htmlFor="name">{f.nameLabel}</label>
           <input id="name" name="name" type="text" required />
         </div>
         <div className={styles.field}>
-          <label htmlFor="phone">טלפון</label>
+          <label htmlFor="phone">{f.phoneLabel}</label>
           <input id="phone" name="phone" type="tel" required />
         </div>
       </div>
       <div className={styles.field}>
-        <label htmlFor="email">אימייל</label>
+        <label htmlFor="email">{f.emailLabel}</label>
         <input id="email" name="email" type="email" required />
       </div>
       <div className={styles.field}>
-        <label htmlFor="message">הודעה</label>
-        <textarea id="message" name="message" placeholder="איך אפשר לעזור?" required />
+        <label htmlFor="message">{f.messageLabel}</label>
+        <textarea id="message" name="message" placeholder={f.messagePlaceholder} required />
       </div>
 
       {state.message && (
@@ -40,11 +42,9 @@ export function ContactForm() {
       )}
 
       <button type="submit" className={styles.submitBtn} disabled={pending}>
-        {pending ? "שולח..." : "שליחה"}
+        {pending ? f.submitting : f.submit}
       </button>
-      <p className={styles.footnote}>
-        לתיאום אירוע פרטי, מומלץ להשתמש בטופס הייעודי בעמוד האירועים הפרטיים.
-      </p>
+      <p className={styles.footnote}>{f.footnote}</p>
     </form>
   );
 }

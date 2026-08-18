@@ -4,20 +4,23 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCart } from "@/components/cart/CartContext";
+import { getDict, type Locale } from "@/lib/dictionary";
+import { LanguageToggle } from "./LanguageToggle";
 import styles from "./Nav.module.css";
 
-const NAV_LINKS = [
-  { href: "/shop", label: "חנות" },
-  { href: "/meals", label: "ארוחות פתוחות" },
-  { href: "/events", label: "אירועים פרטיים" },
-  { href: "/about", label: "אודות" },
-  { href: "/contact", label: "יצירת קשר" },
-];
-
-export function Nav() {
+export function Nav({ locale }: { locale: Locale }) {
   const pathname = usePathname();
   const cart = useCart();
   const [menuOpen, setMenuOpen] = useState(false);
+  const t = getDict(locale).nav;
+
+  const NAV_LINKS = [
+    { href: "/shop", label: t.shop },
+    { href: "/meals", label: t.meals },
+    { href: "/events", label: t.events },
+    { href: "/about", label: t.about },
+    { href: "/contact", label: t.contact },
+  ];
 
   useEffect(() => {
     setMenuOpen(false);
@@ -41,14 +44,15 @@ export function Nav() {
           ))}
         </div>
         <div className={styles.rightGroup}>
+          <LanguageToggle locale={locale} className={styles.langToggle} />
           <button type="button" className={styles.cartButton} onClick={cart.open}>
-            <span>עגלה</span>
+            <span>{t.cart}</span>
             <span className={styles.cartCount}>{cart.count}</span>
           </button>
           <button
             type="button"
             className={styles.menuButton}
-            aria-label={menuOpen ? "סגירת תפריט" : "פתיחת תפריט"}
+            aria-label={menuOpen ? t.closeMenu : t.openMenu}
             aria-expanded={menuOpen}
             onClick={() => setMenuOpen((open) => !open)}
           >

@@ -3,12 +3,14 @@
 // particularly the compliance-standard claim below.
 import type { Metadata } from "next";
 import { LegalLayout } from "@/components/legal/LegalLayout";
+import { getLocale } from "@/lib/i18n";
 
 export const metadata: Metadata = { title: "הצהרת נגישות" };
 
-export default function AccessibilityStatementPage() {
+export default async function AccessibilityStatementPage() {
+  const locale = await getLocale();
   return (
-    <LegalLayout eyebrow="מדיניות" title="הצהרת נגישות" updated="20.07.2026">
+    <LegalLayout eyebrow="מדיניות" title="הצהרת נגישות" updated="20.07.2026" locale={locale}>
       <h2>מחויבותנו לנגישות</h2>
       <p>
         אנחנו רואים חשיבות רבה במתן שירות שוויוני ונגיש לכלל הגולשים, כולל אנשים עם מוגבלות,

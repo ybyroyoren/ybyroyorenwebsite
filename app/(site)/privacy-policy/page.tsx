@@ -2,12 +2,14 @@
 // business owner. Recommended for legal review before relying on it.
 import type { Metadata } from "next";
 import { LegalLayout } from "@/components/legal/LegalLayout";
+import { getLocale } from "@/lib/i18n";
 
 export const metadata: Metadata = { title: "מדיניות פרטיות" };
 
-export default function PrivacyPolicyPage() {
+export default async function PrivacyPolicyPage() {
+  const locale = await getLocale();
   return (
-    <LegalLayout eyebrow="מדיניות" title="מדיניות פרטיות" updated="20.07.2026">
+    <LegalLayout eyebrow="מדיניות" title="מדיניות פרטיות" updated="20.07.2026" locale={locale}>
       <h2>כללי</h2>
       <p>
         אתר Y by Roy Oren (&quot;האתר&quot;) מופעל על ידי רוי אורן, עוסק מורשה מס&apos; 203310750

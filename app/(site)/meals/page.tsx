@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { getOpenMeals } from "@/lib/meals";
 import { getMediaByLocation } from "@/lib/media";
+import { getLocale } from "@/lib/i18n";
+import { getDict } from "@/lib/dictionary";
 import { MealsList } from "@/components/meals/MealsList";
 import { Carousel } from "@/components/site/Carousel";
 import styles from "./page.module.css";
@@ -8,39 +10,37 @@ import styles from "./page.module.css";
 export const metadata: Metadata = { title: "ארוחות פתוחות" };
 
 export default async function MealsPage() {
-  const [meals, carouselImages] = await Promise.all([
+  const [meals, carouselImages, locale] = await Promise.all([
     getOpenMeals(),
     getMediaByLocation("meals_carousel"),
+    getLocale(),
   ]);
+  const t = getDict(locale).meals;
 
   return (
     <>
       <div className={`wrap ${styles.pageHead}`}>
-        <div className={styles.eyebrow}>ארוחות פתוחות</div>
-        <h1>החוויה המושלמת, שולחן שיתופי</h1>
+        <div className={styles.eyebrow}>{t.eyebrow}</div>
+        <h1>{t.heading}</h1>
         <p>
-          בתאריכים נבחרים, אנחנו מארחים ארוחת טעימות מלאה עם אלכוהול חופשי סביב שולחן שיתופי. ערב
-          של אוכל מוקפד, היכרויות וסיפורים מעניינים.
+          {t.subLine1}
           <br />
-          אנחנו יודעים להתחשב בכל מגבלת תזונה כך שכל סועד יכול להנות מארוחה מלאה בלי להשפיע על שאר
-          הסועדים. יש לציין את מגבלות התזונה בעת ההזמנה.
+          {t.subLine2}
         </p>
-        <div className={styles.venueNote}>
-          📍 הארוחות מתקיימות בחלל האירוח שלנו, רחוב השוק 34, תל אביב
-        </div>
+        <div className={styles.venueNote}>{t.venueNote}</div>
       </div>
 
       {carouselImages.length > 0 && (
         <div className={`wrap ${styles.carouselWrap}`}>
-          <Carousel images={carouselImages} />
+          <Carousel images={carouselImages} locale={locale} />
         </div>
       )}
 
       <div className={`wrap ${styles.section}`}>
         {meals.length === 0 ? (
-          <div className={styles.empty}>אין ארוחות פתוחות פנויות כרגע.</div>
+          <div className={styles.empty}>{t.empty}</div>
         ) : (
-          <MealsList meals={meals} />
+          <MealsList meals={meals} locale={locale} />
         )}
       </div>
     </>

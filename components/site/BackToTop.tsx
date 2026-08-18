@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { getDict, type Locale } from "@/lib/dictionary";
 import styles from "./BackToTop.module.css";
 
-export function BackToTop() {
+export function BackToTop({ locale }: { locale: Locale }) {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -16,7 +17,7 @@ export function BackToTop() {
     <button
       type="button"
       className={`${styles.button} ${visible ? styles.visible : ""}`}
-      aria-label="חזרה למעלה"
+      aria-label={getDict(locale).common.backToTop}
       onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
     >
       ↑
