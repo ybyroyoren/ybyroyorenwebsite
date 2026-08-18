@@ -43,6 +43,7 @@ async function getToken(): Promise<string> {
     body: JSON.stringify({
       id: process.env.GREEN_INVOICE_API_KEY,
       secret: process.env.GREEN_INVOICE_API_SECRET,
+      grant_type: "client_credentials",
     }),
   });
 
