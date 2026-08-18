@@ -73,6 +73,19 @@ export async function getActiveProducts(): Promise<ProductView[]> {
   return ((data ?? []) as unknown as ProductRow[]).map(mapProduct);
 }
 
+// Dynamic route params containing non-ASCII characters (Hebrew slugs) are
+// not reliably URL-decoded by the time they reach a page component in this
+// Next.js version — Route Handlers decode them, but page params sometimes
+// arrive still percent-encoded (e.g. "%D7%A2..."). decodeURIComponent on an
+// already-decoded string is a harmless no-op, so this is safe either way.
+function safeDecodeSlug(slug: string): string {
+  try {
+    return decodeURIComponent(slug);
+  } catch {
+    return slug;
+  }
+}
+
 export async function getProductBySlug(slug: string): Promise<ProductView | null> {
   const db = supabaseAdmin();
   const { data, error } = await db
@@ -80,7 +93,7 @@ export async function getProductBySlug(slug: string): Promise<ProductView | null
     .select(
       "id, slug, name, description, category, allergens, image_urls, lead_time_days, product_sizes(id, label, price_before_vat, stock_status, sort_order)"
     )
-    .eq("slug", slug)
+    .eq("slug", safeDecodeSlug(slug))
     .eq("active", true)
     .maybeSingle();
 
