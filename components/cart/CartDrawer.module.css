@@ -74,7 +74,14 @@
   height: 62px;
   border-radius: 5px;
   flex-shrink: 0;
+  overflow: hidden;
   background: linear-gradient(135deg, var(--ink), var(--olive-deep));
+}
+
+.itemVisual img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .itemInfo {

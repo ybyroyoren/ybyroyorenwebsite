@@ -7,6 +7,7 @@ export interface CartItemView {
   productId: string;
   productName: string;
   productSlug: string;
+  imageUrl: string | null;
   sizeLabel: string;
   priceBeforeVat: number;
   qty: number;
@@ -22,7 +23,13 @@ interface CartItemRow {
     label: string;
     price_before_vat: number;
     stock_status: "in_stock" | "out_of_stock";
-    products: { id: string; name: string; slug: string; lead_time_days: number } | null;
+    products: {
+      id: string;
+      name: string;
+      slug: string;
+      lead_time_days: number;
+      image_urls: string[];
+    } | null;
   } | null;
 }
 
@@ -54,7 +61,7 @@ export async function getCart(sessionUserId: string): Promise<CartItemView[]> {
   const { data, error } = await db
     .from("cart_items")
     .select(
-      "id, qty, product_sizes(id, label, price_before_vat, stock_status, products(id, name, slug, lead_time_days))"
+      "id, qty, product_sizes(id, label, price_before_vat, stock_status, products(id, name, slug, lead_time_days, image_urls))"
     )
     .eq("cart_id", cartId);
 
@@ -71,6 +78,7 @@ export async function getCart(sessionUserId: string): Promise<CartItemView[]> {
         productId: product.id,
         productName: product.name,
         productSlug: product.slug,
+        imageUrl: product.image_urls[0] ?? null,
         sizeLabel: size.label,
         priceBeforeVat: size.price_before_vat,
         qty: row.qty,
