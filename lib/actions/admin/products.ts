@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/admin-auth";
 import { supabaseAdmin } from "@/lib/supabase/server";
-import { deleteImage, uploadImage } from "@/lib/storage";
+import { createUploadTicket, deleteImage, type UploadTicket } from "@/lib/storage";
 
 function slugify(name: string): string {
   return (
@@ -206,14 +206,25 @@ export async function deleteCategory(formData: FormData): Promise<void> {
   revalidatePath("/en/shop");
 }
 
-export async function uploadProductImage(formData: FormData): Promise<void> {
+// The actual file bytes never touch this server — see lib/storage.ts for
+// why (Vercel's serverless body-size ceiling). This just authorizes the
+// upload and hands the browser a short-lived signed URL to upload directly
+// to Supabase Storage; attachProductImage below records the result.
+export async function getProductImageUploadTicket(
+  productId: string,
+  filename: string
+): Promise<UploadTicket | null> {
+  const admin = await requireAdmin();
+  if (admin.role !== "owner") return null;
+  if (!productId) return null;
+  return createUploadTicket(`products/${productId}`, filename);
+}
+
+export async function attachProductImage(productId: string, url: string): Promise<void> {
   const admin = await requireAdmin();
   if (admin.role !== "owner") return;
+  if (!productId || !url) return;
   const db = supabaseAdmin();
-
-  const productId = String(formData.get("productId") ?? "");
-  const file = formData.get("image");
-  if (!productId || !(file instanceof File) || file.size === 0) return;
 
   const { data: product } = await db
     .from("products")
@@ -221,8 +232,6 @@ export async function uploadProductImage(formData: FormData): Promise<void> {
     .eq("id", productId)
     .maybeSingle();
   if (!product) return;
-
-  const url = await uploadImage(file, `products/${productId}`);
 
   await db
     .from("products")

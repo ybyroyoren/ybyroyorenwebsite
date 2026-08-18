@@ -3,19 +3,38 @@
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/admin-auth";
 import { supabaseAdmin } from "@/lib/supabase/server";
-import { deleteImage, uploadImage } from "@/lib/storage";
+import { createUploadTicket, deleteImage, type UploadTicket } from "@/lib/storage";
 import type { MediaLocation } from "@/lib/media";
 
 const VALID_LOCATIONS: MediaLocation[] = ["meals_carousel", "events_carousel", "about_hero", "home_carousel"];
 
-export async function uploadMedia(formData: FormData): Promise<void> {
+function revalidateMediaPaths() {
+  revalidatePath("/admin/media");
+  revalidatePath("/meals");
+  revalidatePath("/en/meals");
+  revalidatePath("/events");
+  revalidatePath("/en/events");
+  revalidatePath("/about");
+  revalidatePath("/en/about");
+  revalidatePath("/");
+  revalidatePath("/en");
+}
+
+// See lib/storage.ts: the file bytes go straight from the browser to
+// Supabase Storage via a signed URL, never through this server — Vercel's
+// serverless body-size ceiling would otherwise silently reject real photos.
+export async function getMediaUploadTicket(location: string, filename: string): Promise<UploadTicket | null> {
+  const admin = await requireAdmin();
+  if (admin.role !== "owner") return null;
+  if (!VALID_LOCATIONS.includes(location as MediaLocation)) return null;
+  return createUploadTicket(`site/${location}`, filename);
+}
+
+export async function attachMedia(location: string, url: string): Promise<void> {
   const admin = await requireAdmin();
   if (admin.role !== "owner") return;
+  if (!VALID_LOCATIONS.includes(location as MediaLocation) || !url) return;
   const db = supabaseAdmin();
-
-  const location = String(formData.get("location") ?? "") as MediaLocation;
-  const file = formData.get("image");
-  if (!VALID_LOCATIONS.includes(location) || !(file instanceof File) || file.size === 0) return;
 
   // About only ever shows a single hero photo — replace rather than accumulate.
   if (location === "about_hero") {
@@ -29,18 +48,8 @@ export async function uploadMedia(formData: FormData): Promise<void> {
     }
   }
 
-  const url = await uploadImage(file, `site/${location}`);
   await db.from("site_media").insert({ location, image_url: url });
-
-  revalidatePath("/admin/media");
-  revalidatePath("/meals");
-  revalidatePath("/en/meals");
-  revalidatePath("/events");
-  revalidatePath("/en/events");
-  revalidatePath("/about");
-  revalidatePath("/en/about");
-  revalidatePath("/");
-  revalidatePath("/en");
+  revalidateMediaPaths();
 }
 
 export async function deleteMedia(formData: FormData): Promise<void> {
@@ -55,13 +64,5 @@ export async function deleteMedia(formData: FormData): Promise<void> {
   await db.from("site_media").delete().eq("id", id);
   await deleteImage(url);
 
-  revalidatePath("/admin/media");
-  revalidatePath("/meals");
-  revalidatePath("/en/meals");
-  revalidatePath("/events");
-  revalidatePath("/en/events");
-  revalidatePath("/about");
-  revalidatePath("/en/about");
-  revalidatePath("/");
-  revalidatePath("/en");
+  revalidateMediaPaths();
 }

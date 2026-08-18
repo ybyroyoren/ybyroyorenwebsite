@@ -1,6 +1,7 @@
 import { requireAdminSection } from "@/lib/admin-auth";
 import { getMediaByLocation, type MediaLocation } from "@/lib/media";
-import { deleteMedia, uploadMedia } from "@/lib/actions/admin/media";
+import { attachMedia, deleteMedia, getMediaUploadTicket } from "@/lib/actions/admin/media";
+import { ImageUploadButton } from "@/components/admin/ImageUploadButton";
 import styles from "../../admin.module.css";
 
 const SECTIONS: { location: MediaLocation; title: string; note: string }[] = [
@@ -61,13 +62,11 @@ export default async function AdminMediaPage() {
                 {items.length === 0 && <p className={styles.muted}>אין תמונות עדיין.</p>}
               </div>
 
-              <form action={uploadMedia}>
-                <input type="hidden" name="location" value={section.location} />
-                <input type="file" name="image" accept="image/*" required />
-                <button type="submit" className={styles.btnSecondary} style={{ marginRight: 8 }}>
-                  העלאת תמונה
-                </button>
-              </form>
+              <ImageUploadButton
+                label="העלאת תמונה"
+                getTicket={getMediaUploadTicket.bind(null, section.location)}
+                onUploaded={attachMedia.bind(null, section.location)}
+              />
             </div>
           );
         })

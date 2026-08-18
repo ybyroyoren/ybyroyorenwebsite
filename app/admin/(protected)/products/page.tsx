@@ -3,17 +3,19 @@ import { supabaseAdmin } from "@/lib/supabase/server";
 import { getCategories } from "@/lib/categories";
 import {
   addProductSize,
+  attachProductImage,
   createCategory,
   createProduct,
   deleteCategory,
   deleteProduct,
   deleteProductSize,
+  getProductImageUploadTicket,
   removeProductImage,
   toggleSizeStock,
   updateProduct,
   updateProductSize,
-  uploadProductImage,
 } from "@/lib/actions/admin/products";
+import { ImageUploadButton } from "@/components/admin/ImageUploadButton";
 import styles from "../../admin.module.css";
 
 export default async function AdminProductsPage() {
@@ -224,13 +226,13 @@ export default async function AdminProductsPage() {
                   </div>
                 ))}
               </div>
-              <form action={uploadProductImage} style={{ marginTop: 12 }}>
-                <input type="hidden" name="productId" value={product.id} />
-                <input type="file" name="image" accept="image/*" required />
-                <button type="submit" className={styles.btnSecondary} style={{ marginRight: 8 }}>
-                  העלאת תמונה
-                </button>
-              </form>
+              <div style={{ marginTop: 12 }}>
+                <ImageUploadButton
+                  label="העלאת תמונה"
+                  getTicket={getProductImageUploadTicket.bind(null, product.id)}
+                  onUploaded={attachProductImage.bind(null, product.id)}
+                />
+              </div>
             </>
           )}
 
