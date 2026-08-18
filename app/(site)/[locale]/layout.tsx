@@ -1,6 +1,7 @@
 import { getCartSessionId } from "@/lib/session";
 import { getCart } from "@/lib/cart";
 import { resolveLocale } from "@/lib/i18n";
+import { getDict } from "@/lib/dictionary";
 import { CartProvider } from "@/components/cart/CartContext";
 import { CartDrawer } from "@/components/cart/CartDrawer";
 import { Nav } from "@/components/site/Nav";
@@ -20,6 +21,7 @@ export default async function SiteLayout({
   const locale = resolveLocale(rawLocale);
   const sessionId = await getCartSessionId();
   const items = await getCart(sessionId);
+  const t = getDict(locale).common;
 
   return (
     <CartProvider initialItems={items}>
@@ -28,8 +30,13 @@ export default async function SiteLayout({
         dir={locale === "en" ? "ltr" : "rtl"}
         style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: "100%" }}
       >
+        <a href="#main-content" className="skipLink">
+          {t.skipToContent}
+        </a>
         <Nav locale={locale} />
-        <main style={{ flex: 1 }}>{children}</main>
+        <main id="main-content" style={{ flex: 1 }}>
+          {children}
+        </main>
         <Footer locale={locale} />
         <CartDrawer locale={locale} />
         <BackToTop locale={locale} />

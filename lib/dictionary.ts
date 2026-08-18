@@ -11,6 +11,7 @@ const dictionary = {
   he: {
     common: {
       backToTop: "חזרה למעלה",
+      skipToContent: "דילוג לתוכן הראשי",
       prev: "הקודם",
       next: "הבא",
     },
@@ -39,6 +40,7 @@ const dictionary = {
       newsletterSubmit: "הרשמה",
       newsletterSubmitting: "...",
       legal: {
+        terms: "תקנון האתר",
         privacy: "מדיניות פרטיות",
         cookies: "מדיניות עוגיות",
         returns: "מדיניות החזרות",
@@ -315,6 +317,7 @@ const dictionary = {
   en: {
     common: {
       backToTop: "Back to top",
+      skipToContent: "Skip to main content",
       prev: "Previous",
       next: "Next",
     },
@@ -343,6 +346,7 @@ const dictionary = {
       newsletterSubmit: "Subscribe",
       newsletterSubmitting: "...",
       legal: {
+        terms: "Terms of Use",
         privacy: "Privacy Policy",
         cookies: "Cookie Policy",
         returns: "Returns Policy",

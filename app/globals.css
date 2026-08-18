@@ -78,6 +78,25 @@ textarea:focus-visible {
   outline-offset: 3px;
 }
 
+.skipLink {
+  position: fixed;
+  top: -100px;
+  right: 16px;
+  z-index: 1000;
+  background: var(--ink);
+  color: var(--cream);
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: top 0.15s ease;
+}
+
+.skipLink:focus-visible {
+  top: 16px;
+  outline-color: var(--cream);
+}
+
 /* ---------- accessibility widget (components/site/AccessibilityWidget.tsx) ---------- */
 
 html[data-a11y-font-size="large"] body {

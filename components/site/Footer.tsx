@@ -47,6 +47,7 @@ export function Footer({ locale }: { locale: Locale }) {
           </div>
         </div>
         <div className={styles.legal}>
+          <Link href={p("/terms-of-use")}>{t.legal.terms}</Link>
           <Link href={p("/privacy-policy")}>{t.legal.privacy}</Link>
           <Link href={p("/cookie-policy")}>{t.legal.cookies}</Link>
           <Link href={p("/returns-policy")}>{t.legal.returns}</Link>
