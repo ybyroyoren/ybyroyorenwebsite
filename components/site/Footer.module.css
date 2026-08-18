@@ -5,6 +5,14 @@
   margin-top: 60px;
 }
 
+/* The global focus-visible outline color is the same olive-deep as this
+   background, so it's invisible here without this override. */
+.footer a:focus-visible,
+.footer button:focus-visible,
+.footer input:focus-visible {
+  outline-color: var(--cream);
+}
+
 .grid {
   display: grid;
   grid-template-columns: 1.2fr 0.8fr 1fr 1fr;

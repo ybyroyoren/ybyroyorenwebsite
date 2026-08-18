@@ -37,11 +37,6 @@ export default async function AdminMealsPage() {
     .select("id, title, description, date, total_seats, price_per_seat, status")
     .order("date", { ascending: true });
 
-  const { data: availability } = await db
-    .from("meal_availability")
-    .select("meal_id, taken_seats, remaining_seats");
-  const availByMealId = new Map((availability ?? []).map((a) => [a.meal_id, a]));
-
   const { data: registrations } = await db
     .from("meal_registrations")
     .select(
@@ -112,8 +107,13 @@ export default async function AdminMealsPage() {
       )}
 
       {(meals ?? []).map((meal) => {
-        const avail = availByMealId.get(meal.id);
         const regs = regsByMealId.get(meal.id) ?? [];
+        // Counts everyone registered (including deposit still pending) —
+        // the public meal_availability view only counts paid diners, which
+        // undercounts for planning purposes here.
+        const registeredCount = regs
+          .filter((r) => r.status !== "cancelled")
+          .reduce((sum, r) => sum + r.diners.length, 0);
         const otherMeals = openMeals.filter((m) => m.id !== meal.id).map((m) => ({ id: m.id, title: m.title, date: m.date }));
         return (
           <div key={meal.id} className={styles.card}>
@@ -121,7 +121,7 @@ export default async function AdminMealsPage() {
               <h2>
                 {meal.title} — {meal.date}{" "}
                 <span className={styles.muted}>
-                  ({avail?.remaining_seats ?? meal.total_seats}/{meal.total_seats} פנויים ·{" "}
+                  ({registeredCount}/{meal.total_seats} רשומים ·{" "}
                   {formatCurrency(meal.price_per_seat)} לסועד ·{" "}
                   {meal.status === "open" ? "פתוחה" : "סגורה"})
                 </span>

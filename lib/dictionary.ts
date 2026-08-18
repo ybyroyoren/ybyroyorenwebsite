@@ -114,7 +114,7 @@ const dictionary = {
       seatsLabel: {
         full: "מלא",
         fewLeft: "נשארו מעט מקומות פנויים",
-        available: "פנוי",
+        available: "פתוח להרשמה",
         remaining: (n: number) => `נשארו ${n} מקומות`,
       },
       drawer: {
@@ -416,7 +416,7 @@ const dictionary = {
       seatsLabel: {
         full: "Full",
         fewLeft: "Only a few seats left",
-        available: "Available",
+        available: "Open for registration",
         remaining: (n: number) => `${n} seats left`,
       },
       drawer: {
