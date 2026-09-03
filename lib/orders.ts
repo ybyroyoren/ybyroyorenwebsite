@@ -5,6 +5,7 @@ import { validateCoupon } from "@/lib/coupons";
 import { computeCartTotals, formatCurrency, GREETING_CARD_FEE } from "@/lib/pricing";
 import { issueReceipt } from "@/lib/green-invoice";
 import { sendOrderConfirmationEmail } from "@/lib/resend";
+import { notifyNewOrder } from "@/lib/notifications";
 import { addDaysIso } from "@/lib/date";
 
 export interface CreateOrderParams {
@@ -175,12 +176,36 @@ export async function finalizeOrder(orderId: string, growPaymentId: string): Pro
     await db.from("cart_items").delete().eq("cart_id", order.cart_id);
   }
 
+  if (order.coupon_id) {
+    const { data: coupon } = await db
+      .from("coupons")
+      .select("times_used")
+      .eq("id", order.coupon_id)
+      .maybeSingle();
+    if (coupon) {
+      await db.from("coupons").update({ times_used: coupon.times_used + 1 }).eq("id", order.coupon_id);
+    }
+  }
+
   await sendOrderConfirmationEmail({
     to: order.customer_email,
     customerName: order.customer_name,
     orderId: order.id,
     pickupDate: order.pickup_date,
     totalFormatted: formatCurrency(order.total),
+  });
+
+  await notifyNewOrder({
+    orderId: order.id,
+    customerName: order.customer_name,
+    customerPhone: order.customer_phone,
+    customerEmail: order.customer_email,
+    pickupDate: order.pickup_date,
+    totalFormatted: formatCurrency(order.total),
+    items: (items ?? []).map((i) => ({
+      name: i.size_label ? `${i.product_name} — ${i.size_label}` : i.product_name,
+      qty: i.qty,
+    })),
   });
 
   return {

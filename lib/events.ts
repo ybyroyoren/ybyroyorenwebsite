@@ -1,6 +1,6 @@
 import "server-only";
 import { supabaseAdmin } from "@/lib/supabase/server";
-import { sendContactNotificationEmail } from "@/lib/resend";
+import { notifyNewEventInquiry } from "@/lib/notifications";
 
 export interface EventInquiryInput {
   eventType: string;
@@ -70,11 +70,11 @@ export async function createEventInquiry(input: EventInquiryInput): Promise<{ id
       .upsert({ email: input.email, source: "events_form" }, { onConflict: "email" });
   }
 
-  await sendContactNotificationEmail({
-    name: input.fullName,
+  await notifyNewEventInquiry({
+    fullName: input.fullName,
     phone: input.phone,
     email: input.email,
-    message:
+    summary:
       `פנייה חדשה לאירוע פרטי — ${EVENT_TYPE_LABELS[input.eventType] ?? input.eventType}\n` +
       `תאריך: ${input.eventDate || "לא צוין"} ${input.startTime ? `בשעה ${input.startTime}` : ""}\n` +
       `מיקום: ${input.locationType === "venue" ? "אצלנו" : `בלוקיישן אחר — ${input.locationDetail}`}\n` +

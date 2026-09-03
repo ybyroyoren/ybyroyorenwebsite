@@ -3,6 +3,7 @@ import { supabaseAdmin } from "@/lib/supabase/server";
 import type { MealMenuItem } from "@/lib/supabase/types";
 import { issueReceipt } from "@/lib/green-invoice";
 import { sendMealRegistrationConfirmationEmail } from "@/lib/resend";
+import { notifyNewMealRegistration } from "@/lib/notifications";
 import { formatCurrency } from "@/lib/pricing";
 
 export const DEPOSIT_PER_SEAT = 100;
@@ -218,6 +219,15 @@ export async function finalizeMealRegistration(
     seats: registration.seats_count,
     depositFormatted: formatCurrency(registration.deposit_total),
     balanceFormatted: formatCurrency(balance),
+  });
+
+  await notifyNewMealRegistration({
+    customerName: registration.customer_name,
+    customerPhone: registration.customer_phone,
+    customerEmail: registration.customer_email,
+    mealTitle: meal.title,
+    mealDate: meal.date,
+    seats: registration.seats_count,
   });
 
   return {

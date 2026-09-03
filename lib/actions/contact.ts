@@ -1,7 +1,7 @@
 "use server";
 
 import { supabaseAdmin } from "@/lib/supabase/server";
-import { sendContactNotificationEmail } from "@/lib/resend";
+import { notifyNewContactMessage } from "@/lib/notifications";
 
 export interface ContactState {
   status: "idle" | "success" | "error";
@@ -28,7 +28,7 @@ export async function submitContactForm(
     return { status: "error", message: "משהו השתבש, נסו שוב" };
   }
 
-  await sendContactNotificationEmail({ name, phone, email, message });
+  await notifyNewContactMessage({ name, phone, email, message });
 
   return { status: "success", message: "תודה! ההודעה נשלחה, נחזור אליכם בהקדם." };
 }

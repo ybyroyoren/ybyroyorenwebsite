@@ -11,9 +11,19 @@ export async function createCoupon(formData: FormData): Promise<void> {
 
   const code = String(formData.get("code") ?? "").trim().toUpperCase();
   const discountPct = Number(formData.get("discountPct") ?? 0) / 100;
-  if (!code || !(discountPct > 0 && discountPct <= 1)) return;
+  const usageLimitType = String(formData.get("usageLimitType") ?? "unlimited");
+  const usageLimitCount = Number(formData.get("usageLimitCount") ?? 0);
 
-  await db.from("coupons").insert({ code, discount_pct: discountPct });
+  if (!code || !(discountPct > 0 && discountPct <= 1)) return;
+  if (!["single", "limited", "unlimited"].includes(usageLimitType)) return;
+  if (usageLimitType === "limited" && !(usageLimitCount > 0)) return;
+
+  await db.from("coupons").insert({
+    code,
+    discount_pct: discountPct,
+    usage_limit_type: usageLimitType,
+    usage_limit_count: usageLimitType === "limited" ? usageLimitCount : null,
+  });
   revalidatePath("/admin/coupons");
 }
 

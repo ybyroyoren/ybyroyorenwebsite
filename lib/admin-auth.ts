@@ -45,7 +45,8 @@ export type AdminSection =
   | "events"
   | "messages"
   | "team"
-  | "kitchen_ledger";
+  | "kitchen_ledger"
+  | "notifications";
 
 export const SECTION_ROLES: Record<AdminSection, AdminRole[]> = {
   products: ["owner", "kitchen"],
@@ -61,6 +62,7 @@ export const SECTION_ROLES: Record<AdminSection, AdminRole[]> = {
   // distinction is enforced per-action in lib/actions/admin/kitchen-*.ts,
   // not here — this just gates whether the section is visible at all.
   kitchen_ledger: ["owner", "kitchen", "sales"],
+  notifications: ["owner"],
 };
 
 export function accessibleSections(role: AdminRole): AdminSection[] {

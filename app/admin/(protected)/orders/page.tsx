@@ -1,7 +1,8 @@
 import { requireAdminSection } from "@/lib/admin-auth";
 import { supabaseAdmin } from "@/lib/supabase/server";
-import { cancelOrder } from "@/lib/actions/admin/orders";
+import { cancelOrder, updateOrderFulfillmentStatus } from "@/lib/actions/admin/orders";
 import { formatCurrency } from "@/lib/pricing";
+import { OrderFulfillmentSelect } from "@/components/admin/OrderFulfillmentSelect";
 import styles from "../../admin.module.css";
 
 const STATUS_LABEL: Record<string, string> = {
@@ -18,7 +19,7 @@ export default async function AdminOrdersPage() {
   const { data: orders } = await db
     .from("orders")
     .select(
-      "id, customer_name, customer_email, customer_phone, pickup_date, total, status, created_at, greeting_card_message, order_items(product_name, size_label, unit_price, qty)"
+      "id, customer_name, customer_email, customer_phone, pickup_date, total, status, fulfillment_status, created_at, greeting_card_message, order_items(product_name, size_label, unit_price, qty)"
     )
     .order("created_at", { ascending: false });
 
@@ -37,6 +38,7 @@ export default async function AdminOrdersPage() {
               <th>תאריך איסוף</th>
               {isOwner && <th>סה&quot;כ</th>}
               <th>סטטוס</th>
+              <th>מצב הכנה</th>
               {isOwner && <th></th>}
             </tr>
           </thead>
@@ -66,6 +68,17 @@ export default async function AdminOrdersPage() {
                     {STATUS_LABEL[o.status]}
                   </span>
                 </td>
+                <td>
+                  {o.status === "paid" ? (
+                    <OrderFulfillmentSelect
+                      orderId={o.id}
+                      value={o.fulfillment_status}
+                      updateAction={updateOrderFulfillmentStatus}
+                    />
+                  ) : (
+                    <span className={styles.muted}>—</span>
+                  )}
+                </td>
                 {isOwner && (
                   <td>
                     {o.status !== "cancelled" && (
@@ -82,7 +95,7 @@ export default async function AdminOrdersPage() {
             ))}
             {(orders ?? []).length === 0 && (
               <tr>
-                <td colSpan={8} className={styles.muted}>
+                <td colSpan={9} className={styles.muted}>
                   אין הזמנות עדיין.
                 </td>
               </tr>

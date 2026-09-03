@@ -1,14 +1,25 @@
 import { requireAdminSection } from "@/lib/admin-auth";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { createCoupon, deleteCoupon, toggleCoupon } from "@/lib/actions/admin/coupons";
+import { CouponUsageFields } from "@/components/admin/CouponUsageFields";
 import styles from "../../admin.module.css";
+
+function usageLabel(c: {
+  usage_limit_type: string;
+  usage_limit_count: number | null;
+  times_used: number;
+}): string {
+  if (c.usage_limit_type === "unlimited") return `${c.times_used} (ללא הגבלה)`;
+  const limit = c.usage_limit_type === "single" ? 1 : c.usage_limit_count;
+  return `${c.times_used} / ${limit}`;
+}
 
 export default async function AdminCouponsPage() {
   await requireAdminSection("coupons");
   const db = supabaseAdmin();
   const { data: coupons } = await db
     .from("coupons")
-    .select("id, code, discount_pct, active")
+    .select("id, code, discount_pct, active, usage_limit_type, usage_limit_count, times_used")
     .order("created_at", { ascending: false });
 
   return (
@@ -26,6 +37,7 @@ export default async function AdminCouponsPage() {
             <label>אחוז הנחה</label>
             <input name="discountPct" type="number" min="1" max="100" required />
           </div>
+          <CouponUsageFields />
           <button type="submit" className={styles.btn}>
             הוספה
           </button>
@@ -38,6 +50,7 @@ export default async function AdminCouponsPage() {
             <tr>
               <th>קוד</th>
               <th>הנחה</th>
+              <th>שימושים</th>
               <th>סטטוס</th>
               <th></th>
             </tr>
@@ -47,6 +60,7 @@ export default async function AdminCouponsPage() {
               <tr key={c.id}>
                 <td>{c.code}</td>
                 <td>{(c.discount_pct * 100).toFixed(0)}%</td>
+                <td>{usageLabel(c)}</td>
                 <td>
                   <form action={toggleCoupon}>
                     <input type="hidden" name="id" value={c.id} />

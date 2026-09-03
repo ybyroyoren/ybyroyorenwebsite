@@ -15,7 +15,7 @@ interface SendParams {
   html: string;
 }
 
-async function send({ to, subject, html }: SendParams): Promise<void> {
+export async function sendEmail({ to, subject, html }: SendParams): Promise<void> {
   const resend = client();
   if (!resend) {
     console.warn(`[resend] RESEND_API_KEY not set — skipping email "${subject}" to ${to}.`);
@@ -33,7 +33,7 @@ export async function sendOrderConfirmationEmail(params: {
   pickupDate: string;
   totalFormatted: string;
 }): Promise<void> {
-  await send({
+  await sendEmail({
     to: params.to,
     subject: "אישור הזמנה — Y by Roy Oren",
     html: `
@@ -57,7 +57,7 @@ export async function sendMealRegistrationConfirmationEmail(params: {
   depositFormatted: string;
   balanceFormatted: string;
 }): Promise<void> {
-  await send({
+  await sendEmail({
     to: params.to,
     subject: "אישור הרשמה לארוחה — Y by Roy Oren",
     html: `
@@ -68,29 +68,6 @@ export async function sendMealRegistrationConfirmationEmail(params: {
         <p>מקדמה ששולמה: ${params.depositFormatted}</p>
         <p>יתרה לתשלום במקום: ${params.balanceFormatted}</p>
         <p>ביטול חינם עד 96 שעות לפני הארוחה.</p>
-      </div>
-    `,
-  });
-}
-
-export async function sendContactNotificationEmail(params: {
-  name: string;
-  phone: string;
-  email: string;
-  message: string;
-}): Promise<void> {
-  const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL;
-  if (!adminEmail) return;
-
-  await send({
-    to: adminEmail,
-    subject: `הודעה חדשה מהאתר — ${params.name}`,
-    html: `
-      <div dir="rtl" style="font-family: sans-serif;">
-        <p><b>שם:</b> ${params.name}</p>
-        <p><b>טלפון:</b> ${params.phone}</p>
-        <p><b>אימייל:</b> ${params.email}</p>
-        <p><b>הודעה:</b> ${params.message}</p>
       </div>
     `,
   });

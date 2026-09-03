@@ -11,6 +11,7 @@ const NAV: { section: AdminSection; href: string; label: string }[] = [
   { section: "meals", href: "/admin/meals", label: "ארוחות פתוחות" },
   { section: "events", href: "/admin/events", label: "אירועים פרטיים" },
   { section: "messages", href: "/admin/messages", label: "פניות וניוזלטר" },
+  { section: "notifications", href: "/admin/notifications", label: "התראות אימייל" },
   { section: "kitchen_ledger", href: "/admin/kitchen", label: "ניהול אירועים" },
   { section: "team", href: "/admin/team", label: "צוות" },
 ];
