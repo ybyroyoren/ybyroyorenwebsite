@@ -1,5 +1,3 @@
-import { getCartSessionId } from "@/lib/session";
-import { getCart } from "@/lib/cart";
 import { resolveLocale } from "@/lib/i18n";
 import { getDict } from "@/lib/dictionary";
 import { CartProvider } from "@/components/cart/CartContext";
@@ -19,12 +17,10 @@ export default async function SiteLayout({
 }) {
   const { locale: rawLocale } = await params;
   const locale = resolveLocale(rawLocale);
-  const sessionId = await getCartSessionId();
-  const items = await getCart(sessionId);
   const t = getDict(locale).common;
 
   return (
-    <CartProvider initialItems={items}>
+    <CartProvider>
       <div
         lang={locale}
         dir={locale === "en" ? "ltr" : "rtl"}

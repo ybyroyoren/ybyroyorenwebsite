@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useCallback, useContext, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { CartItemView } from "@/lib/cart";
 import { computeCartTotals, GREETING_CARD_FEE } from "@/lib/pricing";
 import { addDaysIso } from "@/lib/date";
@@ -43,14 +43,12 @@ async function cartRequest(method: string, body?: unknown): Promise<CartItemView
   return data.items as CartItemView[];
 }
 
-export function CartProvider({
-  initialItems,
-  children,
-}: {
-  initialItems: CartItemView[];
-  children: React.ReactNode;
-}) {
-  const [items, setItems] = useState<CartItemView[]>(initialItems);
+export function CartProvider({ children }: { children: React.ReactNode }) {
+  // Fetched client-side after mount rather than server-rendered in the root
+  // layout: the layout wraps every page, and awaiting the cart there (2-3
+  // sequential Supabase round trips) blocked the first paint of every
+  // navigation on the site, cart-related or not.
+  const [items, setItems] = useState<CartItemView[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [discountPct, setDiscountPct] = useState(0);
@@ -69,6 +67,21 @@ export function CartProvider({
   );
   const maxLeadTime = items.reduce((max, item) => Math.max(max, item.leadTimeDays), 0);
   const minPickupDate = useMemo(() => addDaysIso(maxLeadTime), [maxLeadTime]);
+
+  useEffect(() => {
+    let cancelled = false;
+    cartRequest("GET")
+      .then((fetched) => {
+        if (!cancelled) setItems(fetched);
+      })
+      .catch(() => {
+        // Cart stays empty client-side; the drawer will pick up the real
+        // state on the next successful add/update/remove call.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const addItem = useCallback(async (productSizeId: string, qty = 1) => {
     setIsLoading(true);

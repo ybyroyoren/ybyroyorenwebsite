@@ -36,22 +36,17 @@ interface CartItemRow {
 async function getOrCreateCartId(sessionUserId: string): Promise<string> {
   const db = supabaseAdmin();
 
-  const { data: existing } = await db
+  // One round trip instead of select-then-maybe-insert: ON CONFLICT DO
+  // UPDATE (upsert's default, not ignoreDuplicates — a DO NOTHING wouldn't
+  // return the existing row) resolves to the same row either way.
+  const { data, error } = await db
     .from("carts")
-    .select("id")
-    .eq("session_user_id", sessionUserId)
-    .maybeSingle();
-
-  if (existing) return existing.id;
-
-  const { data: created, error } = await db
-    .from("carts")
-    .insert({ session_user_id: sessionUserId })
+    .upsert({ session_user_id: sessionUserId }, { onConflict: "session_user_id" })
     .select("id")
     .single();
 
-  if (error || !created) throw new Error(error?.message ?? "Failed to create cart");
-  return created.id;
+  if (error || !data) throw new Error(error?.message ?? "Failed to create cart");
+  return data.id;
 }
 
 export async function getCart(sessionUserId: string): Promise<CartItemView[]> {

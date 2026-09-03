@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabaseBrowser } from "@/lib/supabase/browser";
+import { compressImageFile } from "@/lib/image-resize";
 import type { UploadTicket } from "@/lib/storage";
 import styles from "@/app/admin/admin.module.css";
 
@@ -38,12 +39,13 @@ export function ImageUploadButton({
     setUploading(true);
     setError(null);
     try {
-      const ticket = await getTicket(file.name);
+      const upload = await compressImageFile(file);
+      const ticket = await getTicket(upload.name);
       if (!ticket) throw new Error("אין הרשאה להעלאה");
 
       const { error: uploadError } = await supabaseBrowser()
         .storage.from("images")
-        .uploadToSignedUrl(ticket.path, ticket.token, file);
+        .uploadToSignedUrl(ticket.path, ticket.token, upload);
       if (uploadError) throw new Error(uploadError.message);
 
       await onUploaded(ticket.publicUrl);
