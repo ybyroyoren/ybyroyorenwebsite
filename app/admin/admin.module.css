@@ -406,3 +406,65 @@
   color: var(--ink-soft);
   font-size: 13px;
 }
+
+/* ---------- order payment / fulfillment status colors ---------- */
+
+.payPending {
+  background: rgba(184, 121, 31, 0.14);
+  color: #8a5a17;
+}
+
+.payPaid {
+  background: var(--olive-mist);
+  color: var(--olive-deep);
+}
+
+.payCancelled {
+  background: rgba(23, 20, 16, 0.08);
+  color: var(--ink-soft);
+  text-decoration: line-through;
+}
+
+.fulfillAwaitingPayment {
+  background: rgba(184, 121, 31, 0.16);
+  color: #8a5a17;
+}
+
+.fulfillOpen {
+  background: rgba(44, 95, 138, 0.14);
+  color: #244d6c;
+}
+
+.fulfillPrepared {
+  background: rgba(31, 122, 108, 0.15);
+  color: #175e52;
+}
+
+.fulfillCompleted {
+  background: var(--olive-mist);
+  color: var(--olive-deep);
+}
+
+.fulfillPartial {
+  background: rgba(184, 88, 31, 0.16);
+  color: #8a4517;
+}
+
+.fulfillNoShow {
+  background: rgba(139, 58, 43, 0.14);
+  color: var(--danger);
+}
+
+.rowCompleted {
+  background: repeating-linear-gradient(
+    135deg,
+    rgba(23, 20, 16, 0.045),
+    rgba(23, 20, 16, 0.045) 10px,
+    rgba(23, 20, 16, 0.09) 10px,
+    rgba(23, 20, 16, 0.09) 20px
+  );
+}
+
+.rowCompleted td {
+  color: var(--ink-soft);
+}
