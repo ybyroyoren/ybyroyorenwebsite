@@ -1,6 +1,11 @@
 import { requireAdminSection } from "@/lib/admin-auth";
 import { supabaseAdmin } from "@/lib/supabase/server";
-import { updateOrderFulfillmentStatus, updateOrderPayment, createManualOrder } from "@/lib/actions/admin/orders";
+import {
+  updateOrderFulfillmentStatus,
+  updateOrderPayment,
+  createManualOrder,
+  deleteOrder,
+} from "@/lib/actions/admin/orders";
 import { formatCurrency } from "@/lib/pricing";
 import { getActiveProducts } from "@/lib/products";
 import { OrderFulfillmentSelect } from "@/components/admin/OrderFulfillmentSelect";
@@ -58,6 +63,7 @@ export default async function AdminOrdersPage() {
               {isOwner && <th>סה&quot;כ</th>}
               <th>סטטוס תשלום</th>
               <th>מצב הכנה</th>
+              {isOwner && <th></th>}
             </tr>
           </thead>
           <tbody>
@@ -103,11 +109,21 @@ export default async function AdminOrdersPage() {
                     updateAction={updateOrderFulfillmentStatus}
                   />
                 </td>
+                {isOwner && (
+                  <td>
+                    <form action={deleteOrder}>
+                      <input type="hidden" name="id" value={o.id} />
+                      <button type="submit" className={styles.btnDanger}>
+                        מחיקה
+                      </button>
+                    </form>
+                  </td>
+                )}
               </tr>
             ))}
             {(orders ?? []).length === 0 && (
               <tr>
-                <td colSpan={8} className={styles.muted}>
+                <td colSpan={9} className={styles.muted}>
                   אין הזמנות עדיין.
                 </td>
               </tr>

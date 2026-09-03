@@ -8,6 +8,17 @@ import { computeCartTotals } from "@/lib/pricing";
 const PAYMENT_STATUSES = ["pending", "paid", "cancelled"];
 const PAYMENT_METHODS = ["website", "credit_card", "bit", "paybox", "cash", "bank_transfer"];
 
+export async function deleteOrder(formData: FormData): Promise<void> {
+  const admin = await requireAdmin();
+  if (admin.role !== "owner") return;
+  const db = supabaseAdmin();
+  const id = String(formData.get("id") ?? "");
+  if (!id) return;
+
+  await db.from("orders").delete().eq("id", id);
+  revalidatePath("/admin/orders");
+}
+
 export async function updateOrderPayment(formData: FormData): Promise<void> {
   const admin = await requireAdmin();
   if (admin.role !== "owner") return;
