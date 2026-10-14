@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/admin-auth";
+import { expireMeals } from "@/lib/cache";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { DEPOSIT_PER_SEAT } from "@/lib/meals";
 
@@ -64,6 +65,7 @@ export async function createManualRegistration(formData: FormData): Promise<void
   });
 
   revalidatePath("/admin/meals");
+  expireMeals();
 }
 
 export async function updateRegistrationContact(formData: FormData): Promise<void> {
@@ -83,6 +85,7 @@ export async function updateRegistrationContact(formData: FormData): Promise<voi
     .eq("id", id);
 
   revalidatePath("/admin/meals");
+  expireMeals();
 }
 
 export async function deleteRegistration(formData: FormData): Promise<void> {
@@ -94,6 +97,7 @@ export async function deleteRegistration(formData: FormData): Promise<void> {
 
   await db.from("meal_registrations").delete().eq("id", id);
   revalidatePath("/admin/meals");
+  expireMeals();
 }
 
 export async function moveRegistrationToMeal(formData: FormData): Promise<void> {
@@ -106,6 +110,7 @@ export async function moveRegistrationToMeal(formData: FormData): Promise<void> 
 
   await db.from("meal_registrations").update({ meal_id: targetMealId }).eq("id", id);
   revalidatePath("/admin/meals");
+  expireMeals();
 }
 
 export async function addDinerToRegistration(formData: FormData): Promise<void> {
@@ -130,6 +135,7 @@ export async function addDinerToRegistration(formData: FormData): Promise<void> 
 
   await syncRegistrationSeats(db, registrationId);
   revalidatePath("/admin/meals");
+  expireMeals();
 }
 
 export async function updateDiner(formData: FormData): Promise<void> {
@@ -150,6 +156,7 @@ export async function updateDiner(formData: FormData): Promise<void> {
     .eq("id", id);
 
   revalidatePath("/admin/meals");
+  expireMeals();
 }
 
 export async function deleteDiner(formData: FormData): Promise<void> {
@@ -170,6 +177,7 @@ export async function deleteDiner(formData: FormData): Promise<void> {
   }
 
   revalidatePath("/admin/meals");
+  expireMeals();
 }
 
 export async function toggleDinerPaid(formData: FormData): Promise<void> {
@@ -182,6 +190,7 @@ export async function toggleDinerPaid(formData: FormData): Promise<void> {
 
   await db.from("meal_diners").update({ deposit_paid: !current }).eq("id", id);
   revalidatePath("/admin/meals");
+  expireMeals();
 }
 
 export async function moveDinerToMeal(formData: FormData): Promise<void> {
@@ -232,4 +241,5 @@ export async function moveDinerToMeal(formData: FormData): Promise<void> {
   }
 
   revalidatePath("/admin/meals");
+  expireMeals();
 }

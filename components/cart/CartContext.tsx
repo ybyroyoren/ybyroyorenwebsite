@@ -85,10 +85,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const addItem = useCallback(async (productSizeId: string, qty = 1) => {
     setIsLoading(true);
+    // Open right away: the server round trip takes a moment, and a click
+    // that visibly does nothing for that long feels broken.
+    setIsOpen(true);
     try {
       const updated = await cartRequest("POST", { productSizeId, qty });
       setItems(updated);
-      setIsOpen(true);
     } finally {
       setIsLoading(false);
     }

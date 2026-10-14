@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { revalidatePath, revalidateTag } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache";
 import { finalizeOrder } from "@/lib/orders";
 import { finalizeMealRegistration } from "@/lib/meals";
 
@@ -36,6 +38,10 @@ export async function POST(request: Request) {
     await finalizeOrder(id, paymentId);
   } else if (kind === "meal") {
     await finalizeMealRegistration(id, paymentId);
+    // A paid registration changes the seats shown on the public meals page.
+    revalidateTag(CACHE_TAGS.meals, "max");
+    revalidatePath("/meals");
+    revalidatePath("/en/meals");
   } else {
     return NextResponse.json({ error: "Unknown reference" }, { status: 400 });
   }

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/admin-auth";
+import { expireMeals } from "@/lib/cache";
 import { supabaseAdmin } from "@/lib/supabase/server";
 
 export async function createMeal(formData: FormData): Promise<void> {
@@ -34,6 +35,7 @@ export async function createMeal(formData: FormData): Promise<void> {
   });
 
   revalidatePath("/admin/meals");
+  expireMeals();
 }
 
 export async function closeMeal(formData: FormData): Promise<void> {
@@ -45,6 +47,7 @@ export async function closeMeal(formData: FormData): Promise<void> {
 
   await db.from("meals").update({ status: "closed" }).eq("id", id);
   revalidatePath("/admin/meals");
+  expireMeals();
 }
 
 export async function reopenMeal(formData: FormData): Promise<void> {
@@ -56,6 +59,7 @@ export async function reopenMeal(formData: FormData): Promise<void> {
 
   await db.from("meals").update({ status: "open" }).eq("id", id);
   revalidatePath("/admin/meals");
+  expireMeals();
 }
 
 export async function deleteMeal(formData: FormData): Promise<void> {
@@ -67,4 +71,5 @@ export async function deleteMeal(formData: FormData): Promise<void> {
 
   await db.from("meals").delete().eq("id", id);
   revalidatePath("/admin/meals");
+  expireMeals();
 }

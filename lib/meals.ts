@@ -1,5 +1,7 @@
 import "server-only";
+import { unstable_cache } from "next/cache";
 import { supabaseAdmin } from "@/lib/supabase/server";
+import { CACHE_TAGS } from "@/lib/cache";
 import type { MealMenuItem } from "@/lib/supabase/types";
 import { issueReceipt } from "@/lib/green-invoice";
 import { sendMealRegistrationConfirmationEmail } from "@/lib/resend";
@@ -21,7 +23,10 @@ export interface MealView {
   menu: MealMenuItem[];
 }
 
-export async function getOpenMeals(): Promise<MealView[]> {
+// Always hits the database. Use this wherever the answer gates a write
+// (registration checks remaining seats against it) — the cached
+// getOpenMeals below is only for display, and may lag a few seconds.
+async function fetchOpenMeals(): Promise<MealView[]> {
   const db = supabaseAdmin();
   const { data: meals, error } = await db
     .from("meals")
@@ -54,8 +59,16 @@ export async function getOpenMeals(): Promise<MealView[]> {
   });
 }
 
+// Display-only: seat counts here can lag registrations by up to a minute
+// (or until a payment/admin edit expires the "meals" tag). Never use this
+// to decide whether a registration fits — see fetchOpenMeals.
+export const getOpenMeals = unstable_cache(fetchOpenMeals, ["open-meals"], {
+  tags: [CACHE_TAGS.meals],
+  revalidate: 60,
+});
+
 export async function getMealById(mealId: string): Promise<MealView | null> {
-  const meals = await getOpenMeals();
+  const meals = await fetchOpenMeals();
   return meals.find((m) => m.id === mealId) ?? null;
 }
 

@@ -1,5 +1,5 @@
 import { resolveLocale } from "@/lib/i18n";
-import { getDict } from "@/lib/dictionary";
+import { getDict, LOCALES } from "@/lib/dictionary";
 import { CartProvider } from "@/components/cart/CartContext";
 import { CartDrawer } from "@/components/cart/CartDrawer";
 import { Nav } from "@/components/site/Nav";
@@ -7,6 +7,10 @@ import { Footer } from "@/components/site/Footer";
 import { BackToTop } from "@/components/site/BackToTop";
 import { CookieNotice } from "@/components/site/CookieNotice";
 import { AccessibilityWidget } from "@/components/site/AccessibilityWidget";
+
+export function generateStaticParams() {
+  return LOCALES.map((locale) => ({ locale }));
+}
 
 export default async function SiteLayout({
   children,

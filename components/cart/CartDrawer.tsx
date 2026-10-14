@@ -29,7 +29,7 @@ export function CartDrawer({ locale }: { locale: Locale }) {
 
         <div className={styles.body}>
           {cart.items.length === 0 ? (
-            <div className={styles.empty}>{t.empty}</div>
+            <div className={styles.empty}>{cart.isLoading ? "…" : t.empty}</div>
           ) : (
             cart.items.map((item) => {
               const unitIncl = item.priceBeforeVat * 1.18;

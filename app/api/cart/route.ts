@@ -16,8 +16,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
   }
 
-  await addCartItem(sessionId, productSizeId, qty);
-  const items = await getCart(sessionId);
+  const cartId = await addCartItem(sessionId, productSizeId, qty);
+  const items = await getCart(sessionId, cartId);
   return NextResponse.json({ items });
 }
 
@@ -29,8 +29,8 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
   }
 
-  await updateCartItemQty(sessionId, cartItemId, qty);
-  const items = await getCart(sessionId);
+  const cartId = await updateCartItemQty(sessionId, cartItemId, qty);
+  const items = await getCart(sessionId, cartId);
   return NextResponse.json({ items });
 }
 
@@ -42,7 +42,7 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
   }
 
-  await removeCartItem(sessionId, cartItemId);
-  const items = await getCart(sessionId);
+  const cartId = await removeCartItem(sessionId, cartItemId);
+  const items = await getCart(sessionId, cartId);
   return NextResponse.json({ items });
 }

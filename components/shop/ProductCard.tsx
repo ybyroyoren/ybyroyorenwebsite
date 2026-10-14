@@ -33,9 +33,13 @@ export function ProductCard({
 
   async function handleAdd() {
     if (!size || !inStock) return;
-    await cart.addItem(size.id, 1);
     setJustAdded(true);
     setTimeout(() => setJustAdded(false), 1200);
+    try {
+      await cart.addItem(size.id, 1);
+    } catch {
+      setJustAdded(false);
+    }
   }
 
   function changePhoto(e: React.MouseEvent, delta: 1 | -1) {

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/admin-auth";
+import { expireMedia } from "@/lib/cache";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { createUploadTicket, deleteImage, type UploadTicket } from "@/lib/storage";
 import type { MediaLocation } from "@/lib/media";
@@ -9,6 +10,7 @@ import type { MediaLocation } from "@/lib/media";
 const VALID_LOCATIONS: MediaLocation[] = ["meals_carousel", "events_carousel", "about_hero", "home_carousel"];
 
 function revalidateMediaPaths() {
+  expireMedia();
   revalidatePath("/admin/media");
   revalidatePath("/meals");
   revalidatePath("/en/meals");

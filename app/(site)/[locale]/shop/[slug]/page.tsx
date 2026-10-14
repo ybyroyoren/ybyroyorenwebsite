@@ -10,6 +10,18 @@ import { ProductGallery } from "@/components/shop/ProductGallery";
 import { formatCurrency, priceIncludingVat } from "@/lib/pricing";
 import styles from "./page.module.css";
 
+// Prerender every active product at build time. Failing to reach the
+// database here must never fail the build — anything not prerendered is
+// simply generated (and then cached) on its first visit.
+export async function generateStaticParams() {
+  try {
+    const products = await getActiveProducts();
+    return products.map((product) => ({ slug: product.slug }));
+  } catch {
+    return [];
+  }
+}
+
 export async function generateMetadata({
   params,
 }: {

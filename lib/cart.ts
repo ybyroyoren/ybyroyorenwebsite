@@ -49,9 +49,24 @@ async function getOrCreateCartId(sessionUserId: string): Promise<string> {
   return data.id;
 }
 
-export async function getCart(sessionUserId: string): Promise<CartItemView[]> {
+// Pass `knownCartId` (returned by the mutating helpers below) to skip
+// looking the cart up a second time within the same request.
+export async function getCart(sessionUserId: string, knownCartId?: string): Promise<CartItemView[]> {
   const db = supabaseAdmin();
-  const cartId = await getOrCreateCartId(sessionUserId);
+
+  // Reading must not create anything: this runs on every page load for every
+  // visitor (bots included), and most of them never add a thing — so a
+  // missing cart just means an empty one.
+  let cartId = knownCartId;
+  if (!cartId) {
+    const { data: existing, error: lookupError } = await db
+      .from("carts")
+      .select("id")
+      .eq("session_user_id", sessionUserId)
+      .maybeSingle();
+    if (lookupError || !existing) return [];
+    cartId = existing.id;
+  }
 
   const { data, error } = await db
     .from("cart_items")
@@ -87,7 +102,7 @@ export async function addCartItem(
   sessionUserId: string,
   productSizeId: string,
   qty: number
-): Promise<void> {
+): Promise<string> {
   const db = supabaseAdmin();
   const cartId = await getOrCreateCartId(sessionUserId);
 
@@ -104,20 +119,21 @@ export async function addCartItem(
       .update({ qty: existing.qty + qty })
       .eq("id", existing.id);
     if (error) throw new Error(error.message);
-    return;
+    return cartId;
   }
 
   const { error } = await db
     .from("cart_items")
     .insert({ cart_id: cartId, product_size_id: productSizeId, qty });
   if (error) throw new Error(error.message);
+  return cartId;
 }
 
 export async function updateCartItemQty(
   sessionUserId: string,
   cartItemId: string,
   qty: number
-): Promise<void> {
+): Promise<string> {
   const db = supabaseAdmin();
   const cartId = await getOrCreateCartId(sessionUserId);
 
@@ -128,7 +144,7 @@ export async function updateCartItemQty(
       .eq("id", cartItemId)
       .eq("cart_id", cartId);
     if (error) throw new Error(error.message);
-    return;
+    return cartId;
   }
 
   const { error } = await db
@@ -137,9 +153,10 @@ export async function updateCartItemQty(
     .eq("id", cartItemId)
     .eq("cart_id", cartId);
   if (error) throw new Error(error.message);
+  return cartId;
 }
 
-export async function removeCartItem(sessionUserId: string, cartItemId: string): Promise<void> {
+export async function removeCartItem(sessionUserId: string, cartItemId: string): Promise<string> {
   const db = supabaseAdmin();
   const cartId = await getOrCreateCartId(sessionUserId);
 
@@ -149,6 +166,7 @@ export async function removeCartItem(sessionUserId: string, cartItemId: string):
     .eq("id", cartItemId)
     .eq("cart_id", cartId);
   if (error) throw new Error(error.message);
+  return cartId;
 }
 
 export async function clearCart(sessionUserId: string): Promise<void> {

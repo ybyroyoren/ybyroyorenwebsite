@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/admin-auth";
+import { expireCatalog } from "@/lib/cache";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { createUploadTicket, deleteImage, type UploadTicket } from "@/lib/storage";
 
@@ -58,6 +59,7 @@ export async function createProduct(formData: FormData): Promise<void> {
   });
 
   revalidatePath("/admin/products");
+  expireCatalog();
 }
 
 export async function updateProduct(formData: FormData): Promise<void> {
@@ -84,6 +86,7 @@ export async function updateProduct(formData: FormData): Promise<void> {
     .eq("id", id);
 
   revalidatePath("/admin/products");
+  expireCatalog();
 }
 
 export async function deleteProduct(formData: FormData): Promise<void> {
@@ -95,6 +98,7 @@ export async function deleteProduct(formData: FormData): Promise<void> {
 
   await db.from("products").delete().eq("id", id);
   revalidatePath("/admin/products");
+  expireCatalog();
 }
 
 export async function addProductSize(formData: FormData): Promise<void> {
@@ -109,6 +113,7 @@ export async function addProductSize(formData: FormData): Promise<void> {
 
   await db.from("product_sizes").insert({ product_id: productId, label, price_before_vat: price });
   revalidatePath("/admin/products");
+  expireCatalog();
 }
 
 export async function updateProductSize(formData: FormData): Promise<void> {
@@ -128,6 +133,7 @@ export async function updateProductSize(formData: FormData): Promise<void> {
     .eq("id", id);
 
   revalidatePath("/admin/products");
+  expireCatalog();
 }
 
 export async function toggleSizeStock(formData: FormData): Promise<void> {
@@ -145,6 +151,7 @@ export async function toggleSizeStock(formData: FormData): Promise<void> {
     .eq("id", id);
 
   revalidatePath("/admin/products");
+  expireCatalog();
 }
 
 export async function deleteProductSize(formData: FormData): Promise<void> {
@@ -156,6 +163,7 @@ export async function deleteProductSize(formData: FormData): Promise<void> {
 
   await db.from("product_sizes").delete().eq("id", id);
   revalidatePath("/admin/products");
+  expireCatalog();
 }
 
 export async function createCategory(formData: FormData): Promise<void> {
@@ -177,8 +185,7 @@ export async function createCategory(formData: FormData): Promise<void> {
   });
 
   revalidatePath("/admin/products");
-  revalidatePath("/shop");
-  revalidatePath("/en/shop");
+  expireCatalog();
 }
 
 export async function deleteCategory(formData: FormData): Promise<void> {
@@ -202,8 +209,7 @@ export async function deleteCategory(formData: FormData): Promise<void> {
 
   await db.from("categories").delete().eq("id", id);
   revalidatePath("/admin/products");
-  revalidatePath("/shop");
-  revalidatePath("/en/shop");
+  expireCatalog();
 }
 
 // The actual file bytes never touch this server — see lib/storage.ts for
@@ -239,8 +245,7 @@ export async function attachProductImage(productId: string, url: string): Promis
     .eq("id", productId);
 
   revalidatePath("/admin/products");
-  revalidatePath("/shop");
-  revalidatePath("/en/shop");
+  expireCatalog();
 }
 
 export async function removeProductImage(formData: FormData): Promise<void> {
@@ -267,6 +272,5 @@ export async function removeProductImage(formData: FormData): Promise<void> {
   await deleteImage(url);
 
   revalidatePath("/admin/products");
-  revalidatePath("/shop");
-  revalidatePath("/en/shop");
+  expireCatalog();
 }

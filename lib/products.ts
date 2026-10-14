@@ -1,5 +1,7 @@
 import "server-only";
+import { unstable_cache } from "next/cache";
 import { supabaseAdmin } from "@/lib/supabase/server";
+import { CACHE_TAGS } from "@/lib/cache";
 
 export interface ProductSizeView {
   id: string;
@@ -71,17 +73,21 @@ function mapProduct(row: ProductRow): ProductView {
   };
 }
 
-export async function getActiveProducts(): Promise<ProductView[]> {
-  const db = supabaseAdmin();
-  const { data, error } = await db
-    .from("products")
-    .select(`${PRODUCT_SELECT}, sort_order`)
-    .eq("active", true)
-    .order("sort_order", { ascending: true });
+export const getActiveProducts = unstable_cache(
+  async (): Promise<ProductView[]> => {
+    const db = supabaseAdmin();
+    const { data, error } = await db
+      .from("products")
+      .select(`${PRODUCT_SELECT}, sort_order`)
+      .eq("active", true)
+      .order("sort_order", { ascending: true });
 
-  if (error) throw new Error(error.message);
-  return ((data ?? []) as unknown as ProductRow[]).map(mapProduct);
-}
+    if (error) throw new Error(error.message);
+    return ((data ?? []) as unknown as ProductRow[]).map(mapProduct);
+  },
+  ["active-products"],
+  { tags: [CACHE_TAGS.products], revalidate: 300 }
+);
 
 // Dynamic route params containing non-ASCII characters (Hebrew slugs) are
 // not reliably URL-decoded by the time they reach a page component in this
@@ -96,16 +102,20 @@ function safeDecodeSlug(slug: string): string {
   }
 }
 
-export async function getProductBySlug(slug: string): Promise<ProductView | null> {
-  const db = supabaseAdmin();
-  const { data, error } = await db
-    .from("products")
-    .select(PRODUCT_SELECT)
-    .eq("slug", safeDecodeSlug(slug))
-    .eq("active", true)
-    .maybeSingle();
+export const getProductBySlug = unstable_cache(
+  async (slug: string): Promise<ProductView | null> => {
+    const db = supabaseAdmin();
+    const { data, error } = await db
+      .from("products")
+      .select(PRODUCT_SELECT)
+      .eq("slug", safeDecodeSlug(slug))
+      .eq("active", true)
+      .maybeSingle();
 
-  if (error) throw new Error(error.message);
-  if (!data) return null;
-  return mapProduct(data as unknown as ProductRow);
-}
+    if (error) throw new Error(error.message);
+    if (!data) return null;
+    return mapProduct(data as unknown as ProductRow);
+  },
+  ["product-by-slug"],
+  { tags: [CACHE_TAGS.products], revalidate: 300 }
+);
