@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# frankfurt migration scratch state (storage path map)
+scripts/frankfurt-migration/.state/
