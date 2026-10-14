@@ -8,6 +8,13 @@
 //   node copy-data.mjs --mirror    also delete rows from the NEW project that
 //                                  no longer exist in the old one (use for the
 //                                  final pre-cutover sync)
+//   node copy-data.mjs --only-missing
+//                                  copy ONLY rows the new project doesn't have
+//                                  yet and never touch existing ones. Use this
+//                                  after the cutover to catch rows written to
+//                                  the old project during the switch — a normal
+//                                  run would overwrite rows that the live site
+//                                  has already updated in the new project.
 //
 // Storage URLs inside rows are rewritten from the old project to the new one,
 // applying .state/storage-map.json for images whose path changed.
@@ -16,6 +23,8 @@ import { loadOld, loadNew, http, fetchAll, TABLES, keptCartIds, chunk, makeRewri
 const args = process.argv.slice(2);
 const dryRun = args.includes("--dry-run");
 const mirror = args.includes("--mirror");
+const onlyMissing = args.includes("--only-missing");
+if (mirror && onlyMissing) { console.error("--mirror and --only-missing can't be combined"); process.exit(1); }
 
 const old = loadOld();
 const target = dryRun ? null : loadNew();
@@ -58,6 +67,27 @@ for (const t of TABLES) {
       await http(target, "DELETE", `/rest/v1/${t}?id=in.(${group.join(",")})`);
     }
     if (extra.length) console.log(`  ${t}: removed ${extra.length} stale row(s) from the new project`);
+  }
+
+  if (onlyMissing) {
+    const have = new Set((await fetchAll(target, t)).map((r) => r.id));
+    const missing = rows.filter((r) => !have.has(r.id));
+    // A row can be "missing" by id yet clash with a newer row on a unique key
+    // (e.g. the same seat re-created after the switch). The new project wins,
+    // so such rows are skipped individually instead of failing the batch.
+    let added = 0, skippedConflicts = 0;
+    try {
+      for (const row of missing) {
+        const res = await http(target, "POST", `/rest/v1/${t}?on_conflict=id`, {
+          headers: { "Content-Type": "application/json", Prefer: "resolution=ignore-duplicates,return=minimal" },
+          body: JSON.stringify([row]),
+          allow: [409],
+        });
+        if (res.status === 409) skippedConflicts++; else added++;
+      }
+      console.log(`${t.padEnd(26)} ${added || skippedConflicts ? `added ${added}${skippedConflicts ? `, skipped ${skippedConflicts} that conflict with newer rows` : ""}` : "nothing missing"}`);
+    } catch (e) { console.log(`${t.padEnd(26)} FAILED: ${e.message}`); failures++; }
+    continue;
   }
 
   try {

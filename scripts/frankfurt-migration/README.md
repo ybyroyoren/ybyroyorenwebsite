@@ -38,8 +38,9 @@ All of 7–9 are idempotent; re-run any time.
    re-enable leaked-password protection.
 4. Push the commit that sets `vercel.json` regions to `["fra1"]` — the deploy
    picks up the new env vars and the new region together.
-5. After it is live: `copy-data.mjs` once more (against old → new) to catch
-   anything written to the old project during the switch, then `verify-data.mjs`.
+5. After it is live: `copy-data.mjs --only-missing` to catch rows written to the
+   old project during the switch. Never a plain run or `--mirror` here — those
+   would overwrite rows the live site already updated in the new project.
 6. Smoke test: shop, add to cart, admin login, upload an image, a test order.
 
 Rollback: restore the three env vars to the old project, set `regions` back

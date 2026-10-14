@@ -45,7 +45,11 @@ export function ImageUploadButton({
 
       const { error: uploadError } = await supabaseBrowser()
         .storage.from("images")
-        .uploadToSignedUrl(ticket.path, ticket.token, upload);
+        .uploadToSignedUrl(ticket.path, ticket.token, upload, {
+          // Object names are random uuids, so a file never changes in place:
+          // let browsers and the CDN keep it for a year.
+          cacheControl: "31536000",
+        });
       if (uploadError) throw new Error(uploadError.message);
 
       await onUploaded(ticket.publicUrl);
