@@ -19,6 +19,8 @@ import { formatCurrency } from "@/lib/pricing";
 import adminStyles from "../../../../../admin.module.css";
 import styles from "./summary.module.css";
 
+const BRING_KIND_LABEL = { dish: "מנה", prep: "הכנה", ingredient: "מרכיב גלם", note: "נוסף" } as const;
+
 function CheckRow({
   eventId,
   itemKey,
@@ -238,8 +240,8 @@ export default async function EventSummaryPage({ params }: { params: Promise<{ i
                 itemKey={key}
                 done={completed.has(key)}
                 label={b.label}
-                qualifier={b.kind === "ingredient" ? "מרכיב גלם" : "הכנה"}
-                amount={`${b.amount.toFixed(1)} ${b.unit}`}
+                qualifier={BRING_KIND_LABEL[b.kind]}
+                amount={b.kind === "note" ? undefined : `${b.amount.toFixed(1)} ${b.unit}`}
               />
             );
           })}

@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/admin-auth";
 import { getEquipmentList, getIngredients, getRecipes } from "@/lib/kitchen/data";
 import { wouldCreateCycle } from "@/lib/kitchen/algorithms";
+import { buildRecipeOptions } from "@/lib/kitchen/recipeOptions";
 import { RecipeEditorForm } from "@/components/admin/kitchen/RecipeEditorForm";
 
 export default async function EditRecipePage({ params }: { params: Promise<{ id: string }> }) {
@@ -19,7 +20,9 @@ export default async function EditRecipePage({ params }: { params: Promise<{ id:
   if (!recipe) notFound();
 
   const recipesById = new Map(recipes.map((r) => [r.id, r]));
-  const validOptions = recipes.filter((r) => r.id !== id && !wouldCreateCycle(id, [r.id], recipesById));
+  const validIds = new Set(
+    recipes.filter((r) => r.id !== id && !wouldCreateCycle(id, [r.id], recipesById)).map((r) => r.id)
+  );
 
   return (
     <>
@@ -29,7 +32,7 @@ export default async function EditRecipePage({ params }: { params: Promise<{ id:
         initial={recipe}
         ingredients={ingredients}
         equipment={equipment}
-        recipeOptions={validOptions.map((r) => ({ id: r.id, name: r.name, baseAmount: r.baseAmount, baseUnit: r.baseUnit }))}
+        recipeOptions={buildRecipeOptions(recipes, ingredients).filter((o) => validIds.has(o.id))}
       />
     </>
   );

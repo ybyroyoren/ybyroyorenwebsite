@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { requireAdmin } from "@/lib/admin-auth";
 import { getKitchenGraph } from "@/lib/kitchen/data";
-import { recipeBaseCost, recipeCostPerBaseUnit } from "@/lib/kitchen/algorithms";
-import { formatCurrency } from "@/lib/pricing";
+import { recipeBaseCost, recipeCostPerBaseUnit, recipeHasMissingPrices } from "@/lib/kitchen/algorithms";
+import { formatCurrencyExact } from "@/lib/pricing";
 import { AdminSearchGrid } from "@/components/admin/kitchen/AdminSearch";
 import styles from "../../../admin.module.css";
 
@@ -32,6 +32,7 @@ export default async function KitchenRecipesPage() {
         items={recipes.map((r) => {
           const baseCost = isOwner ? recipeBaseCost(r.id, recipesById, ingredientsById) : 0;
           const perUnitCost = isOwner ? recipeCostPerBaseUnit(r.id, recipesById, ingredientsById) : 0;
+          const missingPrices = isOwner && recipeHasMissingPrices(r.id, recipesById, ingredientsById);
           const card = (
             <div className={styles.card} style={{ height: "100%" }}>
               <span className={r.type === "dish" ? styles.badgePaid : styles.badgePending}>
@@ -42,9 +43,17 @@ export default async function KitchenRecipesPage() {
                 {r.baseAmount} {r.baseUnit} · {r.components.length} רכיבים · {r.prepSteps.length} שלבים
               </p>
               {isOwner && (
-                <p className={styles.muted} style={{ marginTop: 6 }}>
-                  עלות: {formatCurrency(baseCost)} סה&quot;כ · {formatCurrency(perUnitCost)} ל{r.baseUnit}
-                </p>
+                <div style={{ marginTop: 10 }}>
+                  <p style={{ fontWeight: 700, fontSize: 16 }}>
+                    מחיר המתכון: {formatCurrencyExact(baseCost)}
+                  </p>
+                  <p className={styles.muted}>
+                    {formatCurrencyExact(perUnitCost)} ל{r.baseUnit}
+                    {missingPrices && (
+                      <span style={{ color: "var(--danger)" }}> · חסר מחיר למרכיב — הסכום חלקי</span>
+                    )}
+                  </p>
+                </div>
               )}
             </div>
           );

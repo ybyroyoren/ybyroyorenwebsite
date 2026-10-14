@@ -49,6 +49,14 @@ export interface KLRecipeComponent {
   componentRecipeId: string | null;
   amount: number;
   sortOrder: number;
+  /** Taken to offsite events (true even for a component that is itself a prep, if ticked). */
+  bringOffsite: boolean;
+}
+
+/** A free-text extra to take to offsite events (not an ingredient or a recipe). */
+export interface KLBringNote {
+  id: string;
+  text: string;
 }
 
 export interface KLRecipe {
@@ -60,6 +68,7 @@ export interface KLRecipe {
   prepSteps: KLPrepStep[];
   prepEquipment: KLEquipRef[];
   eventEquipment: KLEquipRef[];
+  bringItems: KLBringNote[];
   components: KLRecipeComponent[];
 }
 

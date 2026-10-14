@@ -9,6 +9,11 @@ export function formatCurrency(amount: number): string {
   return `₪${Math.round(amount).toLocaleString("he-IL")}`;
 }
 
+/** Like formatCurrency but keeps agorot — for small amounts such as a single ingredient's cost. */
+export function formatCurrencyExact(amount: number): string {
+  return `₪${amount.toLocaleString("he-IL", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
 export interface CartTotals {
   subtotal: number;
   discount: number;

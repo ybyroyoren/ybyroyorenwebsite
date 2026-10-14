@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { KLEquipment, KLIngredient, KLRecipe, KLRecipeType } from "@/lib/kitchen/types";
+import { ingredientLineCost } from "@/lib/kitchen/algorithms";
+import { formatCurrencyExact } from "@/lib/pricing";
 import styles from "@/app/admin/admin.module.css";
 
 export interface RecipeOption {
@@ -10,6 +12,10 @@ export interface RecipeOption {
   name: string;
   baseAmount: number;
   baseUnit: string;
+  /** Cost of one base unit of this recipe (for pricing it as a component). */
+  costPerBaseUnit: number;
+  /** Some raw ingredient inside it has no price, so costPerBaseUnit is understated. */
+  pricesIncomplete: boolean;
 }
 
 interface ComponentRow {
@@ -17,6 +23,7 @@ interface ComponentRow {
   ingredientId: string;
   componentRecipeId: string;
   amount: string;
+  bringOffsite: boolean;
 }
 
 interface StepRow {
@@ -27,6 +34,18 @@ interface StepRow {
 interface EquipRow {
   equipId: string;
   qty: string;
+}
+
+interface BringNoteRow {
+  id: string;
+  text: string;
+}
+
+interface LineCost {
+  /** null = the ingredient has no price set. */
+  cost: number | null;
+  /** The cost is understated because a nested ingredient has no price. */
+  approximate: boolean;
 }
 
 function newId(): string {
@@ -57,6 +76,7 @@ export function RecipeEditorForm({
       ingredientId: c.ingredientId ?? "",
       componentRecipeId: c.componentRecipeId ?? "",
       amount: String(c.amount),
+      bringOffsite: c.bringOffsite,
     }))
   );
   const [steps, setSteps] = useState<StepRow[]>(initial?.prepSteps ?? []);
@@ -66,8 +86,30 @@ export function RecipeEditorForm({
   const [eventEquip, setEventEquip] = useState<EquipRow[]>(
     (initial?.eventEquipment ?? []).map((e) => ({ equipId: e.equipId, qty: String(e.qty) }))
   );
+  const [bringNotes, setBringNotes] = useState<BringNoteRow[]>(initial?.bringItems ?? []);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const ingredientsById = useMemo(() => new Map(ingredients.map((i) => [i.id, i])), [ingredients]);
+  const optionsById = useMemo(() => new Map(recipeOptions.map((r) => [r.id, r])), [recipeOptions]);
+
+  // Same formula the recipe list and event costing use (yield loss included),
+  // so these lines always add up to the recipe's price.
+  function lineCost(row: ComponentRow): LineCost | null {
+    const amount = Number(row.amount);
+    if (!(amount > 0)) return null;
+    if (row.kind === "ingredient") {
+      const ingredient = ingredientsById.get(row.ingredientId);
+      return ingredient ? { cost: ingredientLineCost(ingredient, amount), approximate: false } : null;
+    }
+    const option = optionsById.get(row.componentRecipeId);
+    return option ? { cost: amount * option.costPerBaseUnit, approximate: option.pricesIncomplete } : null;
+  }
+
+  const lineCosts = components.map(lineCost);
+  const totalCost = lineCosts.reduce((sum, l) => sum + (l?.cost ?? 0), 0);
+  const unpricedLines = lineCosts.filter((l) => l && (l.cost === null || l.approximate)).length;
+  const baseAmountNumber = Number(baseAmount);
 
   function updateComponent(index: number, patch: Partial<ComponentRow>) {
     setComponents((rows) => rows.map((r, i) => (i === index ? { ...r, ...patch } : r)));
@@ -108,10 +150,12 @@ export function RecipeEditorForm({
         ingredientId: c.kind === "ingredient" ? c.ingredientId : null,
         componentRecipeId: c.kind === "recipe" ? c.componentRecipeId : null,
         amount: Number(c.amount),
+        bringOffsite: c.bringOffsite,
       })),
       prepSteps: steps,
       prepEquipment: prepEquip.map((e) => ({ equipId: e.equipId, qty: Number(e.qty) || 1 })),
       eventEquipment: eventEquip.map((e) => ({ equipId: e.equipId, qty: Number(e.qty) || 1 })),
+      bringItems: bringNotes.filter((n) => n.text.trim()),
     };
 
     setSaving(true);
@@ -214,7 +258,7 @@ export function RecipeEditorForm({
       <div className={styles.field} style={{ width: "100%" }}>
         <label>רכיבים</label>
         {components.map((row, i) => (
-          <div key={i} style={{ display: "flex", gap: 8, marginBottom: 6, alignItems: "center" }}>
+          <div key={i} style={{ display: "flex", gap: 8, marginBottom: 6, alignItems: "center", flexWrap: "wrap" }}>
             <select
               value={row.kind}
               onChange={(e) => updateComponent(i, { kind: e.target.value as "ingredient" | "recipe" })}
@@ -260,6 +304,28 @@ export function RecipeEditorForm({
               onChange={(e) => updateComponent(i, { amount: e.target.value })}
               style={{ width: 90 }}
             />
+            <span
+              title="מחיר הרכיב לפי הכמות שהוזנה"
+              style={{ minWidth: 84, textAlign: "left", fontWeight: 600, fontSize: 13.5 }}
+            >
+              {(() => {
+                const line = lineCosts[i];
+                if (!line) return <span className={styles.muted}>—</span>;
+                if (line.cost === null) return <span style={{ color: "var(--danger)", fontWeight: 500 }}>אין מחיר</span>;
+                return `${formatCurrencyExact(line.cost)}${line.approximate ? "*" : ""}`;
+              })()}
+            </span>
+            <label
+              title="נלקח לאירוע חוץ (גם אם הרכיב הוא הכנה בפני עצמה)"
+              style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 12.5, whiteSpace: "nowrap" }}
+            >
+              <input
+                type="checkbox"
+                checked={row.bringOffsite}
+                onChange={(e) => updateComponent(i, { bringOffsite: e.target.checked })}
+              />
+              לאירוע חוץ
+            </label>
             <button type="button" className={styles.btnDanger} onClick={() => removeComponent(i)}>
               הסרה
             </button>
@@ -269,14 +335,14 @@ export function RecipeEditorForm({
           <button
             type="button"
             className={styles.btnSecondary}
-            onClick={() => setComponents((c) => [...c, { kind: "ingredient", ingredientId: "", componentRecipeId: "", amount: "" }])}
+            onClick={() => setComponents((c) => [...c, { kind: "ingredient", ingredientId: "", componentRecipeId: "", amount: "", bringOffsite: true }])}
           >
             + מרכיב גלם
           </button>
           <button
             type="button"
             className={styles.btnSecondary}
-            onClick={() => setComponents((c) => [...c, { kind: "recipe", ingredientId: "", componentRecipeId: "", amount: "" }])}
+            onClick={() => setComponents((c) => [...c, { kind: "recipe", ingredientId: "", componentRecipeId: "", amount: "", bringOffsite: true }])}
           >
             + מתכון כרכיב
           </button>
@@ -284,6 +350,24 @@ export function RecipeEditorForm({
         <p className={styles.muted} style={{ marginTop: 6 }}>
           מרכיב חדש שלא ברשימה? הוסיפו אותו קודם במסך &quot;מרכיבים&quot;.
         </p>
+
+        {components.length > 0 && (
+          <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1.5px solid var(--ink)" }}>
+            <div style={{ fontWeight: 700, fontSize: 15 }}>
+              סה&quot;כ מחיר המרכיבים (מחיר המתכון): {formatCurrencyExact(totalCost)}
+              {baseAmountNumber > 0 && baseUnit.trim() && (
+                <span className={styles.muted} style={{ fontWeight: 400, marginRight: 10 }}>
+                  · {formatCurrencyExact(totalCost / baseAmountNumber)} ל{baseUnit.trim()}
+                </span>
+              )}
+            </div>
+            <p className={styles.muted} style={{ marginTop: 4 }}>
+              המחיר הוא עבור כמות הבסיס של המתכון{baseAmountNumber > 0 ? ` (${baseAmountNumber} ${baseUnit.trim()})` : ""}.
+              {unpricedLines > 0 &&
+                ` * חסר מחיר ל-${unpricedLines === 1 ? "רכיב אחד" : `${unpricedLines} רכיבים`} — הסכום חלקי. אפשר להוסיף מחיר במסך "מרכיבים".`}
+            </p>
+          </div>
+        )}
       </div>
 
       <div className={styles.field} style={{ width: "100%" }}>
@@ -304,6 +388,29 @@ export function RecipeEditorForm({
 
       {equipRowEditor("ציוד הכנה (בבית, לא נלקח לאירוע)", prepEquip, setPrepEquip)}
       {equipRowEditor("ציוד לקחת לאירוע", eventEquip, setEventEquip)}
+
+      <div className={styles.field} style={{ width: "100%" }}>
+        <label>פריטים נוספים לקחת לאירוע חוץ (טקסט חופשי)</label>
+        {bringNotes.map((note, i) => (
+          <div key={note.id} style={{ display: "flex", gap: 8, marginBottom: 6 }}>
+            <input
+              value={note.text}
+              onChange={(e) => setBringNotes((rows) => rows.map((r, idx) => (idx === i ? { ...r, text: e.target.value } : r)))}
+              placeholder="למשל: סכו״ם חד פעמי, קרח, מפיות"
+              style={{ flex: 1 }}
+            />
+            <button type="button" className={styles.btnDanger} onClick={() => setBringNotes((rows) => rows.filter((_, idx) => idx !== i))}>
+              הסרה
+            </button>
+          </div>
+        ))}
+        <button type="button" className={styles.btnSecondary} onClick={() => setBringNotes((rows) => [...rows, { id: newId(), text: "" }])}>
+          + פריט
+        </button>
+        <p className={styles.muted} style={{ marginTop: 6 }}>
+          מופיע ברשימת &quot;פריטים והכנות לקחת&quot; של כל אירוע חוץ שהמתכון הזה בתפריט שלו.
+        </p>
+      </div>
 
       {error && <p className={styles.error}>{error}</p>}
 

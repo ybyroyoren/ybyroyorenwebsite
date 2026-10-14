@@ -73,7 +73,11 @@ export function buildSummaryText(
       sections.push(`ציוד לקחת:\n${equipmentRows.map((e) => `${e.name} × ${e.qty}`).join("\n")}`);
     }
     if (bringItems.length > 0) {
-      sections.push(`פריטים והכנות לקחת:\n${bringItems.map((b) => `${b.label} — ${b.amount.toFixed(1)} ${b.unit}`).join("\n")}`);
+      sections.push(
+        `פריטים והכנות לקחת:\n${bringItems
+          .map((b) => (b.kind === "note" ? b.label : `${b.label} — ${b.amount.toFixed(1)} ${b.unit}`))
+          .join("\n")}`
+      );
     }
   }
 

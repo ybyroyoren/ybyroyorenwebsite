@@ -50,11 +50,11 @@ export async function getRecipes(): Promise<KLRecipe[]> {
   const db = supabaseAdmin();
   const { data: recipeRows } = await db
     .from("kl_recipes")
-    .select("id, name, type, base_amount, base_unit, prep_steps, prep_equipment, event_equipment")
+    .select("id, name, type, base_amount, base_unit, prep_steps, prep_equipment, event_equipment, bring_items")
     .order("name");
   const { data: componentRows } = await db
     .from("kl_recipe_components")
-    .select("id, recipe_id, kind, ingredient_id, component_recipe_id, amount, sort_order")
+    .select("id, recipe_id, kind, ingredient_id, component_recipe_id, amount, sort_order, bring_offsite")
     .order("sort_order");
 
   const componentsByRecipe = new Map<string, KLRecipe["components"]>();
@@ -67,6 +67,7 @@ export async function getRecipes(): Promise<KLRecipe[]> {
       componentRecipeId: c.component_recipe_id,
       amount: c.amount,
       sortOrder: c.sort_order,
+      bringOffsite: c.bring_offsite ?? true,
     });
     componentsByRecipe.set(c.recipe_id, list);
   }
@@ -80,6 +81,7 @@ export async function getRecipes(): Promise<KLRecipe[]> {
     prepSteps: row.prep_steps ?? [],
     prepEquipment: row.prep_equipment ?? [],
     eventEquipment: row.event_equipment ?? [],
+    bringItems: row.bring_items ?? [],
     components: componentsByRecipe.get(row.id) ?? [],
   }));
 }

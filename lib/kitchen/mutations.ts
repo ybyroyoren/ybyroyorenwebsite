@@ -2,13 +2,14 @@ import "server-only";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { getRecipes } from "./data";
 import { wouldCreateCycle } from "./algorithms";
-import type { KLEquipRef, KLPrepStep, KLRecipeType } from "./types";
+import type { KLBringNote, KLEquipRef, KLPrepStep, KLRecipeType } from "./types";
 
 export interface RecipeComponentInput {
   kind: "ingredient" | "recipe";
   ingredientId: string | null;
   componentRecipeId: string | null;
   amount: number;
+  bringOffsite: boolean;
 }
 
 export interface RecipeInput {
@@ -20,6 +21,14 @@ export interface RecipeInput {
   prepSteps: KLPrepStep[];
   prepEquipment: KLEquipRef[];
   eventEquipment: KLEquipRef[];
+  bringItems: KLBringNote[];
+}
+
+/** Drops blank free-text entries and trims the rest. */
+function cleanBringItems(items: KLBringNote[] | undefined): KLBringNote[] {
+  return (items ?? [])
+    .map((i) => ({ id: i.id, text: String(i.text ?? "").trim() }))
+    .filter((i) => i.text.length > 0);
 }
 
 function validate(input: RecipeInput): string | null {
@@ -46,6 +55,7 @@ async function replaceComponents(recipeId: string, components: RecipeComponentIn
     component_recipe_id: c.kind === "recipe" ? c.componentRecipeId : null,
     amount: c.amount,
     sort_order: i,
+    bring_offsite: c.bringOffsite !== false,
   }));
   const { error } = await db.from("kl_recipe_components").insert(rows);
   if (error) throw new Error(error.message);
@@ -78,6 +88,7 @@ export async function createRecipe(input: RecipeInput): Promise<{ id: string } |
       prep_steps: input.prepSteps,
       prep_equipment: input.prepEquipment,
       event_equipment: input.eventEquipment,
+      bring_items: cleanBringItems(input.bringItems),
     })
     .select("id")
     .single();
@@ -112,6 +123,7 @@ export async function updateRecipe(recipeId: string, input: RecipeInput): Promis
       prep_steps: input.prepSteps,
       prep_equipment: input.prepEquipment,
       event_equipment: input.eventEquipment,
+      bring_items: cleanBringItems(input.bringItems),
     })
     .eq("id", recipeId);
   if (error) return { error: error.message };
