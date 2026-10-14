@@ -69,6 +69,8 @@ export interface KLRecipe {
   prepEquipment: KLEquipRef[];
   eventEquipment: KLEquipRef[];
   bringItems: KLBringNote[];
+  /** The dish/prep itself is listed in an offsite event's bring list when on its menu. */
+  bringOffsite: boolean;
   components: KLRecipeComponent[];
 }
 

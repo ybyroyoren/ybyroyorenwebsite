@@ -329,7 +329,8 @@ export function eventCostBreakdown(
 // ---------- 4.6 bring items (offsite only) ----------
 //
 // What goes into the "items and preps to bring" list of an offsite event:
-//   - every dish/prep on the menu, as such (e.g. the cheesecake itself);
+//   - every dish/prep on the menu that is ticked "bring itself" (e.g. the
+//     cheesecake itself);
 //   - each depth-1 component of those recipes that is ticked "bring to
 //     offsite events" — raw ingredient or prep alike;
 //   - the recipe's free-text bring items (e.g. "disposable cutlery").
@@ -364,7 +365,7 @@ export function buildBringItems(menu: MenuLine[], recipesById: RecipeMap, ingred
 
     // The menu item itself. A prep put straight on the menu merges with the
     // same prep appearing as a component elsewhere (same base unit).
-    addRecipe(recipe.type === "prep" ? preps : dishes, recipe, item.servings);
+    if (recipe.bringOffsite) addRecipe(recipe.type === "prep" ? preps : dishes, recipe, item.servings);
 
     for (const comp of recipe.components) {
       if (!comp.bringOffsite) continue;

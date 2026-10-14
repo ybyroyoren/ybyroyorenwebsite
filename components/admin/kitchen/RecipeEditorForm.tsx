@@ -86,6 +86,7 @@ export function RecipeEditorForm({
   const [eventEquip, setEventEquip] = useState<EquipRow[]>(
     (initial?.eventEquipment ?? []).map((e) => ({ equipId: e.equipId, qty: String(e.qty) }))
   );
+  const [bringSelf, setBringSelf] = useState(initial?.bringOffsite ?? true);
   const [bringNotes, setBringNotes] = useState<BringNoteRow[]>(initial?.bringItems ?? []);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -156,6 +157,7 @@ export function RecipeEditorForm({
       prepEquipment: prepEquip.map((e) => ({ equipId: e.equipId, qty: Number(e.qty) || 1 })),
       eventEquipment: eventEquip.map((e) => ({ equipId: e.equipId, qty: Number(e.qty) || 1 })),
       bringItems: bringNotes.filter((n) => n.text.trim()),
+      bringOffsite: bringSelf,
     };
 
     setSaving(true);
@@ -255,6 +257,17 @@ export function RecipeEditorForm({
         />
       </div>
 
+      <div className={styles.field}>
+        <label>אירוע חוץ</label>
+        <label
+          title="האם הפריט הזה עצמו מופיע ברשימת הפריטים והכנות לקחת, כשהוא בתפריט של אירוע חוץ"
+          style={{ display: "inline-flex", alignItems: "center", gap: 6, fontWeight: 400, fontSize: 13.5, paddingTop: 8 }}
+        >
+          <input type="checkbox" checked={bringSelf} onChange={(e) => setBringSelf(e.target.checked)} />
+          {type === "dish" ? "המנה עצמה נלקחת" : "ההכנה עצמה נלקחת"}
+        </label>
+      </div>
+
       <div className={styles.field} style={{ width: "100%" }}>
         <label>רכיבים</label>
         {components.map((row, i) => (
@@ -304,17 +317,19 @@ export function RecipeEditorForm({
               onChange={(e) => updateComponent(i, { amount: e.target.value })}
               style={{ width: 90 }}
             />
-            <span
-              title="מחיר הרכיב לפי הכמות שהוזנה"
-              style={{ minWidth: 84, textAlign: "left", fontWeight: 600, fontSize: 13.5 }}
-            >
-              {(() => {
-                const line = lineCosts[i];
-                if (!line) return <span className={styles.muted}>—</span>;
-                if (line.cost === null) return <span style={{ color: "var(--danger)", fontWeight: 500 }}>אין מחיר</span>;
-                return `${formatCurrencyExact(line.cost)}${line.approximate ? "*" : ""}`;
-              })()}
-            </span>
+            {(() => {
+              const line = lineCosts[i];
+              if (!line) return <span className={`${styles.costBox} ${styles.costBoxEmpty}`} title="המחיר יופיע אחרי בחירת רכיב והזנת כמות">—</span>;
+              if (line.cost === null) {
+                return <span className={`${styles.costBox} ${styles.costBoxMissing}`} title="לא הוגדר מחיר למרכיב הזה במסך מרכיבים">אין מחיר</span>;
+              }
+              return (
+                <span className={styles.costBox} title="מחיר הרכיב לפי הכמות שהוזנה">
+                  {formatCurrencyExact(line.cost)}
+                  {line.approximate ? "*" : ""}
+                </span>
+              );
+            })()}
             <label
               title="נלקח לאירוע חוץ (גם אם הרכיב הוא הכנה בפני עצמה)"
               style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 12.5, whiteSpace: "nowrap" }}
@@ -353,11 +368,14 @@ export function RecipeEditorForm({
 
         {components.length > 0 && (
           <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1.5px solid var(--ink)" }}>
-            <div style={{ fontWeight: 700, fontSize: 15 }}>
-              סה&quot;כ מחיר המרכיבים (מחיר המתכון): {formatCurrencyExact(totalCost)}
+            <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+              <span style={{ fontWeight: 700, fontSize: 15 }}>סה&quot;כ מחיר המרכיבים (מחיר המתכון):</span>
+              <span className={styles.costBox} style={{ fontSize: 16, padding: "9px 16px" }}>
+                {formatCurrencyExact(totalCost)}
+              </span>
               {baseAmountNumber > 0 && baseUnit.trim() && (
-                <span className={styles.muted} style={{ fontWeight: 400, marginRight: 10 }}>
-                  · {formatCurrencyExact(totalCost / baseAmountNumber)} ל{baseUnit.trim()}
+                <span className={styles.muted}>
+                  {formatCurrencyExact(totalCost / baseAmountNumber)} ל{baseUnit.trim()}
                 </span>
               )}
             </div>

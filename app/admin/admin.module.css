@@ -465,6 +465,36 @@
   );
 }
 
+/* A recipe line's cost, shown as its own small box next to the amount. */
+.costBox {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 92px;
+  padding: 7px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--olive-mist);
+  color: var(--olive-deep);
+  font-size: 13.5px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.costBoxEmpty {
+  background: transparent;
+  border-style: dashed;
+  color: var(--ink-soft);
+  font-weight: 400;
+}
+
+.costBoxMissing {
+  background: rgba(139, 58, 43, 0.1);
+  border-color: rgba(139, 58, 43, 0.3);
+  color: var(--danger);
+  font-weight: 600;
+}
+
 .rowCompleted td {
   color: var(--ink-soft);
 }

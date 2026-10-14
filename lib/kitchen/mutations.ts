@@ -22,6 +22,7 @@ export interface RecipeInput {
   prepEquipment: KLEquipRef[];
   eventEquipment: KLEquipRef[];
   bringItems: KLBringNote[];
+  bringOffsite: boolean;
 }
 
 /** Drops blank free-text entries and trims the rest. */
@@ -89,6 +90,7 @@ export async function createRecipe(input: RecipeInput): Promise<{ id: string } |
       prep_equipment: input.prepEquipment,
       event_equipment: input.eventEquipment,
       bring_items: cleanBringItems(input.bringItems),
+      bring_offsite: input.bringOffsite !== false,
     })
     .select("id")
     .single();
@@ -124,6 +126,7 @@ export async function updateRecipe(recipeId: string, input: RecipeInput): Promis
       prep_equipment: input.prepEquipment,
       event_equipment: input.eventEquipment,
       bring_items: cleanBringItems(input.bringItems),
+      bring_offsite: input.bringOffsite !== false,
     })
     .eq("id", recipeId);
   if (error) return { error: error.message };
