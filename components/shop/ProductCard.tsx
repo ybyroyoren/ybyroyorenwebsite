@@ -9,16 +9,20 @@ import { getDict, type Locale } from "@/lib/dictionary";
 import { localePath } from "@/lib/i18n";
 import { localizedProduct } from "@/lib/localizedProduct";
 import { useSwipe } from "@/lib/useSwipe";
+import { stagger } from "@/lib/motion";
 import styles from "./ProductCard.module.css";
 
 export function ProductCard({
   product,
   locale,
   categoryLabel,
+  index = 0,
 }: {
   product: ProductView;
   locale: Locale;
   categoryLabel: string;
+  /** Position in the grid: the first row animates in at once, later cards as they scroll into view. */
+  index?: number;
 }) {
   const cart = useCart();
   const [sizeIndex, setSizeIndex] = useState(0);
@@ -51,7 +55,11 @@ export function ProductCard({
   const swipe = useSwipe((delta) => setPhotoIndex((i) => (i + delta + photos.length) % photos.length));
 
   return (
-    <div className={styles.card}>
+    <div
+      className={`${styles.card} ${index < 3 ? "enter" : ""}`}
+      {...(index >= 3 ? { "data-reveal": "" } : {})}
+      style={index < 3 ? stagger(index) : undefined}
+    >
       <div
         className={`${styles.visual} ${photos[0] ? styles.hasPhoto : ""}`}
         onTouchStart={photos.length > 1 ? swipe.onTouchStart : undefined}

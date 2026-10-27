@@ -465,6 +465,51 @@
   );
 }
 
+/* Tabs above admin lists (components/admin/AdminTabs.tsx). */
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin: 6px 0 22px;
+  border-bottom: 1px solid var(--line);
+  overflow-x: auto;
+}
+
+.tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 18px;
+  margin-bottom: -1px;
+  border-bottom: 2px solid transparent;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  white-space: nowrap;
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.tab:hover {
+  color: var(--ink);
+}
+
+.tabActive {
+  color: var(--ink);
+  border-bottom-color: var(--ink);
+}
+
+.tabCount {
+  min-width: 22px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--olive-mist);
+  color: var(--olive-deep);
+  font-size: 11.5px;
+  font-weight: 700;
+  text-align: center;
+}
+
 /* A recipe line's cost, shown as its own small box next to the amount. */
 .costBox {
   display: inline-flex;

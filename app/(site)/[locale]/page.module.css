@@ -21,6 +21,15 @@
   opacity: 0.045;
   pointer-events: none;
   user-select: none;
+  animation: markIn 1.8s ease-out backwards;
+}
+
+/* The big watermark Y fades in and drifts a few pixels while the hero text arrives. */
+@keyframes markIn {
+  from {
+    opacity: 0;
+    transform: translateY(calc(-52% + 24px));
+  }
 }
 
 .inner {

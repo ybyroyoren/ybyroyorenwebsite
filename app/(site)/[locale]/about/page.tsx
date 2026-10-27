@@ -14,7 +14,7 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
 
   return (
     <div className={`wrap ${styles.hero}`}>
-      <div>
+      <div className="enter">
         <div className={styles.eyebrow}>{t.eyebrow}</div>
         <h1>
           {t.heading[0]}
@@ -23,7 +23,7 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
         </h1>
         <p>{t.body}</p>
       </div>
-      <div className={`${styles.visual} ${heroImage ? styles.hasPhoto : ""}`}>
+      <div className={`${styles.visual} ${heroImage ? styles.hasPhoto : ""} enterScale`} style={{ "--i": 1 } as React.CSSProperties}>
         {heroImage && (
           // eslint-disable-next-line @next/next/no-img-element
           <img className={styles.photo} src={heroImage.url} alt={t.photoAlt} />

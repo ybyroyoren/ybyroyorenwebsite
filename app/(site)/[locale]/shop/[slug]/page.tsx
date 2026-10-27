@@ -49,14 +49,16 @@ export default async function ProductPage({
 
   return (
     <>
-      <div className={`wrap ${styles.breadcrumb}`}>
+      <div className={`wrap ${styles.breadcrumb} enter`}>
         <Link href={localePath(locale, "/shop")}>{t.shop.eyebrow}</Link> / {p.name}
       </div>
 
       <div className={`wrap ${styles.layout}`}>
-        <ProductGallery imageUrls={product.imageUrls} alt={p.name} locale={locale} />
+        <div className="enterScale">
+          <ProductGallery imageUrls={product.imageUrls} alt={p.name} locale={locale} />
+        </div>
 
-        <div className={styles.info}>
+        <div className={`${styles.info} enter`} style={{ "--i": 2 } as React.CSSProperties}>
           <h1>{p.name}</h1>
           <p className={styles.desc}>{p.description}</p>
 
@@ -71,12 +73,12 @@ export default async function ProductPage({
 
       {related.length > 0 && (
         <div className={`wrap ${styles.relatedSection}`}>
-          <h2>{t.product.relatedHeading}</h2>
+          <h2 data-reveal="fade">{t.product.relatedHeading}</h2>
           <div className={styles.relatedGrid}>
             {related.map((r) => {
               const rp = localizedProduct(r, locale);
               return (
-                <Link key={r.id} href={localePath(locale, `/shop/${r.slug}`)} className={styles.relatedCard}>
+                <Link key={r.id} href={localePath(locale, `/shop/${r.slug}`)} className={styles.relatedCard} data-reveal="">
                   <div className={styles.relatedVisual}>
                     {r.imageUrls[0] && (
                       // eslint-disable-next-line @next/next/no-img-element

@@ -1,6 +1,7 @@
 import { requireAdminSection } from "@/lib/admin-auth";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { deleteInquiry, updateInquiryStatus } from "@/lib/actions/admin/events";
+import { AdminTabs } from "@/components/admin/AdminTabs";
 import styles from "../../admin.module.css";
 
 const EVENT_TYPE_LABELS: Record<string, string> = {
@@ -37,7 +38,9 @@ const STATUS_LABELS: Record<string, string> = {
 
 const DONE_STATUSES = new Set(["paid_closed", "closed"]);
 
-export default async function AdminEventsPage() {
+export default async function AdminEventsPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
+  const { tab } = await searchParams;
+  const activeTab = tab === "closed" ? "closed" : "open";
   const admin = await requireAdminSection("events");
   const isOwner = admin.role === "owner";
   const db = supabaseAdmin();
@@ -46,11 +49,26 @@ export default async function AdminEventsPage() {
     .select("*")
     .order("created_at", { ascending: false });
 
+  // "Closed" = marked closed or paid-and-closed (DONE_STATUSES).
+  const allInquiries = inquiries ?? [];
+  const openInquiries = allInquiries.filter((i) => !DONE_STATUSES.has(i.status));
+  const closedInquiries = allInquiries.filter((i) => DONE_STATUSES.has(i.status));
+  const shownInquiries = activeTab === "closed" ? closedInquiries : openInquiries;
+
   return (
     <>
       <h1>פניות לאירועים פרטיים</h1>
 
-      {(inquiries ?? []).map((inq) => (
+      <AdminTabs
+        basePath="/admin/events"
+        active={activeTab}
+        tabs={[
+          { key: "open", label: "פתוחות", count: openInquiries.length },
+          { key: "closed", label: "סגורות", count: closedInquiries.length },
+        ]}
+      />
+
+      {shownInquiries.map((inq) => (
         <div key={inq.id} className={styles.card}>
           <h2>
             {EVENT_TYPE_LABELS[inq.event_type] ?? inq.event_type} — {inq.full_name}{" "}
@@ -124,7 +142,9 @@ export default async function AdminEventsPage() {
         </div>
       ))}
 
-      {(inquiries ?? []).length === 0 && <p className={styles.muted}>אין פניות עדיין.</p>}
+      {shownInquiries.length === 0 && (
+        <p className={styles.muted}>{activeTab === "closed" ? "אין פניות סגורות." : "אין פניות פתוחות."}</p>
+      )}
     </>
   );
 }

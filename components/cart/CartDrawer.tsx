@@ -38,7 +38,7 @@ export function CartDrawer({ locale }: { locale: Locale }) {
                 ? `${item.productName} — ${item.sizeLabel}`
                 : item.productName;
               return (
-                <div key={item.id} className={styles.item}>
+                <div key={item.id} className={`${styles.item} enter`}>
                   <div className={styles.itemVisual}>
                     {item.imageUrl && (
                       // eslint-disable-next-line @next/next/no-img-element

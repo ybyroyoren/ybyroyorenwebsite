@@ -117,14 +117,16 @@ export function MealsList({ meals, locale }: { meals: MealView[]; locale: Locale
 
   return (
     <>
-      {meals.map((meal) => {
+      {meals.map((meal, index) => {
         const isFull = meal.remainingSeats <= 0;
         const pct = seatsDisplayPct(meal.remainingSeats, meal.totalSeats, meal.takenSeats);
         const { day, num, month } = formatMealDateParts(meal.date, locale);
         return (
           <div
             key={meal.id}
-            className={`${styles.card} ${isFull ? styles.full : ""}`}
+            className={`${styles.card} ${isFull ? styles.full : ""} ${index < 2 ? "enter" : ""}`}
+            {...(index >= 2 ? { "data-reveal": "" } : {})}
+            style={index < 2 ? ({ "--i": index + 2 } as React.CSSProperties) : undefined}
             onClick={() => !isFull && openMeal(meal)}
           >
             <div className={styles.dateBlock}>

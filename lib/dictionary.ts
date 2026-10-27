@@ -14,6 +14,8 @@ const dictionary = {
       skipToContent: "דילוג לתוכן הראשי",
       prev: "הקודם",
       next: "הבא",
+      pauseSlides: "השהיית הגלילה האוטומטית",
+      playSlides: "הפעלת הגלילה האוטומטית",
     },
     nav: {
       shop: "חנות",
@@ -320,6 +322,8 @@ const dictionary = {
       skipToContent: "Skip to main content",
       prev: "Previous",
       next: "Next",
+      pauseSlides: "Pause automatic slideshow",
+      playSlides: "Play automatic slideshow",
     },
     nav: {
       shop: "Shop",

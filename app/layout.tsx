@@ -30,7 +30,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="he" dir="rtl" className={`${frankRuhlLibre.variable} ${assistant.variable}`}>
+    // suppressHydrationWarning: the inline script below adds a class to <html>
+    // before React hydrates.
+    <html lang="he" dir="rtl" className={`${frankRuhlLibre.variable} ${assistant.variable}`} suppressHydrationWarning>
+      <head>
+        {/* [data-reveal] content is only hidden once JS is known to run; if
+            RevealObserver hasn't signalled within 4s, show everything. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              'document.documentElement.classList.add("js");setTimeout(function(){if(!document.documentElement.hasAttribute("data-reveal-ready"))document.documentElement.classList.remove("js")},4000)',
+          }}
+        />
+      </head>
       <body>{children}</body>
     </html>
   );

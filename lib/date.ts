@@ -23,3 +23,8 @@ export function addDaysIso(days: number): string {
   d.setDate(d.getDate() + days);
   return d.toISOString().slice(0, 10);
 }
+
+/** Today's date in Israel as YYYY-MM-DD — what "has this date passed?" should compare against. */
+export function todayIsraelIso(): string {
+  return new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Jerusalem" });
+}

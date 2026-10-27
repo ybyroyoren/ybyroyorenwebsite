@@ -15,6 +15,8 @@ import {
 import { MealRegistrationsTable, type RegistrationData } from "@/components/admin/meals/MealRegistrationsTable";
 import { NewRegistrationButton } from "@/components/admin/meals/NewRegistrationButton";
 import { formatCurrency } from "@/lib/pricing";
+import { todayIsraelIso } from "@/lib/date";
+import { AdminTabs } from "@/components/admin/AdminTabs";
 import styles from "../../admin.module.css";
 
 const REGISTRATION_ACTIONS = {
@@ -28,7 +30,9 @@ const REGISTRATION_ACTIONS = {
   moveDinerToMeal,
 };
 
-export default async function AdminMealsPage() {
+export default async function AdminMealsPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
+  const { tab } = await searchParams;
+  const activeTab = tab === "archive" ? "archive" : "active";
   const admin = await requireAdminSection("meals");
   const isOwner = admin.role === "owner";
   const db = supabaseAdmin();
@@ -64,7 +68,16 @@ export default async function AdminMealsPage() {
     regsByMealId.set(r.meal_id, list);
   }
 
-  const openMeals = (meals ?? []).filter((m) => m.status === "open");
+  // A meal leaves the active tab once it has been closed or its date has passed.
+  const today = todayIsraelIso();
+  const isArchived = (m: { status: string; date: string }) => m.status !== "open" || m.date < today;
+  const allMeals = meals ?? [];
+  const activeMeals = allMeals.filter((m) => !isArchived(m));
+  // Newest first in the archive; soonest first in the active tab.
+  const archivedMeals = allMeals.filter(isArchived).sort((a, b) => (a.date < b.date ? 1 : -1));
+  const shownMeals = activeTab === "archive" ? archivedMeals : activeMeals;
+  // Registrations can only be moved to a meal that is still taking guests.
+  const openMeals = activeMeals;
 
   return (
     <>
@@ -106,7 +119,22 @@ export default async function AdminMealsPage() {
         </div>
       )}
 
-      {(meals ?? []).map((meal) => {
+      <AdminTabs
+        basePath="/admin/meals"
+        active={activeTab}
+        tabs={[
+          { key: "active", label: "פעילות", count: activeMeals.length },
+          { key: "archive", label: "סגורות ושעברו", count: archivedMeals.length },
+        ]}
+      />
+
+      {shownMeals.length === 0 && (
+        <p className={styles.muted}>
+          {activeTab === "archive" ? "אין ארוחות סגורות או שעברו." : "אין ארוחות פעילות. אפשר לפתוח ארוחה חדשה למעלה."}
+        </p>
+      )}
+
+      {shownMeals.map((meal) => {
         const regs = regsByMealId.get(meal.id) ?? [];
         // Counts everyone registered (including deposit still pending) —
         // the public meal_availability view only counts paid diners, which
@@ -123,7 +151,7 @@ export default async function AdminMealsPage() {
                 <span className={styles.muted}>
                   ({registeredCount}/{meal.total_seats} רשומים ·{" "}
                   {formatCurrency(meal.price_per_seat)} לסועד ·{" "}
-                  {meal.status === "open" ? "פתוחה" : "סגורה"})
+                  {meal.status !== "open" ? "סגורה" : meal.date < today ? "עברה" : "פתוחה"})
                 </span>
               </h2>
               {isOwner && <NewRegistrationButton mealId={meal.id} mealTitle={meal.title} createAction={createManualRegistration} />}

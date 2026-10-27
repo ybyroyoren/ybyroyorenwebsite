@@ -62,6 +62,95 @@ button {
   padding: 0 32px;
 }
 
+/* ---------- motion ----------
+   Two ways to bring things in, both opacity/transform only (cheap, no layout):
+   - .enter / .enterScale: pure CSS, plays as soon as the element exists — for
+     what's visible on arrival (headings, hero, first cards). Content is never
+     held back waiting for JavaScript, so it can't slow down the first paint.
+   - [data-reveal]: revealed as it scrolls into view (components/site/
+     RevealObserver.tsx), staggered automatically. Only hidden while the
+     `js` class is on <html> (set by an inline script in the root layout, with a
+     timed fail-safe), so without JS everything simply shows.
+   The prefers-reduced-motion rule and the accessibility widget's "stop
+   animations" switch below turn every one of these off. --i is the optional
+   stagger index (see lib/motion.ts). */
+
+/* Only a `from` frame on purpose: each element animates toward its own
+   resting style, so e.g. a sold-out meal card settles at its dimmed opacity
+   instead of flashing to 1 and snapping back. */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+@keyframes pop {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.25);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* backwards-fill only: the element holds the first frame during its delay,
+   then goes back to its own CSS — so hover transforms etc. keep working. */
+.enter {
+  animation: fadeUp 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+  animation-delay: calc(var(--i, 0) * 110ms);
+}
+
+.enterScale {
+  animation: scaleIn 1s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+  animation-delay: calc(var(--i, 0) * 110ms);
+}
+
+html.js [data-reveal]:not([data-in]) {
+  opacity: 0;
+}
+
+[data-reveal][data-in] {
+  animation: fadeUp 0.75s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+  animation-delay: calc(var(--i, 0) * 90ms);
+}
+
+[data-reveal="fade"][data-in] {
+  animation-name: fadeIn;
+}
+
+[data-reveal="scale"][data-in] {
+  animation-name: scaleIn;
+}
+
+/* Cart count: a little bump whenever it changes (the element is re-keyed). */
+.bump {
+  animation: pop 0.45s ease-out;
+}
+
+/* Press feedback for anything button-like. */
+[class*="btn"]:not(:disabled):active,
+[class*="Btn"]:not(:disabled):active,
+[class*="chip"]:not(:disabled):active {
+  transform: scale(0.97);
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     animation: none !important;

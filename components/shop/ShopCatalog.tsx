@@ -80,9 +80,10 @@ export function ShopCatalog({
         <div className={styles.empty}>{t.empty}</div>
       ) : (
         <div className={styles.grid}>
-          {visible.map((product) => (
+          {visible.map((product, index) => (
             <ProductCard
               key={product.id}
+              index={index}
               product={product}
               locale={locale}
               categoryLabel={categoryLabelBySlug.get(product.category) ?? product.category}

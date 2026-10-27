@@ -20,7 +20,7 @@ export default async function MealsPage({ params }: { params: Promise<{ locale: 
 
   return (
     <>
-      <div className={`wrap ${styles.pageHead}`}>
+      <div className={`wrap ${styles.pageHead} enter`}>
         <div className={styles.eyebrow}>{t.eyebrow}</div>
         <h1>{t.heading}</h1>
         <p>
@@ -32,7 +32,7 @@ export default async function MealsPage({ params }: { params: Promise<{ locale: 
       </div>
 
       {carouselImages.length > 0 && (
-        <div className={`wrap ${styles.carouselWrap}`}>
+        <div className={`wrap ${styles.carouselWrap} enter`} style={{ "--i": 1 } as React.CSSProperties}>
           <Carousel images={carouselImages} locale={locale} />
         </div>
       )}

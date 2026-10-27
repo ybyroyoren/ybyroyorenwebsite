@@ -50,7 +50,9 @@ export function Nav({ locale }: { locale: Locale }) {
           </Suspense>
           <button type="button" className={styles.cartButton} onClick={cart.open}>
             <span>{t.cart}</span>
-            <span className={styles.cartCount}>{cart.count}</span>
+            <span key={cart.count} className={`${styles.cartCount} ${cart.count > 0 ? "bump" : ""}`}>
+              {cart.count}
+            </span>
           </button>
           <button
             type="button"

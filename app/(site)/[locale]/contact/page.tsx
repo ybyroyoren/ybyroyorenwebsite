@@ -13,7 +13,7 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
 
   return (
     <div className={styles.layout}>
-      <div className={styles.introCol}>
+      <div className={`${styles.introCol} enter`}>
         <div className={styles.eyebrow}>{t.eyebrow}</div>
         <h1>{t.heading}</h1>
         <p>{t.sub}</p>
@@ -68,7 +68,7 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
         </div>
       </div>
 
-      <div className={styles.formCol}>
+      <div className={`${styles.formCol} enter`} style={{ "--i": 2 } as React.CSSProperties}>
         <h2>{t.formHeading}</h2>
         <p className={styles.formSub}>{t.formSub}</p>
         <ContactForm locale={locale} />

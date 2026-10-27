@@ -4,6 +4,7 @@ import { getCategories, categoryLabel } from "@/lib/categories";
 import { resolveLocale } from "@/lib/i18n";
 import { getDict } from "@/lib/dictionary";
 import { ShopCatalog } from "@/components/shop/ShopCatalog";
+import { stagger } from "@/lib/motion";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = { title: "חנות" };
@@ -19,7 +20,7 @@ export default async function ShopPage({ params }: { params: Promise<{ locale: s
 
   return (
     <>
-      <div className={`wrap ${styles.pageHead}`}>
+      <div className={`wrap ${styles.pageHead} enter`} style={stagger(0)}>
         <div className={styles.eyebrow}>{t.eyebrow}</div>
         <h1>{t.heading}</h1>
         <p>{t.sub}</p>

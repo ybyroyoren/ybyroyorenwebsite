@@ -11,6 +11,7 @@ import { getActiveProducts } from "@/lib/products";
 import { OrderFulfillmentSelect } from "@/components/admin/OrderFulfillmentSelect";
 import { OrderPaymentControls } from "@/components/admin/OrderPaymentControls";
 import { ManualOrderForm } from "@/components/admin/ManualOrderForm";
+import { AdminTabs } from "@/components/admin/AdminTabs";
 import styles from "../../admin.module.css";
 
 const PAYMENT_METHOD_LABEL: Record<string, string> = {
@@ -22,7 +23,9 @@ const PAYMENT_METHOD_LABEL: Record<string, string> = {
   bank_transfer: "העברה בנקאית",
 };
 
-export default async function AdminOrdersPage() {
+export default async function AdminOrdersPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
+  const { tab } = await searchParams;
+  const activeTab = tab === "closed" ? "closed" : "open";
   const admin = await requireAdminSection("orders");
   const isOwner = admin.role === "owner";
 
@@ -33,6 +36,15 @@ export default async function AdminOrdersPage() {
       "id, customer_name, customer_email, customer_phone, pickup_date, total, status, payment_method, fulfillment_status, created_at, greeting_card_message, order_items(product_name, size_label, unit_price, qty)"
     )
     .order("created_at", { ascending: false });
+
+  // "Closed" = handled and finished: completed (prepared and collected), or cancelled.
+  // Everything else — including partly fulfilled and no-shows — still needs attention.
+  const isClosed = (o: { status: string; fulfillment_status: string }) =>
+    o.status === "cancelled" || o.fulfillment_status === "completed";
+  const allOrders = orders ?? [];
+  const openOrders = allOrders.filter((o) => !isClosed(o));
+  const closedOrders = allOrders.filter(isClosed);
+  const shownOrders = activeTab === "closed" ? closedOrders : openOrders;
 
   const products = isOwner ? await getActiveProducts() : [];
   const sizeOptions = products.flatMap((p) =>
@@ -51,6 +63,15 @@ export default async function AdminOrdersPage() {
         </div>
       )}
 
+      <AdminTabs
+        basePath="/admin/orders"
+        active={activeTab}
+        tabs={[
+          { key: "open", label: "פתוחות", count: openOrders.length },
+          { key: "closed", label: "סגורות (הושלמו / בוטלו)", count: closedOrders.length },
+        ]}
+      />
+
       <div className={styles.card}>
         <table className={styles.table}>
           <thead>
@@ -67,7 +88,7 @@ export default async function AdminOrdersPage() {
             </tr>
           </thead>
           <tbody>
-            {(orders ?? []).map((o) => (
+            {shownOrders.map((o) => (
               <tr key={o.id} className={o.fulfillment_status === "completed" ? styles.rowCompleted : ""}>
                 <td>{o.customer_name}</td>
                 <td>{o.customer_phone}</td>
@@ -121,10 +142,10 @@ export default async function AdminOrdersPage() {
                 )}
               </tr>
             ))}
-            {(orders ?? []).length === 0 && (
+            {shownOrders.length === 0 && (
               <tr>
                 <td colSpan={9} className={styles.muted}>
-                  אין הזמנות עדיין.
+                  {activeTab === "closed" ? "אין הזמנות סגורות." : "אין הזמנות פתוחות."}
                 </td>
               </tr>
             )}
