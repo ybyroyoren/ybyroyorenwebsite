@@ -1,6 +1,7 @@
 "use client";
 
 import { getDict, type Locale } from "@/lib/dictionary";
+import { PlayPauseIcon } from "@/components/site/PlayPauseIcon";
 import styles from "./ShopFilters.module.css";
 
 export function ShopFilters({
@@ -10,6 +11,7 @@ export function ShopFilters({
   activeSort,
   onCategoryChange,
   onSortChange,
+  rotation,
 }: {
   locale: Locale;
   categories: { slug: string; label: string }[];
@@ -17,6 +19,8 @@ export function ShopFilters({
   activeSort: string;
   onCategoryChange: (category: string) => void;
   onSortChange: (sort: string) => void;
+  /** Pause/play for the cards' automatic photo cycling; omitted when no product has several photos. */
+  rotation?: { playing: boolean; onToggle: () => void };
 }) {
   const t = getDict(locale).shop;
 
@@ -39,6 +43,18 @@ export function ShopFilters({
           </button>
         ))}
       </div>
+      <div className={styles.tools}>
+      {rotation && (
+        <button
+          type="button"
+          className={styles.rotationToggle}
+          onClick={rotation.onToggle}
+          aria-pressed={!rotation.playing}
+        >
+          <PlayPauseIcon playing={rotation.playing} size={11} />
+          {rotation.playing ? t.pauseRotation : t.playRotation}
+        </button>
+      )}
       <select
         className={styles.sortSelect}
         value={activeSort}
@@ -48,6 +64,7 @@ export function ShopFilters({
         <option value="asc">{t.sort.asc}</option>
         <option value="desc">{t.sort.desc}</option>
       </select>
+      </div>
     </div>
   );
 }

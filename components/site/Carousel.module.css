@@ -10,7 +10,8 @@
   overflow-x: auto;
   scroll-behavior: smooth;
   scrollbar-width: none;
-  touch-action: pan-x;
+  /* Horizontal swipes scroll the track; vertical ones must still scroll the page. */
+  touch-action: pan-x pan-y;
   -webkit-overflow-scrolling: touch;
   scroll-snap-type: x mandatory;
 }
@@ -31,8 +32,20 @@
   flex-basis: calc(50% - 6px);
 }
 
-.slideSingle {
+/* Single-slide variant (home): one full-width slide at a time, no gap between
+   slides so a transition reads as one continuous strip. The doubled selector
+   keeps it above the small-screen .slide rule at the bottom of the file. */
+.slide.slideSingle {
   flex-basis: 100%;
+  border-radius: 0;
+}
+
+.trackSingle {
+  gap: 0;
+}
+
+.carouselSingle {
+  border-radius: 0;
 }
 
 .slide img {
@@ -105,8 +118,6 @@
   border-radius: 50%;
   background: rgba(239, 232, 216, 0.88);
   color: var(--ink);
-  font-size: 11px;
-  letter-spacing: -1px;
   display: flex;
   align-items: center;
   justify-content: center;

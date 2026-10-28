@@ -64,6 +64,11 @@
 }
 
 @media (max-width: 860px) {
+  /* With the photo stacked under the text, the vertical "scroll" cue would sit on top of it. */
+  .heroWithMedia .scrollCue {
+    display: none;
+  }
+
   .inner.withMedia {
     grid-template-columns: minmax(0, 1fr);
     gap: 36px;

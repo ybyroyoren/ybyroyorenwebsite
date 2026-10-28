@@ -13,7 +13,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   const images = await getMediaByLocation("home_carousel");
 
   return (
-    <section className={styles.hero}>
+    <section className={`${styles.hero} ${images.length > 0 ? styles.heroWithMedia : ""}`}>
       <div className={styles.heroMark}>Y</div>
       <div className={`wrap ${styles.inner} ${images.length > 0 ? styles.withMedia : ""}`}>
         <div className={styles.textCol}>

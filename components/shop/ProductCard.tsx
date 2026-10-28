@@ -10,6 +10,7 @@ import { localePath } from "@/lib/i18n";
 import { localizedProduct } from "@/lib/localizedProduct";
 import { useSwipe } from "@/lib/useSwipe";
 import { stagger } from "@/lib/motion";
+import { AUTOPLAY_MS, useAutoplay } from "@/lib/useAutoplay";
 import styles from "./ProductCard.module.css";
 
 export function ProductCard({
@@ -17,12 +18,15 @@ export function ProductCard({
   locale,
   categoryLabel,
   index = 0,
+  autoplay = true,
 }: {
   product: ProductView;
   locale: Locale;
   categoryLabel: string;
   /** Position in the grid: the first row animates in at once, later cards as they scroll into view. */
   index?: number;
+  /** Cycle through the product's photos on their own (the shop page can switch this off). */
+  autoplay?: boolean;
 }) {
   const cart = useCart();
   const [sizeIndex, setSizeIndex] = useState(0);
@@ -49,13 +53,26 @@ export function ProductCard({
   function changePhoto(e: React.MouseEvent, delta: 1 | -1) {
     e.preventDefault();
     e.stopPropagation();
+    pauseFor(AUTOPLAY_MS * 1.5);
     setPhotoIndex((i) => (i + delta + photos.length) % photos.length);
   }
 
-  const swipe = useSwipe((delta) => setPhotoIndex((i) => (i + delta + photos.length) % photos.length));
+  const { rootRef, handlers, pauseFor } = useAutoplay({
+    enabled: autoplay && photos.length > 1,
+    // Cards start out of step so a whole grid doesn't flip in unison.
+    initialDelayMs: AUTOPLAY_MS + (index % 4) * 650,
+    advance: () => setPhotoIndex((i) => (i + 1) % photos.length),
+  });
+
+  const swipe = useSwipe((delta) => {
+    pauseFor(AUTOPLAY_MS * 1.5);
+    setPhotoIndex((i) => (i + delta + photos.length) % photos.length);
+  });
 
   return (
     <div
+      ref={rootRef}
+      {...handlers}
       className={`${styles.card} ${index < 3 ? "enter" : ""}`}
       {...(index >= 3 ? { "data-reveal": "" } : {})}
       style={index < 3 ? stagger(index) : undefined}
@@ -65,10 +82,18 @@ export function ProductCard({
         onTouchStart={photos.length > 1 ? swipe.onTouchStart : undefined}
         onTouchEnd={photos.length > 1 ? swipe.onTouchEnd : undefined}
       >
-        {photos[0] && (
+        {/* All photos stacked; the active one fades in over the previous. */}
+        {photos.map((url, i) => (
           // eslint-disable-next-line @next/next/no-img-element
-          <img className={styles.photo} src={photos[photoIndex]} alt={p.name} />
-        )}
+          <img
+            key={url}
+            className={`${styles.photo} ${i === photoIndex ? styles.photoActive : ""}`}
+            src={url}
+            alt={i === photoIndex ? p.name : ""}
+            loading={i === 0 ? undefined : "lazy"}
+            decoding="async"
+          />
+        ))}
         <span className={styles.tag}>{categoryLabel}</span>
         {photos.length > 1 && (
           <>

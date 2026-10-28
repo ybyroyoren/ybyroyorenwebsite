@@ -3,9 +3,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { MediaItem } from "@/lib/media";
 import { getDict, type Locale } from "@/lib/dictionary";
+import { motionAllowed } from "@/lib/motion";
+import { PlayPauseIcon } from "./PlayPauseIcon";
+import { AUTOPLAY_MS, useAutoplay } from "@/lib/useAutoplay";
 import styles from "./Carousel.module.css";
 
-const AUTOPLAY_MS = 5000;
 const SLIDE_MS = 800;
 const FALLBACK_STEP_PX = 260;
 
@@ -13,12 +15,6 @@ const INSTANT = "instant" as ScrollBehavior;
 
 function easeInOutCubic(t: number): number {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-}
-
-/** False when the visitor (or their device) asked for less motion. */
-function motionAllowed(): boolean {
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return false;
-  return document.documentElement.getAttribute("data-a11y-stop-animations") !== "true";
 }
 
 /**
@@ -68,7 +64,6 @@ export function Carousel({
   /** Advance on its own every few seconds (still fully manual too). */
   autoplay?: boolean;
 }) {
-  const rootRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const t = getDict(locale).common;
 
@@ -83,10 +78,7 @@ export function Carousel({
 
   const animRef = useRef<number | null>(null);
   const animatingRef = useRef(false);
-  const hoverRef = useRef(false);
-  const keyboardFocusRef = useRef(false);
-  const inViewRef = useRef(true);
-  const pausedUntilRef = useRef(0);
+  const touchingRef = useRef(false);
   const userPausedRef = useRef(false);
   const [userPaused, setUserPaused] = useState(false);
   const [active, setActive] = useState(0);
@@ -102,7 +94,13 @@ export function Carousel({
     setActive(idx === 0 ? n - 1 : idx === children.length - 1 ? 0 : idx - 1);
   }, [loop, images.length]);
 
-  /** After a move settles on a clone slide, jump (invisibly) to its real twin. */
+  /**
+   * Once a move has come to rest: if it landed on a clone slide, hop
+   * (invisibly — it's the same picture) to its real twin at the other end, and
+   * make sure the slide sits exactly on the track edge. Runs only after
+   * scrolling has stopped; jumping while the browser is still flinging or
+   * snapping leaves the slide a few pixels off.
+   */
   const settle = useCallback(() => {
     const track = trackRef.current;
     if (!track || !loop) return;
@@ -110,8 +108,12 @@ export function Carousel({
     const current = findActiveChild(track);
     if (!current) return;
     const idx = children.indexOf(current);
-    if (idx === 0) alignChildToStart(track, children[images.length], INSTANT);
-    else if (idx === children.length - 1) alignChildToStart(track, children[1], INSTANT);
+    let target = current;
+    if (idx === 0) target = children[images.length];
+    else if (idx === children.length - 1) target = children[1];
+    if (Math.abs(target.getBoundingClientRect().left - track.getBoundingClientRect().left) >= 1) {
+      alignChildToStart(track, target, INSTANT);
+    }
     syncActive();
   }, [loop, images.length, syncActive]);
 
@@ -179,10 +181,6 @@ export function Carousel({
     return Math.abs(second.getBoundingClientRect().left - first.getBoundingClientRect().left) || FALLBACK_STEP_PX;
   }, []);
 
-  const pauseFor = useCallback((ms: number) => {
-    pausedUntilRef.current = Math.max(pausedUntilRef.current, performance.now() + ms);
-  }, []);
-
   /** Loop mode: move to the slide at DOM index `idx`. */
   const goToChild = useCallback(
     (idx: number) => {
@@ -202,39 +200,40 @@ export function Carousel({
     if (track && firstReal) alignChildToStart(track, firstReal, INSTANT);
   }, [loop]);
 
-  // Once a swipe settles on a clone slide, jump instantly to the equivalent
-  // real slide at the other end — invisible to the viewer since it's the same
-  // image, but lets scrolling continue indefinitely. IntersectionObserver
-  // rather than a scroll-event listener: it reports once a clone has become
-  // the dominant visible slide without a manual debounce. Animated moves are
-  // settled by animateBy itself, so they're skipped here.
+  // Swipes: when scrolling stops (no scroll event for a moment, and no finger
+  // down), settle(). Animated moves call settle() themselves when they finish.
   useEffect(() => {
     if (!loop) return;
     const track = trackRef.current;
     if (!track) return;
-    const children = Array.from(track.children) as HTMLElement[];
-    const leadingClone = children[0];
-    const trailingClone = children[children.length - 1];
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.intersectionRatio < 0.9 || animatingRef.current) continue;
-          const current = trackRef.current;
-          if (!current) continue;
-          if (entry.target === leadingClone) {
-            alignChildToStart(current, current.children[images.length] as HTMLElement, INSTANT);
-          } else if (entry.target === trailingClone) {
-            alignChildToStart(current, current.children[1] as HTMLElement, INSTANT);
-          }
-        }
-      },
-      { root: track, threshold: 0.9 }
-    );
-    observer.observe(leadingClone);
-    observer.observe(trailingClone);
-    return () => observer.disconnect();
-  }, [loop, images.length]);
+    let timer: ReturnType<typeof setTimeout>;
+    const schedule = (delay: number) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        if (animatingRef.current || touchingRef.current) return;
+        settle();
+      }, delay);
+    };
+    const onScroll = () => schedule(140);
+    const onTouchEnd = () => {
+      touchingRef.current = false;
+      schedule(200);
+    };
+    const onTouchStart = () => {
+      touchingRef.current = true;
+    };
+    track.addEventListener("scroll", onScroll, { passive: true });
+    track.addEventListener("touchstart", onTouchStart, { passive: true });
+    track.addEventListener("touchend", onTouchEnd, { passive: true });
+    track.addEventListener("touchcancel", onTouchEnd, { passive: true });
+    return () => {
+      clearTimeout(timer);
+      track.removeEventListener("scroll", onScroll);
+      track.removeEventListener("touchstart", onTouchStart);
+      track.removeEventListener("touchend", onTouchEnd);
+      track.removeEventListener("touchcancel", onTouchEnd);
+    };
+  }, [loop, settle]);
 
   // Keep the dots in step with swipes (throttled to one update per frame).
   useEffect(() => {
@@ -295,40 +294,11 @@ export function Carousel({
     animateBy(towardEnd * slideStep());
   }, [loop, move, animateBy, slideStep]);
 
-  // Autoplay.
-  useEffect(() => {
-    if (!autoplay || images.length < 2) return;
-
-    const root = rootRef.current;
-    let io: IntersectionObserver | undefined;
-    if (root && typeof IntersectionObserver !== "undefined") {
-      io = new IntersectionObserver(([entry]) => {
-        inViewRef.current = entry.isIntersecting;
-      });
-      io.observe(root);
-    }
-
-    let timer: ReturnType<typeof setTimeout>;
-    const tick = () => {
-      const paused =
-        hoverRef.current ||
-        keyboardFocusRef.current ||
-        animatingRef.current ||
-        document.hidden ||
-        userPausedRef.current ||
-        !inViewRef.current ||
-        performance.now() < pausedUntilRef.current ||
-        !motionAllowed();
-      if (!paused) advance();
-      timer = setTimeout(tick, AUTOPLAY_MS);
-    };
-    timer = setTimeout(tick, AUTOPLAY_MS);
-
-    return () => {
-      clearTimeout(timer);
-      io?.disconnect();
-    };
-  }, [autoplay, images.length, advance]);
+  const { rootRef, handlers, pauseFor } = useAutoplay({
+    enabled: autoplay && images.length > 1,
+    advance,
+    isBusy: () => animatingRef.current || userPausedRef.current,
+  });
 
   useEffect(() => stopAnimation, [stopAnimation]);
 
@@ -346,36 +316,21 @@ export function Carousel({
     setUserPaused(userPausedRef.current);
   }
 
-  function onUserTouch() {
-    // The visitor took over: stop any running slide and leave them alone for a while.
+  /** The visitor grabbed the track (wheel / mouse): stop any running slide and leave them alone for a while. */
+  function onUserTakeover() {
     stopAnimation();
-    pauseFor(AUTOPLAY_MS * 2);
+    pauseFor(AUTOPLAY_MS * 1.5);
   }
 
   return (
-    <div
-      ref={rootRef}
-      className={styles.carousel}
-      onPointerEnter={(e) => {
-        if (e.pointerType === "mouse") hoverRef.current = true;
-      }}
-      onPointerLeave={(e) => {
-        if (e.pointerType === "mouse") hoverRef.current = false;
-      }}
-      onFocus={(e) => {
-        if (e.target.matches(":focus-visible")) keyboardFocusRef.current = true;
-      }}
-      onBlur={() => {
-        keyboardFocusRef.current = false;
-      }}
-    >
+    <div ref={rootRef} className={`${styles.carousel} ${single ? styles.carouselSingle : ""}`} {...handlers}>
       <div
-        className={styles.track}
+        className={`${styles.track} ${single ? styles.trackSingle : ""}`}
         ref={trackRef}
-        onTouchStart={onUserTouch}
-        onWheel={onUserTouch}
+        onTouchStart={stopAnimation}
+        onWheel={onUserTakeover}
         onPointerDown={(e) => {
-          if (e.pointerType !== "touch") onUserTouch();
+          if (e.pointerType !== "touch") onUserTakeover();
         }}
       >
         {slides.map((img, i) => (
@@ -406,7 +361,7 @@ export function Carousel({
           aria-label={userPaused ? t.playSlides : t.pauseSlides}
           aria-pressed={userPaused}
         >
-          {userPaused ? "▶" : "❚❚"}
+          <PlayPauseIcon playing={!userPaused} />
         </button>
       )}
       {loop && (

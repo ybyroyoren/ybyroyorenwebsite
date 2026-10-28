@@ -60,13 +60,15 @@ const dictionary = {
       ctaMeals: "שריינו מקום לארוחה הקרובה",
       ctaShop: "לחנות המוצרים",
       ctaEvents: "מתכננים אירוע פרטי? לחצו כאן ←",
-      scrollCue: "גלול/י",
+      scrollCue: "גלול",
     },
     shop: {
       eyebrow: "חנות",
       heading: "מהמטבח שלי, ישר אליכם",
       sub: "כל המוצרים מיוצרים אצלנו לפי הזמנה. בחרו, הוסיפו לעגלה ובחרו תאריך איסוף בסוף התהליך.",
       pickupNote: "איסוף עצמי מרחוב השוק 34, תל אביב · משלוח מוגבל בקרוב",
+      pauseRotation: "השהיית מעבר התמונות",
+      playRotation: "הפעלת מעבר התמונות",
       empty: "אין מוצרים בקטגוריה הזו כרגע.",
       allCategories: "הכל",
       sort: {
@@ -375,6 +377,8 @@ const dictionary = {
       heading: "From my kitchen, straight to you",
       sub: "All products are made to order, here at our kitchen. Choose, add to cart, and pick a pickup date at checkout.",
       pickupNote: "Self pickup from 34 HaShuk St, Tel Aviv · Delivery coming soon",
+      pauseRotation: "Pause photo slideshow",
+      playRotation: "Play photo slideshow",
       empty: "No products in this category right now.",
       allCategories: "All",
       sort: {

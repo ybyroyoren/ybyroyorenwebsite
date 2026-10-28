@@ -23,7 +23,9 @@ export function ShopCatalog({
 }) {
   const [category, setCategory] = useState("all");
   const [sort, setSort] = useState("default");
+  const [rotating, setRotating] = useState(true);
   const t = getDict(locale).shop;
+  const hasGalleries = products.some((p) => p.imageUrls.length > 1);
 
   // Pick up a deep link like /shop?cat=pasta on first load. Initial render
   // stays on the defaults so it matches the statically generated HTML.
@@ -75,6 +77,7 @@ export function ShopCatalog({
         activeSort={sort}
         onCategoryChange={(next) => update(next, sort)}
         onSortChange={(next) => update(category, next)}
+        rotation={hasGalleries ? { playing: rotating, onToggle: () => setRotating((r) => !r) } : undefined}
       />
       {visible.length === 0 ? (
         <div className={styles.empty}>{t.empty}</div>
@@ -84,6 +87,7 @@ export function ShopCatalog({
             <ProductCard
               key={product.id}
               index={index}
+              autoplay={rotating}
               product={product}
               locale={locale}
               categoryLabel={categoryLabelBySlug.get(product.category) ?? product.category}
