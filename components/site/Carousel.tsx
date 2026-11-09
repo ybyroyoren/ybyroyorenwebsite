@@ -17,6 +17,20 @@ function easeInOutCubic(t: number): number {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 }
 
+const isRtl = (el: HTMLElement) => getComputedStyle(el).direction === "rtl";
+
+/** The edge a slide snaps to: its right edge in RTL, its left edge otherwise. */
+const startEdge = (el: HTMLElement, rtl: boolean) => {
+  const r = el.getBoundingClientRect();
+  return rtl ? r.right : r.left;
+};
+
+/** How far (in scrollLeft units, whatever the RTL sign convention) `child` is from the track's start edge. */
+function offsetToStart(track: HTMLElement, child: HTMLElement): number {
+  const rtl = isRtl(track);
+  return startEdge(child, rtl) - startEdge(track, rtl);
+}
+
 /**
  * Scrolls `track` so `child`'s start edge aligns with the track's own start
  * edge. Computed from live getBoundingClientRect deltas rather than
@@ -25,23 +39,17 @@ function easeInOutCubic(t: number): number {
  * of either.
  */
 function alignChildToStart(track: HTMLElement, child: HTMLElement, behavior: ScrollBehavior) {
-  const delta = child.getBoundingClientRect().left - track.getBoundingClientRect().left;
-  track.scrollBy({ left: delta, behavior });
+  track.scrollBy({ left: offsetToStart(track, child), behavior });
 }
 
-// Only used in loop mode, where exactly one slide is meant to occupy the
-// full track width at a time — picks whichever child's center is closest to
-// the track's center. (Deliberately not "most overlapping": that ties
-// whenever the scroll position is imprecisely between two slides, which
-// picking the closest center avoids.)
-function findActiveChild(track: HTMLElement): HTMLElement | null {
-  const containerRect = track.getBoundingClientRect();
-  const containerCenter = (containerRect.left + containerRect.right) / 2;
+// The "leading" slide is the one whose start edge is nearest the track's
+// start edge. Works for any number of slides per screen (the closest-center
+// rule only worked when exactly one slide was visible).
+function findLeadingChild(track: HTMLElement): HTMLElement | null {
   let best: HTMLElement | null = null;
   let bestDist = Infinity;
   for (const child of Array.from(track.children)) {
-    const r = (child as HTMLElement).getBoundingClientRect();
-    const dist = Math.abs((r.left + r.right) / 2 - containerCenter);
+    const dist = Math.abs(offsetToStart(track, child as HTMLElement));
     if (dist < bestDist) {
       bestDist = dist;
       best = child as HTMLElement;
@@ -67,14 +75,18 @@ export function Carousel({
   const trackRef = useRef<HTMLDivElement>(null);
   const t = getDict(locale).common;
 
-  // Clone-based infinite looping relies on exactly one slide being visible
-  // at a time to unambiguously detect "which slide is active" — true for
-  // `single` (the home page carousel), not for the narrow/default variants
-  // that show several slides per screen at once (meals/events/about), where
-  // that detection would tie and misfire. Those scroll through their slides
-  // and wind back to the start instead.
-  const loop = single === true && images.length > 1;
-  const slides = loop ? [images[images.length - 1], ...images, images[0]] : images;
+  // Endless looping works with clones: the last `edge` slides are repeated
+  // before the first one and the first `edge` after the last, where `edge` is
+  // the most slides ever on screen at once. When a move comes to rest on a
+  // clone we hop (invisibly — same pictures) to its real twin. If everything
+  // already fits on screen (no more images than `edge`) there is nothing to
+  // loop through and the plain scroll-and-wrap behaviour below is used.
+  const edge = single ? 1 : narrow ? 2 : 4;
+  const n = images.length;
+  const loop = n > edge;
+  const slides = loop
+    ? [...Array.from({ length: edge }, (_, j) => images[n - edge + j]), ...images, ...images.slice(0, edge)]
+    : images;
 
   const animRef = useRef<number | null>(null);
   const animatingRef = useRef(false);
@@ -86,13 +98,10 @@ export function Carousel({
   const syncActive = useCallback(() => {
     const track = trackRef.current;
     if (!track || !loop) return;
-    const children = Array.from(track.children);
-    const current = findActiveChild(track);
-    if (!current) return;
-    const idx = children.indexOf(current);
-    const n = images.length;
-    setActive(idx === 0 ? n - 1 : idx === children.length - 1 ? 0 : idx - 1);
-  }, [loop, images.length]);
+    const idx = Array.from(track.children).indexOf(findLeadingChild(track) as Element);
+    if (idx < 0) return;
+    setActive((((idx - edge) % n) + n) % n);
+  }, [loop, edge, n]);
 
   /**
    * Once a move has come to rest: if it landed on a clone slide, hop
@@ -105,17 +114,17 @@ export function Carousel({
     const track = trackRef.current;
     if (!track || !loop) return;
     const children = Array.from(track.children) as HTMLElement[];
-    const current = findActiveChild(track);
+    const current = findLeadingChild(track);
     if (!current) return;
     const idx = children.indexOf(current);
     let target = current;
-    if (idx === 0) target = children[images.length];
-    else if (idx === children.length - 1) target = children[1];
-    if (Math.abs(target.getBoundingClientRect().left - track.getBoundingClientRect().left) >= 1) {
+    if (idx < edge) target = children[idx + n];
+    else if (idx >= edge + n) target = children[idx - n];
+    if (Math.abs(offsetToStart(track, target)) >= 1) {
       alignChildToStart(track, target, INSTANT);
     }
     syncActive();
-  }, [loop, images.length, syncActive]);
+  }, [loop, edge, n, syncActive]);
 
   const stopAnimation = useCallback(() => {
     const track = trackRef.current;
@@ -187,18 +196,18 @@ export function Carousel({
       const track = trackRef.current;
       const child = track?.children[idx] as HTMLElement | undefined;
       if (!track || !child) return;
-      animateBy(child.getBoundingClientRect().left - track.getBoundingClientRect().left);
+      animateBy(offsetToStart(track, child));
     },
     [animateBy]
   );
 
-  // Position on the first real slide (skipping the leading clone) once, on mount.
+  // Position on the first real slide (skipping the leading clones) once, on mount.
   useEffect(() => {
     if (!loop) return;
     const track = trackRef.current;
-    const firstReal = track?.children[1] as HTMLElement | undefined;
+    const firstReal = track?.children[edge] as HTMLElement | undefined;
     if (track && firstReal) alignChildToStart(track, firstReal, INSTANT);
-  }, [loop]);
+  }, [loop, edge]);
 
   // Swipes: when scrolling stops (no scroll event for a moment, and no finger
   // down), settle(). Animated moves call settle() themselves when they finish.
@@ -222,12 +231,15 @@ export function Carousel({
     const onTouchStart = () => {
       touchingRef.current = true;
     };
+    const onResize = () => schedule(200); // breakpoint change: slide widths changed, re-align
+    window.addEventListener("resize", onResize);
     track.addEventListener("scroll", onScroll, { passive: true });
     track.addEventListener("touchstart", onTouchStart, { passive: true });
     track.addEventListener("touchend", onTouchEnd, { passive: true });
     track.addEventListener("touchcancel", onTouchEnd, { passive: true });
     return () => {
       clearTimeout(timer);
+      window.removeEventListener("resize", onResize);
       track.removeEventListener("scroll", onScroll);
       track.removeEventListener("touchstart", onTouchStart);
       track.removeEventListener("touchend", onTouchEnd);
@@ -256,43 +268,41 @@ export function Carousel({
     };
   }, [loop, syncActive]);
 
-  /** prev = -1, next = +1 (the buttons' wiring; the multi-slide variants keep their original direction). */
+  /**
+   * prev = -1, next = +1: towards earlier / later slides. Loop mode wraps
+   * through the clones. When everything fits on screen (no loop) it scrolls a
+   * slide at a time and wraps past either end.
+   */
   const move = useCallback(
-    (direction: 1 | -1) => {
+    (direction: 1 | -1, rewindMs = 1100) => {
       const track = trackRef.current;
       if (!track) return;
 
       if (!loop) {
-        animateBy(direction * slideStep());
+        const maxScroll = track.scrollWidth - track.clientWidth;
+        if (maxScroll <= 2) return; // everything already fits — nothing to scroll
+        const sign = isRtl(track) ? -1 : 1; // scrollLeft runs negative in RTL
+        const pos = Math.abs(track.scrollLeft);
+        if (direction === 1 && pos >= maxScroll - 2) animateBy(-track.scrollLeft, rewindMs);
+        else if (direction === -1 && pos <= 2) animateBy(sign * maxScroll - track.scrollLeft, rewindMs);
+        else animateBy(direction * sign * slideStep());
         return;
       }
 
+      // Come to rest on a real slide first (a no-op if already there), so a
+      // clone is never the starting point of a move.
+      if (!animatingRef.current) settle();
       const children = Array.from(track.children) as HTMLElement[];
-      const current = findActiveChild(track);
-      const currentIdx = current ? children.indexOf(current) : 1;
-      let target = currentIdx + direction;
-      if (target < 0) target = children.length - 2;
-      if (target > children.length - 1) target = 1;
+      const current = findLeadingChild(track);
+      const currentIdx = current ? children.indexOf(current) : edge;
+      const target = Math.min(children.length - 1, Math.max(0, currentIdx + direction));
       goToChild(target);
     },
-    [loop, animateBy, slideStep, goToChild]
+    [loop, edge, animateBy, slideStep, goToChild, settle]
   );
 
-  /** One automatic step: loop mode goes to the next image; the others scroll a slide and wind back at the end. */
-  const advance = useCallback(() => {
-    const track = trackRef.current;
-    if (!track) return;
-    if (loop) return move(1);
-
-    const maxScroll = track.scrollWidth - track.clientWidth;
-    if (maxScroll <= 2) return; // everything already fits — nothing to scroll
-    if (Math.abs(track.scrollLeft) >= maxScroll - 2) {
-      animateBy(-track.scrollLeft, 1100); // back to the start
-      return;
-    }
-    const towardEnd = getComputedStyle(track).direction === "rtl" ? -1 : 1;
-    animateBy(towardEnd * slideStep());
-  }, [loop, move, animateBy, slideStep]);
+  /** One automatic step to the next slide (wrapping round at the end). */
+  const advance = useCallback(() => move(1), [move]);
 
   const { rootRef, handlers, pauseFor } = useAutoplay({
     enabled: autoplay && images.length > 1,
@@ -364,7 +374,7 @@ export function Carousel({
           <PlayPauseIcon playing={!userPaused} />
         </button>
       )}
-      {loop && (
+      {loop && single && (
         <div className={styles.dots}>
           {images.map((img, i) => (
             <button
@@ -375,7 +385,7 @@ export function Carousel({
               aria-current={i === active}
               onClick={() => {
                 pauseFor(AUTOPLAY_MS * 1.5);
-                goToChild(i + 1);
+                goToChild(edge + i);
               }}
             />
           ))}
