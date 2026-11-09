@@ -29,7 +29,7 @@ export function ProductCard({
   autoplay?: boolean;
 }) {
   const cart = useCart();
-  const [sizeIndex, setSizeIndex] = useState(0);
+  const [sizeIndex, setSizeIndex] = useState(product.defaultSizeIndex);
   const [photoIndex, setPhotoIndex] = useState(0);
   const [justAdded, setJustAdded] = useState(false);
   const t = getDict(locale).shop;

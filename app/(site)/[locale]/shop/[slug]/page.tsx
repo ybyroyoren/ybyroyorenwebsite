@@ -86,9 +86,9 @@ export default async function ProductPage({
                     )}
                   </div>
                   <div className={styles.relatedName}>{rp.name}</div>
-                  {r.sizes[0] && (
+                  {r.sizes[r.defaultSizeIndex] && (
                     <div className={styles.relatedPrice}>
-                      {formatCurrency(priceIncludingVat(r.sizes[0].priceBeforeVat))} {t.shop.inclVat}
+                      {formatCurrency(priceIncludingVat(r.sizes[r.defaultSizeIndex].priceBeforeVat))} {t.shop.inclVat}
                     </div>
                   )}
                 </Link>

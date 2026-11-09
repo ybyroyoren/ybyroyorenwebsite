@@ -23,6 +23,8 @@ export interface ProductView {
   imageUrls: string[];
   leadTimeDays: number;
   sizes: ProductSizeView[];
+  /** Index into `sizes` of the size that is preselected (the owner's choice; the first one if none was picked). */
+  defaultSizeIndex: number;
 }
 
 interface ProductRow {
@@ -43,13 +45,15 @@ interface ProductRow {
     price_before_vat: number;
     stock_status: "in_stock" | "out_of_stock";
     sort_order: number;
+    is_default: boolean;
   }[];
 }
 
 const PRODUCT_SELECT =
-  "id, slug, name, name_en, description, description_en, category, allergens, allergens_en, image_urls, lead_time_days, product_sizes(id, label, price_before_vat, stock_status, sort_order)";
+  "id, slug, name, name_en, description, description_en, category, allergens, allergens_en, image_urls, lead_time_days, product_sizes(id, label, price_before_vat, stock_status, sort_order, is_default)";
 
 function mapProduct(row: ProductRow): ProductView {
+  const ordered = [...row.product_sizes].sort((a, b) => a.sort_order - b.sort_order);
   return {
     id: row.id,
     slug: row.slug,
@@ -62,14 +66,13 @@ function mapProduct(row: ProductRow): ProductView {
     allergensEn: row.allergens_en,
     imageUrls: row.image_urls,
     leadTimeDays: row.lead_time_days,
-    sizes: [...row.product_sizes]
-      .sort((a, b) => a.sort_order - b.sort_order)
-      .map((s) => ({
-        id: s.id,
-        label: s.label,
-        priceBeforeVat: s.price_before_vat,
-        stockStatus: s.stock_status,
-      })),
+    sizes: ordered.map((s) => ({
+      id: s.id,
+      label: s.label,
+      priceBeforeVat: s.price_before_vat,
+      stockStatus: s.stock_status,
+    })),
+    defaultSizeIndex: Math.max(0, ordered.findIndex((s) => s.is_default)),
   };
 }
 
@@ -80,7 +83,8 @@ export const getActiveProducts = unstable_cache(
       .from("products")
       .select(`${PRODUCT_SELECT}, sort_order`)
       .eq("active", true)
-      .order("sort_order", { ascending: true });
+      .order("sort_order", { ascending: true })
+      .order("created_at", { ascending: true });
 
     if (error) throw new Error(error.message);
     return ((data ?? []) as unknown as ProductRow[]).map(mapProduct);

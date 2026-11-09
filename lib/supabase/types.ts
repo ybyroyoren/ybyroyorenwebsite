@@ -45,6 +45,7 @@ export interface Database {
           price_before_vat: number;
           stock_status: StockStatus;
           sort_order: number;
+          is_default: boolean;
         };
         Insert: Partial<Database["public"]["Tables"]["product_sizes"]["Row"]> & {
           product_id: string;

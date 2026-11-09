@@ -543,3 +543,50 @@
 .rowCompleted td {
   color: var(--ink-soft);
 }
+
+/* Reordering (products, sizes): numbered list with up / down buttons. */
+.orderList {
+  list-style: decimal inside;
+  margin: 12px 0 0;
+  padding: 0;
+}
+
+.orderItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.orderName {
+  flex: 1;
+}
+
+.orderButtons {
+  display: flex;
+  gap: 6px;
+}
+
+.orderBtn {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.orderBtn:hover:not(:disabled) {
+  background: var(--ink);
+  color: var(--cream);
+}
+
+.orderBtn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}

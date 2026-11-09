@@ -62,8 +62,8 @@ export function ShopCatalog({
     const filtered = category === "all" ? products : products.filter((p) => p.category === category);
     if (sort !== "asc" && sort !== "desc") return filtered;
     return [...filtered].sort((a, b) => {
-      const priceA = a.sizes[0]?.priceBeforeVat ?? 0;
-      const priceB = b.sizes[0]?.priceBeforeVat ?? 0;
+      const priceA = a.sizes[a.defaultSizeIndex]?.priceBeforeVat ?? 0;
+      const priceB = b.sizes[b.defaultSizeIndex]?.priceBeforeVat ?? 0;
       return sort === "asc" ? priceA - priceB : priceB - priceA;
     });
   }, [products, category, sort]);

@@ -34,9 +34,17 @@ export async function createProduct(formData: FormData): Promise<void> {
 
   if (!name || !category || !sizeLabel || !(sizePrice > 0)) return;
 
+  const { data: last } = await db
+    .from("products")
+    .select("sort_order")
+    .order("sort_order", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
   const { data: product, error } = await db
     .from("products")
     .insert({
+      sort_order: (last?.sort_order ?? -1) + 1,
       name,
       name_en: nameEn || null,
       slug: slugify(name),
@@ -111,7 +119,17 @@ export async function addProductSize(formData: FormData): Promise<void> {
   const price = Number(formData.get("price") ?? 0);
   if (!productId || !label || !(price > 0)) return;
 
-  await db.from("product_sizes").insert({ product_id: productId, label, price_before_vat: price });
+  const { data: last } = await db
+    .from("product_sizes")
+    .select("sort_order")
+    .eq("product_id", productId)
+    .order("sort_order", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  await db
+    .from("product_sizes")
+    .insert({ product_id: productId, label, price_before_vat: price, sort_order: (last?.sort_order ?? -1) + 1 });
   revalidatePath("/admin/products");
   expireCatalog();
 }
@@ -132,6 +150,68 @@ export async function updateProductSize(formData: FormData): Promise<void> {
     })
     .eq("id", id);
 
+  revalidatePath("/admin/products");
+  expireCatalog();
+}
+
+/**
+ * Moves `id` one step up/down inside `order` (the ids exactly as the admin
+ * page shows them) and returns the new list — or null when there is nothing to
+ * move. Positions are then rewritten as 0..n-1, so rows that used to share a
+ * sort_order end up with distinct ones.
+ */
+function movedOrder(order: string[], id: string, direction: string): string[] | null {
+  const i = order.indexOf(id);
+  const j = direction === "up" ? i - 1 : direction === "down" ? i + 1 : -1;
+  if (i < 0 || j < 0 || j >= order.length) return null;
+  const next = [...order];
+  [next[i], next[j]] = [next[j], next[i]];
+  return next;
+}
+
+const parseIds = (raw: FormDataEntryValue | null) =>
+  String(raw ?? "")
+    .split(",")
+    .map((x) => x.trim())
+    .filter(Boolean);
+
+/** Shop order of the products. `order` = the ids as currently listed, `direction` = up | down. */
+export async function moveProduct(formData: FormData): Promise<void> {
+  const admin = await requireAdmin();
+  if (admin.role !== "owner") return;
+  const next = movedOrder(parseIds(formData.get("order")), String(formData.get("id") ?? ""), String(formData.get("direction") ?? ""));
+  if (!next) return;
+  const db = supabaseAdmin();
+  await Promise.all(next.map((id, i) => db.from("products").update({ sort_order: i }).eq("id", id)));
+  revalidatePath("/admin/products");
+  expireCatalog();
+}
+
+/** Order of one product's sizes. `order` = that product's size ids as currently listed. */
+export async function moveProductSize(formData: FormData): Promise<void> {
+  const admin = await requireAdmin();
+  if (admin.role !== "owner") return;
+  const productId = String(formData.get("productId") ?? "");
+  const next = movedOrder(parseIds(formData.get("order")), String(formData.get("id") ?? ""), String(formData.get("direction") ?? ""));
+  if (!productId || !next) return;
+  const db = supabaseAdmin();
+  await Promise.all(
+    next.map((id, i) => db.from("product_sizes").update({ sort_order: i }).eq("id", id).eq("product_id", productId))
+  );
+  revalidatePath("/admin/products");
+  expireCatalog();
+}
+
+/** The size that is preselected in the shop — independent of where it sits in the list. */
+export async function setDefaultSize(formData: FormData): Promise<void> {
+  const admin = await requireAdmin();
+  if (admin.role !== "owner") return;
+  const productId = String(formData.get("productId") ?? "");
+  const id = String(formData.get("id") ?? "");
+  if (!productId || !id) return;
+  const db = supabaseAdmin();
+  await db.from("product_sizes").update({ is_default: false }).eq("product_id", productId);
+  await db.from("product_sizes").update({ is_default: true }).eq("id", id).eq("product_id", productId);
   revalidatePath("/admin/products");
   expireCatalog();
 }

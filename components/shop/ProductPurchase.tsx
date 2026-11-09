@@ -9,7 +9,7 @@ import styles from "@/app/(site)/[locale]/shop/[slug]/page.module.css";
 
 export function ProductPurchase({ product, locale }: { product: ProductView; locale: Locale }) {
   const cart = useCart();
-  const [sizeIndex, setSizeIndex] = useState(0);
+  const [sizeIndex, setSizeIndex] = useState(product.defaultSizeIndex);
   const [qty, setQty] = useState(1);
   const t = getDict(locale);
 

@@ -9,6 +9,9 @@ import {
   deleteCategory,
   deleteProduct,
   deleteProductSize,
+  moveProduct,
+  moveProductSize,
+  setDefaultSize,
   getProductImageUploadTicket,
   removeProductImage,
   toggleSizeStock,
@@ -17,6 +20,48 @@ import {
 } from "@/lib/actions/admin/products";
 import { ImageUploadButton } from "@/components/admin/ImageUploadButton";
 import styles from "../../admin.module.css";
+
+/** Move up / move down buttons for one row of an ordered list (server action; ids as currently listed). */
+function OrderButtons({
+  action,
+  id,
+  order,
+  extra,
+  isFirst,
+  isLast,
+  label,
+}: {
+  action: (formData: FormData) => Promise<void>;
+  id: string;
+  order: string;
+  extra?: Record<string, string>;
+  isFirst: boolean;
+  isLast: boolean;
+  label: string;
+}) {
+  return (
+    <div className={styles.orderButtons}>
+      {(["up", "down"] as const).map((direction) => (
+        <form key={direction} action={action}>
+          <input type="hidden" name="id" value={id} />
+          <input type="hidden" name="order" value={order} />
+          <input type="hidden" name="direction" value={direction} />
+          {Object.entries(extra ?? {}).map(([k, v]) => (
+            <input key={k} type="hidden" name={k} value={v} />
+          ))}
+          <button
+            type="submit"
+            className={styles.orderBtn}
+            disabled={direction === "up" ? isFirst : isLast}
+            aria-label={`${direction === "up" ? "הזזה למעלה" : "הזזה למטה"}: ${label}`}
+          >
+            {direction === "up" ? "↑" : "↓"}
+          </button>
+        </form>
+      ))}
+    </div>
+  );
+}
 
 export default async function AdminProductsPage() {
   const admin = await requireAdminSection("products");
@@ -28,13 +73,19 @@ export default async function AdminProductsPage() {
     db
       .from("products")
       .select(
-        "id, slug, name, name_en, description, description_en, category, allergens, allergens_en, active, lead_time_days, image_urls, product_sizes(id, label, price_before_vat, stock_status)"
+        "id, slug, name, name_en, description, description_en, category, allergens, allergens_en, active, lead_time_days, image_urls, product_sizes(id, label, price_before_vat, stock_status, sort_order, is_default)"
       )
-      .order("sort_order", { ascending: true }),
+      .order("sort_order", { ascending: true })
+      .order("created_at", { ascending: true }),
     getCategories(),
   ]);
 
-  const products = rows ?? [];
+  // Sizes in the owner's order (stable sort: ties keep the database order).
+  const products = (rows ?? []).map((p) => ({
+    ...p,
+    product_sizes: [...p.product_sizes].sort((a, b) => a.sort_order - b.sort_order),
+  }));
+  const productOrder = products.map((p) => p.id).join(",");
 
   return (
     <>
@@ -83,6 +134,31 @@ export default async function AdminProductsPage() {
               הוספת קטגוריה
             </button>
           </form>
+        </div>
+      )}
+
+      {isOwner && products.length > 1 && (
+        <div className={styles.card}>
+          <h2>סדר המוצרים בחנות</h2>
+          <p className={styles.sectionNote}>המוצר העליון מופיע ראשון בחנות (בכל קטגוריה לפי אותו סדר יחסי).</p>
+          <ol className={styles.orderList}>
+            {products.map((product, i) => (
+              <li key={product.id} className={styles.orderItem}>
+                <span className={styles.orderName}>
+                  {product.name}
+                  {!product.active && <span className={styles.muted}> (לא פעיל)</span>}
+                </span>
+                <OrderButtons
+                  action={moveProduct}
+                  id={product.id}
+                  order={productOrder}
+                  isFirst={i === 0}
+                  isLast={i === products.length - 1}
+                  label={product.name}
+                />
+              </li>
+            ))}
+          </ol>
         </div>
       )}
 
@@ -239,19 +315,35 @@ export default async function AdminProductsPage() {
           <table className={styles.table} style={{ marginTop: 16 }}>
             <thead>
               <tr>
+                {isOwner && <th>סדר</th>}
                 <th>גודל</th>
                 <th>מחיר (לפני מע&quot;מ)</th>
                 <th>מלאי</th>
+                {isOwner && <th>ברירת מחדל</th>}
                 {isOwner && <th></th>}
               </tr>
             </thead>
             <tbody>
-              {product.product_sizes.map((size) => {
+              {product.product_sizes.map((size, sizeIdx) => {
                 const formId = `size-form-${size.id}`;
+                const sizeOrder = product.product_sizes.map((x) => x.id).join(",");
+                // The shop preselects the size marked as default, else the first one.
+                const isDefault = size.is_default || (!product.product_sizes.some((x) => x.is_default) && sizeIdx === 0);
                 return (
                   <tr key={size.id}>
                     {isOwner ? (
                       <>
+                        <td>
+                          <OrderButtons
+                            action={moveProductSize}
+                            id={size.id}
+                            order={sizeOrder}
+                            extra={{ productId: product.id }}
+                            isFirst={sizeIdx === 0}
+                            isLast={sizeIdx === product.product_sizes.length - 1}
+                            label={size.label}
+                          />
+                        </td>
                         <td>
                           <input form={formId} name="label" type="text" defaultValue={size.label} style={{ width: 120 }} />
                         </td>
@@ -277,6 +369,19 @@ export default async function AdminProductsPage() {
                               {size.stock_status === "in_stock" ? "במלאי" : "אזל"}
                             </button>
                           </form>
+                        </td>
+                        <td>
+                          {isDefault ? (
+                            <span className={styles.badgePaid}>ברירת מחדל</span>
+                          ) : (
+                            <form action={setDefaultSize}>
+                              <input type="hidden" name="id" value={size.id} />
+                              <input type="hidden" name="productId" value={product.id} />
+                              <button type="submit" className={styles.btnSecondary}>
+                                קבע כברירת מחדל
+                              </button>
+                            </form>
+                          )}
                         </td>
                         <td>
                           <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
