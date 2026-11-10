@@ -118,13 +118,6 @@
   background: var(--cream);
 }
 
-.info {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 10px;
-}
-
 .name {
   display: block;
   font-size: 21px;
@@ -181,6 +174,33 @@
   align-items: center;
   margin-top: auto;
   padding-top: 16px;
+}
+
+/* One shared grid per row of cards: each card spans the same 6 rows (photo, name,
+   description, allergens, size, price) of the product grid, so every row of the
+   cards lines up with its neighbours whatever the text lengths. */
+@supports (grid-template-rows: subgrid) {
+  .card {
+    display: grid;
+    grid-row: span 6;
+    grid-template-rows: subgrid;
+    row-gap: 0;
+    margin-bottom: 28px;
+  }
+
+  .visual {
+    align-self: start;
+  }
+
+  .sizeSelect,
+  .sizeFixed {
+    align-self: start;
+  }
+
+  .footer {
+    align-self: end;
+    margin-top: 0;
+  }
 }
 
 .addBtn {

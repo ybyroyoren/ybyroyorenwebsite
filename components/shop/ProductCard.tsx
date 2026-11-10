@@ -113,16 +113,14 @@ export function ProductCard({
           </>
         )}
       </div>
-      <div className={styles.info}>
-        <div>
-          <Link className={styles.name} href={localePath(locale, `/shop/${product.slug}`)}>
-            {p.name}
-          </Link>
-          <div className={styles.desc}>{p.description}</div>
-          <div className={styles.allergens}>
-            <AllergenTags tags={product.allergens} locale={locale} label={t.allergensLabel} />
-          </div>
-        </div>
+      {/* name / description / allergens / size / price are direct children of the card so each
+          gets its own row on the shared grid (see .card below): they line up across a whole row of cards. */}
+      <Link className={styles.name} href={localePath(locale, `/shop/${product.slug}`)}>
+        {p.name}
+      </Link>
+      <div className={styles.desc}>{p.description}</div>
+      <div className={styles.allergens}>
+        <AllergenTags tags={product.allergens} locale={locale} label={t.allergensLabel} />
       </div>
 
       {product.sizes.length > 1 ? (

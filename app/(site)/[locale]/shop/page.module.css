@@ -59,6 +59,13 @@
   padding-bottom: 120px;
 }
 
+/* Cards share rows (subgrid) and bring their own bottom margin, so no row gap here. */
+@supports (grid-template-rows: subgrid) {
+  .grid {
+    row-gap: 0;
+  }
+}
+
 @media (max-width: 860px) {
   .grid {
     grid-template-columns: repeat(2, 1fr);
