@@ -2,6 +2,7 @@ import "server-only";
 import { unstable_cache } from "next/cache";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { CACHE_TAGS } from "@/lib/cache";
+import type { AllergenTag } from "@/lib/allergenTags";
 
 export interface ProductSizeView {
   id: string;
@@ -18,8 +19,8 @@ export interface ProductView {
   description: string;
   descriptionEn: string | null;
   category: string;
-  allergens: string;
-  allergensEn: string | null;
+  /** Owner-chosen allergen tags (colored), in the owner's list order. */
+  allergens: AllergenTag[];
   imageUrls: string[];
   leadTimeDays: number;
   sizes: ProductSizeView[];
@@ -35,8 +36,9 @@ interface ProductRow {
   description: string;
   description_en: string | null;
   category: string;
-  allergens: string;
-  allergens_en: string | null;
+  product_allergens: {
+    allergens: { id: string; label_he: string; label_en: string; color: string; sort_order: number } | null;
+  }[];
   image_urls: string[];
   lead_time_days: number;
   product_sizes: {
@@ -50,7 +52,7 @@ interface ProductRow {
 }
 
 const PRODUCT_SELECT =
-  "id, slug, name, name_en, description, description_en, category, allergens, allergens_en, image_urls, lead_time_days, product_sizes(id, label, price_before_vat, stock_status, sort_order, is_default)";
+  "id, slug, name, name_en, description, description_en, category, image_urls, lead_time_days, product_allergens(allergens(id, label_he, label_en, color, sort_order)), product_sizes(id, label, price_before_vat, stock_status, sort_order, is_default)";
 
 function mapProduct(row: ProductRow): ProductView {
   const ordered = [...row.product_sizes].sort((a, b) => a.sort_order - b.sort_order);
@@ -62,8 +64,10 @@ function mapProduct(row: ProductRow): ProductView {
     description: row.description,
     descriptionEn: row.description_en,
     category: row.category,
-    allergens: row.allergens,
-    allergensEn: row.allergens_en,
+    allergens: row.product_allergens
+      .flatMap((pa) => (pa.allergens ? [pa.allergens] : []))
+      .sort((a, b) => a.sort_order - b.sort_order)
+      .map((a) => ({ id: a.id, labelHe: a.label_he, labelEn: a.label_en, color: a.color })),
     imageUrls: row.image_urls,
     leadTimeDays: row.lead_time_days,
     sizes: ordered.map((s) => ({

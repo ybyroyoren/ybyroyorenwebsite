@@ -156,7 +156,7 @@ export function CartDrawer({ locale }: { locale: Locale }) {
               <span>{formatCurrency(cart.totals.total)}</span>
             </div>
 
-            <Link href={localePath(locale, "/checkout")} className={styles.checkoutBtn} onClick={cart.close}>
+            <Link href={localePath(locale, "/checkout")} className={`ybtn ${styles.checkoutBtn}`} onClick={cart.close}>
               {t.checkoutBtn}
             </Link>
             <p className={styles.note}>{t.note}</p>

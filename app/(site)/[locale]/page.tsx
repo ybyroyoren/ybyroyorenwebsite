@@ -17,20 +17,23 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       <div className={styles.heroMark}>Y</div>
       <div className={`wrap ${styles.inner} ${images.length > 0 ? styles.withMedia : ""}`}>
         <div className={styles.textCol}>
-          <div className={`${styles.eyebrow} enter`} style={stagger(0)}>{t.eyebrow}</div>
-          <h1 className="enter" style={stagger(1)}>{t.heading}</h1>
-          <p className={`${styles.sub} enter`} style={stagger(2)}>{t.sub}</p>
-          <div className={`${styles.actions} enter`} style={stagger(3)}>
-            <Link className={`${styles.btn} ${styles.btnPrimary}`} href={localePath(locale, "/meals")}>
+          <h1 className="enter" style={stagger(0)}>
+            <span className={styles.bigY}>Y</span>
+            <span className={styles.tagline}>{t.heading}</span>
+          </h1>
+          <div className={`${styles.actions} enter`} style={stagger(1)}>
+            <Link className={`ybtn ${styles.btn}`} href={localePath(locale, "/meals")}>
               {t.ctaMeals}
             </Link>
-            <Link className={`${styles.btn} ${styles.btnOutline}`} href={localePath(locale, "/shop")}>
+            <Link className={`ybtn ${styles.btn}`} href={localePath(locale, "/shop")}>
               {t.ctaShop}
             </Link>
+            <Link className={`ybtn ${styles.btn}`} href={localePath(locale, "/events")}>
+              {t.ctaEvents}
+            </Link>
           </div>
-          <Link className={`${styles.tertiary} enter`} style={stagger(4)} href={localePath(locale, "/events")}>
-            {t.ctaEvents}
-          </Link>
+          <div className={`${styles.eyebrow} enter`} style={stagger(2)}>{t.eyebrow}</div>
+          <p className={`${styles.sub} enter`} style={stagger(3)}>{t.sub}</p>
         </div>
         {images.length > 0 && (
           <div className={`${styles.media} enterScale`} style={stagger(2)}>

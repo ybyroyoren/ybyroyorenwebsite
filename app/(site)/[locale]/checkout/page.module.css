@@ -2,7 +2,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 70px;
-  padding: 70px 0 120px;
+  padding-block: 70px 120px;
   align-items: start;
 }
 
@@ -20,14 +20,14 @@
 }
 
 .summary h2 {
-  font-size: 20px;
+  font-size: 22px;
   margin-bottom: 20px;
 }
 
 .line {
   display: flex;
   justify-content: space-between;
-  font-size: 14px;
+  font-size: 16px;
   padding: 10px 0;
   border-bottom: 1px solid var(--line);
 }
@@ -35,13 +35,13 @@
 .totalsRow {
   display: flex;
   justify-content: space-between;
-  font-size: 14px;
+  font-size: 16px;
   color: var(--ink-soft);
   margin-top: 12px;
 }
 
 .totalsRow.grand {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 700;
   color: var(--ink);
   margin-top: 14px;
@@ -62,7 +62,7 @@
 }
 
 .field label {
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--ink-soft);
 }
@@ -74,7 +74,7 @@
   border: 1px solid var(--line);
   background: transparent;
   font-family: inherit;
-  font-size: 14.5px;
+  font-size: 16.5px;
   color: var(--ink);
 }
 
@@ -90,34 +90,21 @@
 }
 
 .fieldNote {
-  font-size: 12px;
+  font-size: 14px;
   color: var(--ink-soft);
 }
 
 .error {
   color: var(--danger);
-  font-size: 13.5px;
+  font-size: 15.5px;
 }
 
 .submitBtn {
   margin-top: 8px;
-  background: var(--ink);
-  color: var(--cream);
   padding: 16px;
-  border-radius: 999px;
-  font-size: 15px;
-  font-weight: 600;
-  text-align: center;
 }
 
-.submitBtn:hover {
-  background: var(--olive-deep);
-}
 
-.submitBtn:disabled {
-  opacity: 0.6;
-  cursor: default;
-}
 
 .empty {
   padding: 100px 0;

@@ -1,11 +1,15 @@
 import { requireAdminSection } from "@/lib/admin-auth";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { getCategories } from "@/lib/categories";
+import { getAllergens } from "@/lib/allergens";
+import { tagTextColor } from "@/lib/allergenTags";
 import {
   addProductSize,
   attachProductImage,
+  createAllergen,
   createCategory,
   createProduct,
+  deleteAllergen,
   deleteCategory,
   deleteProduct,
   deleteProductSize,
@@ -15,6 +19,7 @@ import {
   getProductImageUploadTicket,
   removeProductImage,
   toggleSizeStock,
+  updateAllergen,
   updateProduct,
   updateProductSize,
 } from "@/lib/actions/admin/products";
@@ -69,15 +74,16 @@ export default async function AdminProductsPage() {
 
   // Includes inactive products too (unlike the public getActiveProducts()).
   const db = supabaseAdmin();
-  const [{ data: rows }, categories] = await Promise.all([
+  const [{ data: rows }, categories, allergens] = await Promise.all([
     db
       .from("products")
       .select(
-        "id, slug, name, name_en, description, description_en, category, allergens, allergens_en, active, lead_time_days, image_urls, product_sizes(id, label, price_before_vat, stock_status, sort_order, is_default)"
+        "id, slug, name, name_en, description, description_en, category, active, lead_time_days, image_urls, product_allergens(allergen_id), product_sizes(id, label, price_before_vat, stock_status, sort_order, is_default)"
       )
       .order("sort_order", { ascending: true })
       .order("created_at", { ascending: true }),
     getCategories(),
+    getAllergens(),
   ]);
 
   // Sizes in the owner's order (stable sort: ties keep the database order).
@@ -132,6 +138,75 @@ export default async function AdminProductsPage() {
             </div>
             <button type="submit" className={styles.btn}>
               הוספת קטגוריה
+            </button>
+          </form>
+        </div>
+      )}
+
+      {isOwner && (
+        <div className={styles.card}>
+          <h2>אלרגנים (תגיות)</h2>
+          <p className={styles.sectionNote}>
+            רשימת האלרגנים שאפשר לסמן בכל מוצר. לכל תגית צבע משלה, והיא מופיעה באתר ומשמשת לסינון בחנות. מחיקת תגית מסירה אותה מכל המוצרים.
+          </p>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>עברית</th>
+                <th>אנגלית</th>
+                <th>צבע</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {allergens.map((a) => {
+                const formId = `allergen-form-${a.id}`;
+                return (
+                  <tr key={a.id}>
+                    <td>
+                      <input form={formId} name="labelHe" type="text" defaultValue={a.labelHe} required style={{ width: 130 }} />
+                    </td>
+                    <td>
+                      <input form={formId} name="labelEn" type="text" defaultValue={a.labelEn} style={{ width: 130 }} />
+                    </td>
+                    <td>
+                      <input form={formId} name="color" type="color" defaultValue={a.color} aria-label="צבע" />
+                    </td>
+                    <td>
+                      <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+                        <button form={formId} type="submit" className={styles.btnSecondary}>
+                          שמירה
+                        </button>
+                        <button form={formId} formAction={deleteAllergen} type="submit" className={styles.btnDanger}>
+                          מחיקה
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+          {allergens.map((a) => (
+            <form key={a.id} id={`allergen-form-${a.id}`} action={updateAllergen} style={{ display: "none" }}>
+              <input type="hidden" name="id" value={a.id} />
+            </form>
+          ))}
+          <form action={createAllergen} className={styles.form} style={{ marginTop: 16 }}>
+            <div className={styles.field}>
+              <label>אלרגן חדש (עברית)</label>
+              <input name="labelHe" type="text" required />
+            </div>
+            <div className={styles.field}>
+              <label>אנגלית</label>
+              <input name="labelEn" type="text" />
+            </div>
+            <div className={styles.field}>
+              <label>צבע</label>
+              <input name="color" type="color" defaultValue="#c9923a" />
+            </div>
+            <button type="submit" className={styles.btn}>
+              הוספת אלרגן
             </button>
           </form>
         </div>
@@ -193,14 +268,6 @@ export default async function AdminProductsPage() {
               <input name="descriptionEn" type="text" />
             </div>
             <div className={styles.field}>
-              <label>אלרגנים (עברית)</label>
-              <input name="allergens" type="text" />
-            </div>
-            <div className={styles.field}>
-              <label>אלרגנים (אנגלית)</label>
-              <input name="allergensEn" type="text" />
-            </div>
-            <div className={styles.field}>
               <label>גודל ראשון</label>
               <input name="sizeLabel" type="text" placeholder='למשל: 500 גרם' required />
             </div>
@@ -251,14 +318,6 @@ export default async function AdminProductsPage() {
                 <input name="descriptionEn" type="text" defaultValue={product.description_en ?? ""} />
               </div>
               <div className={styles.field}>
-                <label>אלרגנים (עברית)</label>
-                <input name="allergens" type="text" defaultValue={product.allergens} />
-              </div>
-              <div className={styles.field}>
-                <label>אלרגנים (אנגלית)</label>
-                <input name="allergensEn" type="text" defaultValue={product.allergens_en ?? ""} />
-              </div>
-              <div className={styles.field}>
                 <label>ימי הכנה מראש</label>
                 <input
                   name="leadTimeDays"
@@ -268,6 +327,24 @@ export default async function AdminProductsPage() {
                   style={{ width: 80 }}
                 />
               </div>
+              {allergens.length > 0 && (
+                <div className={styles.field} style={{ flexBasis: "100%" }}>
+                  <label>אלרגנים</label>
+                  <div className={styles.tagPicker}>
+                    {allergens.map((a) => (
+                      <label key={a.id} className={styles.tagOption}>
+                        <input
+                          type="checkbox"
+                          name="allergenIds"
+                          value={a.id}
+                          defaultChecked={product.product_allergens.some((pa) => pa.allergen_id === a.id)}
+                        />
+                        <span style={{ background: a.color, color: tagTextColor(a.color) }}>{a.labelHe}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
               <div className={styles.field}>
                 <label>
                   <input type="checkbox" name="active" defaultChecked={product.active} /> פעיל

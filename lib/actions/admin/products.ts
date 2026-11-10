@@ -26,8 +26,6 @@ export async function createProduct(formData: FormData): Promise<void> {
   const category = String(formData.get("category") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
   const descriptionEn = String(formData.get("descriptionEn") ?? "").trim();
-  const allergens = String(formData.get("allergens") ?? "").trim();
-  const allergensEn = String(formData.get("allergensEn") ?? "").trim();
   const sizeLabel = String(formData.get("sizeLabel") ?? "").trim();
   const sizePrice = Number(formData.get("sizePrice") ?? 0);
   const leadTimeDays = Number(formData.get("leadTimeDays") ?? 0);
@@ -51,8 +49,6 @@ export async function createProduct(formData: FormData): Promise<void> {
       category,
       description,
       description_en: descriptionEn || null,
-      allergens,
-      allergens_en: allergensEn || null,
       lead_time_days: Math.max(0, leadTimeDays),
     })
     .select("id")
@@ -86,12 +82,19 @@ export async function updateProduct(formData: FormData): Promise<void> {
       category: String(formData.get("category") ?? "").trim(),
       description: String(formData.get("description") ?? "").trim(),
       description_en: String(formData.get("descriptionEn") ?? "").trim() || null,
-      allergens: String(formData.get("allergens") ?? "").trim(),
-      allergens_en: String(formData.get("allergensEn") ?? "").trim() || null,
       active: formData.get("active") === "on",
       lead_time_days: Math.max(0, Number(formData.get("leadTimeDays") ?? 0)),
     })
     .eq("id", id);
+
+  // Allergen tags: the ticked ones replace whatever was set before.
+  const allergenIds = formData.getAll("allergenIds").map(String).filter(Boolean);
+  await db.from("product_allergens").delete().eq("product_id", id);
+  if (allergenIds.length > 0) {
+    await db
+      .from("product_allergens")
+      .insert(allergenIds.map((allergen_id) => ({ product_id: id, allergen_id })));
+  }
 
   revalidatePath("/admin/products");
   expireCatalog();
@@ -242,6 +245,58 @@ export async function deleteProductSize(formData: FormData): Promise<void> {
   if (!id) return;
 
   await db.from("product_sizes").delete().eq("id", id);
+  revalidatePath("/admin/products");
+  expireCatalog();
+}
+
+const HEX_COLOR = /^#[0-9a-f]{6}$/i;
+
+export async function createAllergen(formData: FormData): Promise<void> {
+  const admin = await requireAdmin();
+  if (admin.role !== "owner") return;
+  const labelHe = String(formData.get("labelHe") ?? "").trim();
+  const labelEn = String(formData.get("labelEn") ?? "").trim();
+  const color = String(formData.get("color") ?? "");
+  if (!labelHe) return;
+  const db = supabaseAdmin();
+  const { data: last } = await db
+    .from("allergens")
+    .select("sort_order")
+    .order("sort_order", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  await db.from("allergens").insert({
+    label_he: labelHe,
+    label_en: labelEn,
+    color: HEX_COLOR.test(color) ? color : "#c9923a",
+    sort_order: (last?.sort_order ?? -1) + 1,
+  });
+  revalidatePath("/admin/products");
+  expireCatalog();
+}
+
+export async function updateAllergen(formData: FormData): Promise<void> {
+  const admin = await requireAdmin();
+  if (admin.role !== "owner") return;
+  const id = String(formData.get("id") ?? "");
+  const labelHe = String(formData.get("labelHe") ?? "").trim();
+  const color = String(formData.get("color") ?? "");
+  if (!id || !labelHe || !HEX_COLOR.test(color)) return;
+  await supabaseAdmin()
+    .from("allergens")
+    .update({ label_he: labelHe, label_en: String(formData.get("labelEn") ?? "").trim(), color })
+    .eq("id", id);
+  revalidatePath("/admin/products");
+  expireCatalog();
+}
+
+/** Deleting a tag also removes it from every product that had it (cascade). */
+export async function deleteAllergen(formData: FormData): Promise<void> {
+  const admin = await requireAdmin();
+  if (admin.role !== "owner") return;
+  const id = String(formData.get("id") ?? "");
+  if (!id) return;
+  await supabaseAdmin().from("allergens").delete().eq("id", id);
   revalidatePath("/admin/products");
   expireCatalog();
 }

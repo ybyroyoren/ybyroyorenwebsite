@@ -1,6 +1,6 @@
 .breadcrumb {
-  padding: 26px 0 0;
-  font-size: 13px;
+  padding-block: 26px 0;
+  font-size: 17px;
   color: var(--ink-soft);
 }
 
@@ -12,7 +12,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 70px;
-  padding: 40px 0 110px;
+  padding-block: 40px 110px;
   align-items: start;
 }
 
@@ -91,7 +91,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 19px;
+  font-size: 21px;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
 }
 
@@ -142,7 +142,7 @@
 
 .tag {
   display: inline-block;
-  font-size: 12px;
+  font-size: 14px;
   letter-spacing: 0.05em;
   font-weight: 600;
   background: var(--olive-mist);
@@ -153,7 +153,7 @@
 }
 
 .info h1 {
-  font-size: clamp(30px, 3.4vw, 42px);
+  font-size: clamp(32px, 3.4vw, 44px);
   margin-bottom: 14px;
 }
 
@@ -165,17 +165,17 @@
 }
 
 .priceMain {
-  font-size: 26px;
+  font-size: 28px;
   font-weight: 700;
 }
 
 .priceVatNote {
-  font-size: 13px;
+  font-size: 15px;
   color: var(--ink-soft);
 }
 
 .desc {
-  font-size: 15.5px;
+  font-size: 17.5px;
   color: var(--ink-soft);
   line-height: 1.75;
   margin-bottom: 30px;
@@ -193,7 +193,7 @@
 }
 
 .infoBlock h4 {
-  font-size: 12px;
+  font-size: 14px;
   letter-spacing: 0.08em;
   color: var(--ink-soft);
   font-weight: 600;
@@ -202,14 +202,7 @@
 }
 
 .infoBlock p {
-  font-size: 14.5px;
-}
-
-.allergenTag {
-  display: inline-block;
-  font-size: 12.5px;
-  color: var(--olive-deep);
-  font-weight: 600;
+  font-size: 16.5px;
 }
 
 .sizeSelect {
@@ -217,7 +210,7 @@
 }
 
 .sizeSelect h4 {
-  font-size: 12px;
+  font-size: 14px;
   letter-spacing: 0.08em;
   color: var(--ink-soft);
   font-weight: 600;
@@ -235,16 +228,22 @@
   padding: 10px 18px;
   border-radius: 999px;
   border: 1px solid var(--line);
-  font-size: 13.5px;
+  font-size: 15.5px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
+.sizeChip:hover {
+  border-color: var(--olive-deep);
+  box-shadow: 0 0 0 1px var(--olive-deep);
+}
+
 .sizeChip.selected {
-  background: var(--ink);
+  background: var(--olive-deep);
   color: var(--cream);
-  border-color: var(--ink);
+  border-color: var(--olive-deep);
+  box-shadow: none;
 }
 
 .qtyAddRow {
@@ -266,31 +265,18 @@
 .qtyControl button {
   width: 26px;
   height: 26px;
-  font-size: 16px;
+  font-size: 18px;
 }
 
 .addToCartBtn {
   flex: 1;
-  background: var(--ink);
-  color: var(--cream);
   padding: 15px;
-  border-radius: 999px;
-  font-size: 15px;
-  font-weight: 600;
-  text-align: center;
 }
 
-.addToCartBtn:hover {
-  background: var(--olive-deep);
-}
 
-.addToCartBtn:disabled {
-  opacity: 0.6;
-  cursor: default;
-}
 
 .pickupNote {
-  font-size: 13px;
+  font-size: 15px;
   color: var(--olive-deep);
   background: var(--olive-mist);
   padding: 10px 16px;
@@ -300,7 +286,7 @@
 
 .outOfStockBadge {
   display: inline-block;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
   letter-spacing: 0.05em;
   background: rgba(139, 58, 43, 0.1);
@@ -311,7 +297,7 @@
 }
 
 .outOfStockText {
-  font-size: 14.5px;
+  font-size: 16.5px;
   color: var(--ink-soft);
   line-height: 1.6;
   margin-bottom: 18px;
@@ -319,11 +305,11 @@
 }
 
 .relatedSection {
-  padding: 0 0 110px;
+  padding-block: 0 110px;
 }
 
 .relatedSection h2 {
-  font-size: 26px;
+  font-size: 28px;
   margin-bottom: 30px;
 }
 
@@ -360,11 +346,11 @@
 
 .relatedName {
   font-family: var(--font-serif-family);
-  font-size: 16px;
+  font-size: 18px;
   margin-bottom: 4px;
 }
 
 .relatedPrice {
-  font-size: 13.5px;
+  font-size: 15.5px;
   color: var(--ink-soft);
 }

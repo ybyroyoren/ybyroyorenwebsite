@@ -155,7 +155,7 @@ export function MealsList({ meals, locale }: { meals: MealView[]; locale: Locale
               {isFull ? (
                 <span className={styles.fullBadge}>{t.full}</span>
               ) : (
-                <span className={styles.btn}>{t.detailsCta}</span>
+                <span className={`ybtn ${styles.btn}`}>{t.detailsCta}</span>
               )}
             </div>
           </div>
@@ -268,7 +268,7 @@ export function MealsList({ meals, locale }: { meals: MealView[]; locale: Locale
               {error && <p className={styles.error}>{error}</p>}
               <button
                 type="button"
-                className={styles.registerBtn}
+                className={`ybtn ${styles.registerBtn}`}
                 onClick={submit}
                 disabled={submitting}
               >

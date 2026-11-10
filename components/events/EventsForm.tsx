@@ -273,9 +273,9 @@ export function EventsForm({ locale }: { locale: Locale }) {
 
       <p className={styles.fieldNote}>{f.cleaningFeeNote}</p>
 
-      {error && <p style={{ color: "var(--danger)", fontSize: 13.5 }}>{error}</p>}
+      {error && <p style={{ color: "var(--danger)", fontSize: 15.5 }}>{error}</p>}
 
-      <button type="submit" className={styles.submitBtn} disabled={submitting}>
+      <button type="submit" className={`ybtn ${styles.submitBtn}`} disabled={submitting}>
         {submitting ? f.submitting : f.submit}
       </button>
       <p className={styles.footnote}>{f.footnote}</p>

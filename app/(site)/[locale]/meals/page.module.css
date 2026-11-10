@@ -1,9 +1,10 @@
 .pageHead {
-  padding: 70px 0 50px;
+  /* vertical only: the horizontal padding comes from .wrap, so the text lines up with the images below */
+  padding-block: 70px 50px;
 }
 
 .eyebrow {
-  font-size: 13px;
+  font-size: 15px;
   letter-spacing: 0.16em;
   color: var(--olive-deep);
   font-weight: 600;
@@ -21,20 +22,20 @@
 }
 
 .pageHead h1 {
-  font-size: clamp(38px, 5vw, 58px);
+  font-size: clamp(40px, 5vw, 60px);
   margin-bottom: 14px;
 }
 
 .pageHead p {
   max-width: 500px;
   color: var(--ink-soft);
-  font-size: 16px;
+  font-size: 18px;
   line-height: 1.6;
 }
 
 .venueNote {
   margin-top: 22px;
-  font-size: 13.5px;
+  font-size: 15.5px;
   color: var(--olive-deep);
   background: var(--olive-mist);
   padding: 10px 16px;

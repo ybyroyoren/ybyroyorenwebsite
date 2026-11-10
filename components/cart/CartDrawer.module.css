@@ -41,11 +41,11 @@
 }
 
 .head h3 {
-  font-size: 22px;
+  font-size: 24px;
 }
 
 .close {
-  font-size: 22px;
+  font-size: 24px;
   line-height: 1;
 }
 
@@ -57,7 +57,7 @@
 
 .empty {
   color: var(--ink-soft);
-  font-size: 14px;
+  font-size: 16px;
   padding: 40px 0;
   text-align: center;
 }
@@ -90,12 +90,12 @@
 
 .itemName {
   font-family: var(--font-serif-family);
-  font-size: 16px;
+  font-size: 18px;
   margin-bottom: 4px;
 }
 
 .itemPrice {
-  font-size: 13px;
+  font-size: 15px;
   color: var(--ink-soft);
   margin-bottom: 10px;
 }
@@ -115,18 +115,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 15px;
+  font-size: 17px;
 }
 
 .remove {
-  font-size: 12px;
+  font-size: 14px;
   color: var(--danger);
   margin-right: 14px;
   text-decoration: underline;
 }
 
 .itemTotal {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
   white-space: nowrap;
 }
@@ -149,7 +149,7 @@
   border: 1px solid var(--line);
   background: var(--cream);
   font-family: inherit;
-  font-size: 14px;
+  font-size: 16px;
   color: var(--ink);
 }
 
@@ -157,7 +157,7 @@
   padding: 0 18px;
   border-radius: 8px;
   border: 1px solid var(--ink);
-  font-size: 13.5px;
+  font-size: 15.5px;
   font-weight: 600;
   transition: all 0.2s ease;
 }
@@ -168,7 +168,7 @@
 }
 
 .couponMsg {
-  font-size: 12.5px;
+  font-size: 14.5px;
   margin-top: -12px;
   margin-bottom: 16px;
 }
@@ -185,7 +185,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 13.5px;
+  font-size: 15.5px;
   font-weight: 600;
   cursor: pointer;
   margin-bottom: 14px;
@@ -206,7 +206,7 @@
   border: 1px solid var(--line);
   background: var(--cream);
   font-family: inherit;
-  font-size: 13.5px;
+  font-size: 15.5px;
   color: var(--ink);
   resize: vertical;
 }
@@ -214,7 +214,7 @@
 .giftCount {
   display: block;
   text-align: left;
-  font-size: 11.5px;
+  font-size: 13.5px;
   color: var(--ink-soft);
   margin-top: 4px;
 }
@@ -222,13 +222,13 @@
 .totalsRow {
   display: flex;
   justify-content: space-between;
-  font-size: 14px;
+  font-size: 16px;
   color: var(--ink-soft);
   margin-bottom: 8px;
 }
 
 .totalsRow.grand {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 700;
   color: var(--ink);
   margin-top: 14px;
@@ -237,24 +237,15 @@
 }
 
 .checkoutBtn {
-  display: block;
+  display: flex;
   width: 100%;
   margin-top: 20px;
-  background: var(--ink);
-  color: var(--cream);
   padding: 16px;
-  border-radius: 999px;
-  font-size: 15px;
-  font-weight: 600;
-  text-align: center;
 }
 
-.checkoutBtn:hover {
-  background: var(--olive-deep);
-}
 
 .note {
-  font-size: 12px;
+  font-size: 14px;
   color: var(--ink-soft);
   margin-top: 14px;
   text-align: center;

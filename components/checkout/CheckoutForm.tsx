@@ -60,7 +60,7 @@ export function CheckoutForm({ locale }: { locale: Locale }) {
 
       {state.error && <p className={styles.error}>{state.error}</p>}
 
-      <button type="submit" className={styles.submitBtn} disabled={pending}>
+      <button type="submit" className={`ybtn ${styles.submitBtn}`} disabled={pending}>
         {pending ? f.submitting : f.submit}
       </button>
     </form>

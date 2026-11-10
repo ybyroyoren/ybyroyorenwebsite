@@ -62,7 +62,7 @@ export function ProductPurchase({ product, locale }: { product: ProductView; loc
             </div>
             <button
               type="button"
-              className={styles.addToCartBtn}
+              className={`ybtn ${styles.addToCartBtn}`}
               onClick={handleAdd}
               disabled={cart.isLoading}
             >

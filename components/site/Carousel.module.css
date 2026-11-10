@@ -22,7 +22,7 @@
 
 .slide {
   flex: 0 0 calc(25% - 9px);
-  aspect-ratio: 9 / 16;
+  aspect-ratio: var(--slide-aspect, 9 / 16);
   border-radius: 8px;
   overflow: hidden;
   scroll-snap-align: start;
@@ -65,7 +65,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
+  font-size: 20px;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
 }
 

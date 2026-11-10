@@ -13,41 +13,79 @@
   outline-color: var(--cream);
 }
 
+/* One 4-column grid for the whole footer. Each column spans two rows (heading,
+   content) on shared subgrid rows, so headings and first lines line up across
+   columns; the legal links and the bottom bar reuse the same column lines. */
 .grid {
   display: grid;
-  grid-template-columns: 1.2fr 0.8fr 1fr 1fr;
-  gap: 50px;
-  padding-bottom: 60px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-rows: auto 1fr;
+  column-gap: 40px;
+  row-gap: 0;
+  padding-bottom: 50px;
   border-bottom: 1px solid rgba(239, 232, 216, 0.18);
+}
+
+.col {
+  display: grid;
+  grid-row: span 2;
+  grid-template-rows: subgrid;
+  align-content: start;
+}
+
+.col h4,
+.mark {
+  min-height: 48px;
+  margin: 0;
+  display: flex;
+  align-items: flex-start;
 }
 
 .mark {
   font-family: var(--font-serif-family);
-  font-size: 40px;
+  font-size: 34px;
+  line-height: 1;
   font-weight: 700;
-  margin-bottom: 18px;
-}
-
-.grid p {
-  color: rgba(239, 232, 216, 0.65);
-  font-size: 14px;
-  line-height: 1.7;
-  max-width: 300px;
 }
 
 .col h4 {
-  font-size: 13px;
+  font-size: 15px;
   letter-spacing: 0.12em;
   color: rgba(239, 232, 216, 0.5);
-  margin-bottom: 20px;
   font-weight: 600;
 }
 
-.col a {
-  display: block;
+.items {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.items p {
+  color: rgba(239, 232, 216, 0.65);
+  font-size: 16px;
+  line-height: 1.7;
+  margin: 0 0 10px;
+}
+
+/* Footer links read as buttons: a line appears under them on hover. */
+.col .items a:not(.iconLink),
+.legal a {
+  display: inline-block;
   padding: 7px 0;
-  font-size: 15px;
+  font-size: 17px;
   color: var(--cream);
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 6px;
+  text-decoration-thickness: 1px;
+  transition: text-decoration-color 0.2s ease;
+}
+
+.col .items a:not(.iconLink):hover,
+.legal a:hover {
+  text-decoration-color: currentColor;
 }
 
 .iconLink {
@@ -71,6 +109,7 @@
 .newsletterForm {
   display: flex;
   gap: 8px;
+  width: 100%;
 }
 
 .newsletterForm input {
@@ -81,7 +120,7 @@
   border: 1px solid rgba(239, 232, 216, 0.3);
   background: transparent;
   font-family: inherit;
-  font-size: 13px;
+  font-size: 15px;
   color: var(--cream);
 }
 
@@ -90,37 +129,45 @@
 }
 
 .newsletterForm button {
-  padding: 10px 16px;
-  border-radius: 6px;
-  border: 1px solid var(--cream);
-  background: var(--cream);
-  color: var(--olive-deep);
-  font-size: 13px;
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: 1px solid rgba(239, 232, 216, 0.6);
+  background: transparent;
+  color: var(--cream);
+  font-size: 15px;
   font-weight: 600;
   white-space: nowrap;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
 }
 
 .newsletterForm button:hover {
-  background: transparent;
-  color: var(--cream);
+  border-color: var(--cream);
+  box-shadow: 0 0 0 1px var(--cream);
+}
+
+.newsletterForm button:active {
+  background: var(--cream);
+  color: var(--olive-deep);
 }
 
 .newsletterMsg {
-  font-size: 12px;
+  font-size: 14px;
   margin-top: 8px;
   color: rgba(239, 232, 216, 0.7);
 }
 
 .legal {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 24px;
-  padding-top: 30px;
-  font-size: 12.5px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: 40px;
+  row-gap: 0;
+  padding-top: 22px;
+  font-size: 14.5px;
 }
 
 .legal a {
-  color: rgba(239, 232, 216, 0.55);
+  font-size: 14.5px;
+  color: rgba(239, 232, 216, 0.6);
 }
 
 .legal a:hover {
@@ -128,22 +175,48 @@
 }
 
 .bottom {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: 40px;
   align-items: center;
-  justify-content: space-between;
   padding-top: 18px;
-  font-size: 13px;
+  font-size: 15px;
   color: rgba(239, 232, 216, 0.45);
 }
 
-.bottomText {
-  display: flex;
-  gap: 24px;
+.bottom .iconLink {
+  justify-self: end;
+  grid-column: 4;
 }
 
 @media (max-width: 860px) {
   .grid {
-    grid-template-columns: 1fr;
-    gap: 30px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: none;
+    row-gap: 36px;
   }
+
+  .col {
+    grid-row: auto;
+    grid-template-rows: auto 1fr;
+  }
+
+  .legal,
+  .bottom {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .bottom .iconLink {
+    grid-column: 2;
+  }
+}
+
+@media (max-width: 520px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.bottomText {
+  display: contents;
 }

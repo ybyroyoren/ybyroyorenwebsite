@@ -12,38 +12,46 @@ export function Footer({ locale }: { locale: Locale }) {
     <footer className={styles.footer} id="contact">
       <div className="wrap">
         <div className={styles.grid}>
-          <div>
+          <div className={styles.col}>
             <div className={styles.mark}>Y</div>
-            <p>{t.tagline}</p>
+            <div className={styles.items}>
+              <p>{t.tagline}</p>
+            </div>
           </div>
           <div className={styles.col}>
             <h4>{t.navHeading}</h4>
-            <Link href={p("/shop")}>{t.navShop}</Link>
-            <Link href={p("/meals")}>{t.navMeals}</Link>
-            <Link href={p("/events")}>{t.navEvents}</Link>
+            <div className={styles.items}>
+              <Link href={p("/shop")}>{t.navShop}</Link>
+              <Link href={p("/meals")}>{t.navMeals}</Link>
+              <Link href={p("/events")}>{t.navEvents}</Link>
+            </div>
           </div>
           <div className={styles.col}>
             <h4>{t.contactHeading}</h4>
-            <a href="tel:0543737307">054-3737-307</a>
-            <a href="mailto:roy@ybyroyoren.com">roy@ybyroyoren.com</a>
-            <a
-              href="https://instagram.com/ybyroyoren"
-              target="_blank"
-              rel="noopener"
-              aria-label={t.instagramLabel}
-              className={styles.iconLink}
-            >
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8">
-                <rect x="3" y="3" width="18" height="18" rx="5" />
-                <circle cx="12" cy="12" r="4.2" />
-                <circle cx="17.3" cy="6.7" r="1.1" fill="currentColor" stroke="none" />
-              </svg>
-            </a>
+            <div className={styles.items}>
+              <a href="tel:0543737307">054-3737-307</a>
+              <a href="mailto:roy@ybyroyoren.com">roy@ybyroyoren.com</a>
+              <a
+                href="https://instagram.com/ybyroyoren"
+                target="_blank"
+                rel="noopener"
+                aria-label={t.instagramLabel}
+                className={styles.iconLink}
+              >
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8">
+                  <rect x="3" y="3" width="18" height="18" rx="5" />
+                  <circle cx="12" cy="12" r="4.2" />
+                  <circle cx="17.3" cy="6.7" r="1.1" fill="currentColor" stroke="none" />
+                </svg>
+              </a>
+            </div>
           </div>
           <div className={styles.col}>
             <h4>{t.updatesHeading}</h4>
-            <p style={{ marginBottom: 14 }}>{t.updatesSub}</p>
-            <NewsletterForm locale={locale} />
+            <div className={styles.items}>
+              <p>{t.updatesSub}</p>
+              <NewsletterForm locale={locale} />
+            </div>
           </div>
         </div>
         <div className={styles.legal}>

@@ -8,6 +8,5 @@ export function localizedProduct(product: ProductView, locale: Locale) {
   return {
     name: (locale === "en" && product.nameEn) || product.name,
     description: (locale === "en" && product.descriptionEn) || product.description,
-    allergens: (locale === "en" && product.allergensEn) || product.allergens,
   };
 }

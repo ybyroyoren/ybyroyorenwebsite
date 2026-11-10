@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { getMediaByLocation } from "@/lib/media";
 import { resolveLocale } from "@/lib/i18n";
 import { getDict } from "@/lib/dictionary";
-import { EventsForm } from "@/components/events/EventsForm";
+import { EventInquiry } from "@/components/events/EventInquiry";
 import { Carousel } from "@/components/site/Carousel";
 import styles from "./page.module.css";
 
@@ -15,35 +15,39 @@ export default async function EventsPage({ params }: { params: Promise<{ locale:
   const t = getDict(locale).events;
 
   return (
-    <div className={styles.layout}>
-      <div className={`${styles.introCol} enter`}>
-        <div className={styles.eyebrow}>{t.eyebrow}</div>
-        <h1>{t.heading}</h1>
-        <p>{t.sub}</p>
+    <>
+      <div className={`wrap ${styles.ctaSection} enter`}>
+        <EventInquiry locale={locale} />
+      </div>
+
+      <div className={`wrap ${styles.content}`}>
+        <div className={`${styles.eyebrow} enter`}>{t.eyebrow}</div>
+        <h1 className="enter" style={{ "--i": 1 } as React.CSSProperties}>
+          {t.heading}
+        </h1>
+        <p className={`${styles.intro} enter`} style={{ "--i": 2 } as React.CSSProperties}>
+          {t.sub}
+        </p>
 
         {carouselImages.length > 0 && (
-          <div className={styles.carouselWrap}>
-            <Carousel images={carouselImages} narrow locale={locale} />
+          <div className={styles.carouselWrap} data-reveal="">
+            <Carousel images={carouselImages} single locale={locale} />
           </div>
         )}
 
-        <div className={styles.leadTimeNote}>{t.leadTimeNote}</div>
+        <div className={styles.leadTimeNote} data-reveal="">
+          {t.leadTimeNote}
+        </div>
 
         <div className={styles.eventTypes}>
           {t.eventTypes.map((row) => (
-            <div key={row.label} className={styles.eventTypeRow}>
+            <div key={row.label} className={styles.eventTypeRow} data-reveal="">
               <span>{row.label}</span>
               <span>{row.value}</span>
             </div>
           ))}
         </div>
       </div>
-
-      <div className={`${styles.formCol} enter`} style={{ "--i": 2 } as React.CSSProperties}>
-        <h2>{t.formHeading}</h2>
-        <p className={styles.formSub}>{t.formSub}</p>
-        <EventsForm locale={locale} />
-      </div>
-    </div>
+    </>
   );
 }

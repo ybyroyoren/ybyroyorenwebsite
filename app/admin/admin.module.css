@@ -590,3 +590,28 @@
   opacity: 0.3;
   cursor: default;
 }
+
+/* Allergen tag picker inside a product. */
+.tagPicker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tagOption {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.tagOption span {
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.tagOption input:not(:checked) + span {
+  opacity: 0.35;
+}

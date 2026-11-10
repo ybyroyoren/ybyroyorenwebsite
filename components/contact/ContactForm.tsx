@@ -41,7 +41,7 @@ export function ContactForm({ locale }: { locale: Locale }) {
         </p>
       )}
 
-      <button type="submit" className={styles.submitBtn} disabled={pending}>
+      <button type="submit" className={`ybtn ${styles.submitBtn}`} disabled={pending}>
         {pending ? f.submitting : f.submit}
       </button>
       <p className={styles.footnote}>{f.footnote}</p>

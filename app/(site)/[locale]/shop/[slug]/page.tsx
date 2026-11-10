@@ -6,6 +6,7 @@ import { localizedProduct } from "@/lib/localizedProduct";
 import { resolveLocale, localePath } from "@/lib/i18n";
 import { getDict } from "@/lib/dictionary";
 import { ProductPurchase } from "@/components/shop/ProductPurchase";
+import { AllergenTags } from "@/components/shop/AllergenTags";
 import { ProductGallery } from "@/components/shop/ProductGallery";
 import { formatCurrency, priceIncludingVat } from "@/lib/pricing";
 import styles from "./page.module.css";
@@ -62,10 +63,19 @@ export default async function ProductPage({
           <h1>{p.name}</h1>
           <p className={styles.desc}>{p.description}</p>
 
-          <div className={styles.infoBlock}>
-            <h4>{t.product.allergensHeading}</h4>
-            <p className={styles.allergenTag}>{p.allergens}</p>
-          </div>
+          {product.allergens.length > 0 && (
+            <div className={styles.infoBlock}>
+              <h4>{t.product.allergensHeading}</h4>
+              <AllergenTags tags={product.allergens} locale={locale} label={t.product.allergensHeading} size="md" />
+            </div>
+          )}
+
+          {product.leadTimeDays > 0 && (
+            <div className={styles.infoBlock}>
+              <h4>{t.product.leadTimeHeading}</h4>
+              <p>{t.product.leadTimeValue(product.leadTimeDays)}</p>
+            </div>
+          )}
 
           <ProductPurchase product={product} locale={locale} />
         </div>

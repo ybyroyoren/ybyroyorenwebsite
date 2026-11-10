@@ -27,6 +27,7 @@ export default async function SiteLayout({
   return (
     <CartProvider>
       <div
+        className="siteRoot"
         lang={locale}
         dir={locale === "en" ? "ltr" : "rtl"}
         style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: "100%" }}

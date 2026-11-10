@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { ProductView } from "@/lib/products";
+import type { AllergenTag } from "@/lib/allergenTags";
 import { getDict, type Locale } from "@/lib/dictionary";
 import { ShopFilters } from "./ShopFilters";
 import { ProductCard } from "./ProductCard";
@@ -15,15 +16,19 @@ import styles from "@/app/(site)/[locale]/shop/page.module.css";
 export function ShopCatalog({
   products,
   categories,
+  allergens,
   locale,
 }: {
   products: ProductView[];
   categories: { slug: string; label: string }[];
+  /** Allergen tags in use, for the "free of" filter. */
+  allergens: AllergenTag[];
   locale: Locale;
 }) {
   const [category, setCategory] = useState("all");
   const [sort, setSort] = useState("default");
   const [rotating, setRotating] = useState(true);
+  const [excluded, setExcluded] = useState<string[]>([]);
   const t = getDict(locale).shop;
   const hasGalleries = products.some((p) => p.imageUrls.length > 1);
 
@@ -59,14 +64,17 @@ export function ShopCatalog({
   );
 
   const visible = useMemo(() => {
-    const filtered = category === "all" ? products : products.filter((p) => p.category === category);
+    const byCategory = category === "all" ? products : products.filter((p) => p.category === category);
+    // "Free of": hide every product that carries one of the chosen allergens.
+    const filtered =
+      excluded.length === 0 ? byCategory : byCategory.filter((p) => !p.allergens.some((a) => excluded.includes(a.id)));
     if (sort !== "asc" && sort !== "desc") return filtered;
     return [...filtered].sort((a, b) => {
       const priceA = a.sizes[a.defaultSizeIndex]?.priceBeforeVat ?? 0;
       const priceB = b.sizes[b.defaultSizeIndex]?.priceBeforeVat ?? 0;
       return sort === "asc" ? priceA - priceB : priceB - priceA;
     });
-  }, [products, category, sort]);
+  }, [products, category, sort, excluded]);
 
   return (
     <>
@@ -77,6 +85,10 @@ export function ShopCatalog({
         activeSort={sort}
         onCategoryChange={(next) => update(next, sort)}
         onSortChange={(next) => update(category, next)}
+        allergens={allergens}
+        excludedAllergens={excluded}
+        onToggleAllergen={(id) => setExcluded((cur) => (cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id]))}
+        onClearAllergens={() => setExcluded([])}
         rotation={hasGalleries ? { playing: rotating, onToggle: () => setRotating((r) => !r) } : undefined}
       />
       {visible.length === 0 ? (

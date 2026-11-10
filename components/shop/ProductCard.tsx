@@ -11,6 +11,7 @@ import { localizedProduct } from "@/lib/localizedProduct";
 import { useSwipe } from "@/lib/useSwipe";
 import { stagger } from "@/lib/motion";
 import { AUTOPLAY_MS, useAutoplay } from "@/lib/useAutoplay";
+import { AllergenTags } from "./AllergenTags";
 import styles from "./ProductCard.module.css";
 
 export function ProductCard({
@@ -118,7 +119,7 @@ export function ProductCard({
           </Link>
           <div className={styles.desc}>{p.description}</div>
           <div className={styles.allergens}>
-            {t.allergensLabel}: {p.allergens}
+            <AllergenTags tags={product.allergens} locale={locale} label={t.allergensLabel} />
           </div>
         </div>
       </div>
@@ -149,7 +150,7 @@ export function ProductCard({
         {inStock ? (
           <button
             type="button"
-            className={`${styles.addBtn} ${justAdded ? styles.added : ""}`}
+            className={`ybtn ${styles.addBtn} ${justAdded ? styles.added : ""}`}
             onClick={handleAdd}
             disabled={cart.isLoading}
           >

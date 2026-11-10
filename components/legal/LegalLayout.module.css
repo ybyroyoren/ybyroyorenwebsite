@@ -1,9 +1,9 @@
 .page {
-  padding: 70px 0 120px;
+  padding-block: 70px 120px;
 }
 
 .eyebrow {
-  font-size: 13px;
+  font-size: 15px;
   letter-spacing: 0.16em;
   color: var(--olive-deep);
   font-weight: 600;
@@ -21,13 +21,13 @@
 }
 
 .page h1 {
-  font-size: clamp(32px, 4vw, 46px);
+  font-size: clamp(34px, 4vw, 48px);
   margin-bottom: 10px;
 }
 
 .updated {
   color: var(--ink-soft);
-  font-size: 13px;
+  font-size: 15px;
   margin-bottom: 46px;
 }
 
@@ -35,7 +35,7 @@
   max-width: 760px;
   background: var(--olive-mist);
   color: var(--olive-deep);
-  font-size: 13.5px;
+  font-size: 15.5px;
   line-height: 1.6;
   padding: 14px 16px;
   border-radius: 8px;
@@ -45,13 +45,13 @@
 .body {
   max-width: 760px;
   color: var(--ink-soft);
-  font-size: 15.5px;
+  font-size: 17.5px;
   line-height: 1.75;
 }
 
 .body h2 {
   color: var(--ink);
-  font-size: 20px;
+  font-size: 22px;
   margin-top: 40px;
   margin-bottom: 14px;
 }

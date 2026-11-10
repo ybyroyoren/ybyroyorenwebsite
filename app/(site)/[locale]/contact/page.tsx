@@ -12,10 +12,17 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
   const t = getDict(locale).contact;
 
   return (
-    <div className={styles.layout}>
-      <div className={`${styles.introCol} enter`}>
+    <>
+      <div className={`${styles.formSection} wrap enter`}>
+        <h1>{t.formHeading}</h1>
+        <p className={styles.formSub}>{t.formSub}</p>
+        <ContactForm locale={locale} />
+      </div>
+
+      <div className={`${styles.detailsSection} wrap`} data-reveal="">
+        <div className={styles.detailsText}>
         <div className={styles.eyebrow}>{t.eyebrow}</div>
-        <h1>{t.heading}</h1>
+        <h2>{t.heading}</h2>
         <p>{t.sub}</p>
 
         <div className={styles.methods}>
@@ -39,10 +46,11 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
           </div>
           <div className={styles.row}>
             <span className={styles.label}>{t.addressLabel}</span>
-            <span className={styles.value} style={{ fontSize: 16 }}>
+            <span className={styles.value} style={{ fontSize: 18 }}>
               {t.address}
             </span>
           </div>
+        </div>
         </div>
 
         <div className={styles.mapBlock}>
@@ -67,12 +75,6 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
           </div>
         </div>
       </div>
-
-      <div className={`${styles.formCol} enter`} style={{ "--i": 2 } as React.CSSProperties}>
-        <h2>{t.formHeading}</h2>
-        <p className={styles.formSub}>{t.formSub}</p>
-        <ContactForm locale={locale} />
-      </div>
-    </div>
+    </>
   );
 }

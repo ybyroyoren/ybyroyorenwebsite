@@ -1,5 +1,5 @@
 .hero {
-  padding: 90px 0 70px;
+  padding-block: 90px 70px;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 80px;
@@ -14,7 +14,7 @@
 }
 
 .eyebrow {
-  font-size: 13px;
+  font-size: 15px;
   letter-spacing: 0.16em;
   color: var(--olive-deep);
   font-weight: 600;
@@ -32,14 +32,14 @@
 }
 
 .hero h1 {
-  font-size: clamp(36px, 4.5vw, 54px);
+  font-size: clamp(38px, 4.5vw, 56px);
   line-height: 1.15;
   margin-bottom: 22px;
 }
 
 .hero p {
   color: var(--ink-soft);
-  font-size: 16px;
+  font-size: 18px;
   line-height: 1.75;
   max-width: 460px;
 }
