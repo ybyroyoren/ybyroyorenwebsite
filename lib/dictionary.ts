@@ -49,7 +49,7 @@ const dictionary = {
         shipping: "מדיניות משלוחים",
         accessibility: "הצהרת נגישות",
       },
-      copyright: "© 2026 Roy Oren",
+      copyright: "© 2023–{year} Roy Oren", // {year} = the current year, filled in by the footer
       brand: "Y by Roy Oren",
       adminLink: "כניסת מנהלים",
     },
@@ -366,7 +366,7 @@ const dictionary = {
         shipping: "Shipping Policy",
         accessibility: "Accessibility Statement",
       },
-      copyright: "© 2026 Roy Oren",
+      copyright: "© 2023–{year} Roy Oren", // {year} = the current year, filled in by the footer
       brand: "Y by Roy Oren",
       adminLink: "Admin login",
     },

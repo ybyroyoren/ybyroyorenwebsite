@@ -65,7 +65,7 @@ export function Footer({ locale }: { locale: Locale }) {
         </div>
         <div className={styles.bottom}>
           <div className={styles.bottomText}>
-            <span>{t.copyright}</span>
+            <span dir="ltr">{t.copyright.replace("{year}", String(new Date().getFullYear()))}</span>
             <span>{t.brand}</span>
           </div>
           <Link href="/admin/login" aria-label={t.adminLink} className={styles.iconLink}>
