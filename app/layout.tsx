@@ -32,7 +32,7 @@ export default function RootLayout({
   return (
     // suppressHydrationWarning: the inline script below adds a class to <html>
     // before React hydrates.
-    <html lang="he" dir="rtl" className={`${frankRuhlLibre.variable} ${assistant.variable}`} suppressHydrationWarning>
+    <html lang="he" dir="rtl" data-scroll-behavior="smooth" className={`${frankRuhlLibre.variable} ${assistant.variable}`} suppressHydrationWarning>
       <head>
         {/* [data-reveal] content is only hidden once JS is known to run; if
             RevealObserver hasn't signalled within 4s, show everything. */}
