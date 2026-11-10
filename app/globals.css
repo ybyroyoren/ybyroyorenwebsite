@@ -1,5 +1,6 @@
 :root {
-  --cream: #efe8d8;
+  --cream: #f3eee1; /* page background (a touch lighter than before) */
+  --surface: #efe8d8; /* the previous, slightly darker cream: product cards */
   --cream-dark: #e3d9c2;
   --ink: #171410;
   --ink-soft: #3a342a;
@@ -282,6 +283,7 @@ html[data-a11y-font-size="larger"] body {
 
 html[data-a11y-contrast="true"] {
   --cream: #000000;
+  --surface: #0d0d0d;
   --cream-dark: #0d0d0d;
   --ink: #ffffff;
   --ink-soft: #f2f2f2;
