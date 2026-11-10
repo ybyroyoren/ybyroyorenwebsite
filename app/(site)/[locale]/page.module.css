@@ -83,7 +83,7 @@
 .sub {
   max-width: 460px;
   margin-inline: auto;
-  margin-top: 36px;
+  margin-top: 56px;
   font-size: 20px;
   line-height: 1.7;
   color: var(--ink-soft);
@@ -106,7 +106,7 @@
 }
 
 .byline {
-  margin-top: 10px;
+  margin-top: -18px; /* tuck it up under the Y (the Y's line box leaves a gap below the glyph) */
   font-size: clamp(20px, 2.4vw, 30px);
   font-weight: 500;
   letter-spacing: 0.22em;
@@ -115,7 +115,7 @@
 }
 
 .tagline {
-  margin-top: 22px;
+  margin-top: 6px;
   font-size: clamp(32px, 4.2vw, 56px);
   line-height: 1.1;
 }
@@ -125,7 +125,7 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 14px;
-  margin-top: 36px;
+  margin-top: 60px;
 }
 
 .btn {
