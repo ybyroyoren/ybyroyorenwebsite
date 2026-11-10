@@ -29,7 +29,7 @@ const dictionary = {
       langSwitchTo: "English",
     },
     footer: {
-      tagline: "שף פרטי לאירועים וארוחות פתוחות - מכל הלב, מהמטבח שלי",
+      tagline: "שף פרטי לאירועים פרטיים וארוחות פתוחות - מכל הלב, מהמטבח שלי",
       navHeading: "ניווט",
       navShop: "חנות",
       navMeals: "ארוחות",
@@ -346,7 +346,7 @@ const dictionary = {
       langSwitchTo: "עברית",
     },
     footer: {
-      tagline: "Private chef for events and open meals — made with heart, from my kitchen",
+      tagline: "Private chef for private events and open meals — made with heart, from my kitchen",
       navHeading: "Navigation",
       navShop: "Shop",
       navMeals: "Meals",
