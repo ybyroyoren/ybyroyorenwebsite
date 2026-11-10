@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { ProductView } from "@/lib/products";
 import type { AllergenTag } from "@/lib/allergenTags";
 import { getDict, type Locale } from "@/lib/dictionary";
+import { useRowAlign } from "@/lib/useRowAlign";
 import { ShopFilters } from "./ShopFilters";
 import { ProductCard } from "./ProductCard";
 import styles from "@/app/(site)/[locale]/shop/page.module.css";
@@ -29,6 +30,7 @@ export function ShopCatalog({
   const [sort, setSort] = useState("default");
   const [rotating, setRotating] = useState(true);
   const [excluded, setExcluded] = useState<string[]>([]);
+  const gridRef = useRef<HTMLDivElement>(null);
   const t = getDict(locale).shop;
   const hasGalleries = products.some((p) => p.imageUrls.length > 1);
 
@@ -76,6 +78,9 @@ export function ShopCatalog({
     });
   }, [products, category, sort, excluded]);
 
+  // Older browsers without CSS subgrid: line the card parts up in script instead.
+  useRowAlign(gridRef, [visible]);
+
   return (
     <>
       <ShopFilters
@@ -94,7 +99,7 @@ export function ShopCatalog({
       {visible.length === 0 ? (
         <div className={styles.empty}>{t.empty}</div>
       ) : (
-        <div className={styles.grid}>
+        <div className={styles.grid} ref={gridRef}>
           {visible.map((product, index) => (
             <ProductCard
               key={product.id}

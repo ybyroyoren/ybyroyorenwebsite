@@ -115,17 +115,18 @@ export function ProductCard({
       </div>
       {/* name / description / allergens / size / price are direct children of the card so each
           gets its own row on the shared grid (see .card below): they line up across a whole row of cards. */}
-      <Link className={styles.name} href={localePath(locale, `/shop/${product.slug}`)}>
+      <Link className={styles.name} data-part="name" href={localePath(locale, `/shop/${product.slug}`)}>
         {p.name}
       </Link>
-      <div className={styles.desc}>{p.description}</div>
-      <div className={styles.allergens}>
+      <div className={styles.desc} data-part="desc">{p.description}</div>
+      <div className={styles.allergens} data-part="allergens">
         <AllergenTags tags={product.allergens} locale={locale} label={t.allergensLabel} />
       </div>
 
       {product.sizes.length > 1 ? (
         <select
           className={styles.sizeSelect}
+          data-part="size"
           value={sizeIndex}
           onChange={(e) => setSizeIndex(Number(e.target.value))}
         >
@@ -136,7 +137,7 @@ export function ProductCard({
           ))}
         </select>
       ) : (
-        <div className={styles.sizeFixed}>{size?.label}</div>
+        <div className={styles.sizeFixed} data-part="size">{size?.label}</div>
       )}
 
       <div className={styles.footer}>
