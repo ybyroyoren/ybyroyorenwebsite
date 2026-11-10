@@ -23,6 +23,7 @@ import {
   updateProduct,
   updateProductSize,
 } from "@/lib/actions/admin/products";
+import { ConfirmButton } from "@/components/admin/ConfirmButton";
 import { ImageUploadButton } from "@/components/admin/ImageUploadButton";
 import styles from "../../admin.module.css";
 
@@ -78,7 +79,7 @@ export default async function AdminProductsPage() {
     db
       .from("products")
       .select(
-        "id, slug, name, name_en, description, description_en, category, active, lead_time_days, image_urls, product_allergens(allergen_id), product_sizes(id, label, price_before_vat, stock_status, sort_order, is_default)"
+        "id, slug, name, name_en, description, description_en, active, lead_time_days, image_urls, product_categories(category_id), product_allergens(allergen_id), product_sizes(id, label, price_before_vat, stock_status, sort_order, is_default)"
       )
       .order("sort_order", { ascending: true })
       .order("created_at", { ascending: true }),
@@ -92,6 +93,9 @@ export default async function AdminProductsPage() {
     product_sizes: [...p.product_sizes].sort((a, b) => a.sort_order - b.sort_order),
   }));
   const productOrder = products.map((p) => p.id).join(",");
+  // How many products sit in each category (a product can be in several).
+  const categoryCount = new Map<string, number>();
+  for (const p of products) for (const pc of p.product_categories) categoryCount.set(pc.category_id, (categoryCount.get(pc.category_id) ?? 0) + 1);
 
   return (
     <>
@@ -106,6 +110,7 @@ export default async function AdminProductsPage() {
               <tr>
                 <th>עברית</th>
                 <th>אנגלית</th>
+                <th>מוצרים</th>
                 <th></th>
               </tr>
             </thead>
@@ -114,19 +119,27 @@ export default async function AdminProductsPage() {
                 <tr key={c.id}>
                   <td>{c.labelHe}</td>
                   <td>{c.labelEn}</td>
+                  <td>{categoryCount.get(c.id) ?? 0}</td>
                   <td>
                     <form action={deleteCategory}>
                       <input type="hidden" name="id" value={c.id} />
-                      <button type="submit" className={styles.btnDanger}>
+                      <ConfirmButton
+                        className={styles.btnDanger}
+                        message={
+                          (categoryCount.get(c.id) ?? 0) > 0
+                            ? `למחוק את הקטגוריה "${c.labelHe}"? ${categoryCount.get(c.id)} מוצרים נמצאים בה כרגע; הם יישארו בחנות ויוסרו רק מהקטגוריה הזו.`
+                            : `למחוק את הקטגוריה "${c.labelHe}"?`
+                        }
+                      >
                         מחיקה
-                      </button>
+                      </ConfirmButton>
                     </form>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-          <p className={styles.sectionNote}>לא ניתן למחוק קטגוריה שיש בה מוצרים.</p>
+          <p className={styles.sectionNote}>מחיקת קטגוריה מסירה אותה מהמוצרים שבה, והמוצרים עצמם נשארים בחנות.</p>
           <form action={createCategory} className={styles.form} style={{ marginTop: 16 }}>
             <div className={styles.field}>
               <label>שם הקטגוריה (עברית)</label>
@@ -249,15 +262,16 @@ export default async function AdminProductsPage() {
               <label>שם (אנגלית)</label>
               <input name="nameEn" type="text" />
             </div>
-            <div className={styles.field}>
-              <label>קטגוריה</label>
-              <select name="category" required>
+            <div className={styles.field} style={{ flexBasis: "100%" }}>
+              <label>קטגוריות (אפשר כמה)</label>
+              <div className={styles.tagPicker}>
                 {categories.map((c) => (
-                  <option key={c.id} value={c.slug}>
-                    {c.labelHe}
-                  </option>
+                  <label key={c.id} className={styles.catOption}>
+                    <input type="checkbox" name="categoryIds" value={c.id} />
+                    <span>{c.labelHe}</span>
+                  </label>
                 ))}
-              </select>
+              </div>
             </div>
             <div className={styles.field}>
               <label>תיאור (עברית)</label>
@@ -299,15 +313,21 @@ export default async function AdminProductsPage() {
                 <label>שם (אנגלית)</label>
                 <input name="nameEn" type="text" defaultValue={product.name_en ?? ""} />
               </div>
-              <div className={styles.field}>
-                <label>קטגוריה</label>
-                <select name="category" defaultValue={product.category}>
+              <div className={styles.field} style={{ flexBasis: "100%" }}>
+                <label>קטגוריות (אפשר כמה)</label>
+                <div className={styles.tagPicker}>
                   {categories.map((c) => (
-                    <option key={c.id} value={c.slug}>
-                      {c.labelHe}
-                    </option>
+                    <label key={c.id} className={styles.catOption}>
+                      <input
+                        type="checkbox"
+                        name="categoryIds"
+                        value={c.id}
+                        defaultChecked={product.product_categories.some((pc) => pc.category_id === c.id)}
+                      />
+                      <span>{c.labelHe}</span>
+                    </label>
                   ))}
-                </select>
+                </div>
               </div>
               <div className={styles.field}>
                 <label>תיאור (עברית)</label>

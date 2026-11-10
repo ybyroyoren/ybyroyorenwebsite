@@ -65,8 +65,14 @@ export function ShopCatalog({
     [categories]
   );
 
+  // The tag on a card: the category being browsed if the product is in it, else its first category.
+  const categoryTagLabel = (product: ProductView, active: string) => {
+    const slug = active !== "all" && product.categories.includes(active) ? active : product.categories[0];
+    return slug ? (categoryLabelBySlug.get(slug) ?? slug) : "";
+  };
+
   const visible = useMemo(() => {
-    const byCategory = category === "all" ? products : products.filter((p) => p.category === category);
+    const byCategory = category === "all" ? products : products.filter((p) => p.categories.includes(category));
     // "Free of": hide every product that carries one of the chosen allergens.
     const filtered =
       excluded.length === 0 ? byCategory : byCategory.filter((p) => !p.allergens.some((a) => excluded.includes(a.id)));
@@ -107,7 +113,7 @@ export function ShopCatalog({
               autoplay={rotating}
               product={product}
               locale={locale}
-              categoryLabel={categoryLabelBySlug.get(product.category) ?? product.category}
+              categoryLabel={categoryTagLabel(product, category)}
             />
           ))}
         </div>

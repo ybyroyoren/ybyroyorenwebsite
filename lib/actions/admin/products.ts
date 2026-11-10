@@ -16,6 +16,21 @@ function slugify(name: string): string {
   );
 }
 
+/** The ticked categories replace whatever categories the product was in before. */
+async function setProductCategories(
+  db: ReturnType<typeof supabaseAdmin>,
+  productId: string,
+  raw: FormDataEntryValue[]
+): Promise<void> {
+  const categoryIds = raw.map(String).filter(Boolean);
+  await db.from("product_categories").delete().eq("product_id", productId);
+  if (categoryIds.length > 0) {
+    await db
+      .from("product_categories")
+      .insert(categoryIds.map((category_id) => ({ product_id: productId, category_id })));
+  }
+}
+
 export async function createProduct(formData: FormData): Promise<void> {
   const admin = await requireAdmin();
   if (admin.role !== "owner") return;
@@ -23,14 +38,13 @@ export async function createProduct(formData: FormData): Promise<void> {
 
   const name = String(formData.get("name") ?? "").trim();
   const nameEn = String(formData.get("nameEn") ?? "").trim();
-  const category = String(formData.get("category") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
   const descriptionEn = String(formData.get("descriptionEn") ?? "").trim();
   const sizeLabel = String(formData.get("sizeLabel") ?? "").trim();
   const sizePrice = Number(formData.get("sizePrice") ?? 0);
   const leadTimeDays = Number(formData.get("leadTimeDays") ?? 0);
 
-  if (!name || !category || !sizeLabel || !(sizePrice > 0)) return;
+  if (!name || !sizeLabel || !(sizePrice > 0)) return;
 
   const { data: last } = await db
     .from("products")
@@ -46,7 +60,6 @@ export async function createProduct(formData: FormData): Promise<void> {
       name,
       name_en: nameEn || null,
       slug: slugify(name),
-      category,
       description,
       description_en: descriptionEn || null,
       lead_time_days: Math.max(0, leadTimeDays),
@@ -55,6 +68,8 @@ export async function createProduct(formData: FormData): Promise<void> {
     .single();
 
   if (error || !product) return;
+
+  await setProductCategories(db, product.id, formData.getAll("categoryIds"));
 
   await db.from("product_sizes").insert({
     product_id: product.id,
@@ -79,13 +94,14 @@ export async function updateProduct(formData: FormData): Promise<void> {
     .update({
       name: String(formData.get("name") ?? "").trim(),
       name_en: String(formData.get("nameEn") ?? "").trim() || null,
-      category: String(formData.get("category") ?? "").trim(),
       description: String(formData.get("description") ?? "").trim(),
       description_en: String(formData.get("descriptionEn") ?? "").trim() || null,
       active: formData.get("active") === "on",
       lead_time_days: Math.max(0, Number(formData.get("leadTimeDays") ?? 0)),
     })
     .eq("id", id);
+
+  await setProductCategories(db, id, formData.getAll("categoryIds"));
 
   // Allergen tags: the ticked ones replace whatever was set before.
   const allergenIds = formData.getAll("allergenIds").map(String).filter(Boolean);
@@ -323,6 +339,7 @@ export async function createCategory(formData: FormData): Promise<void> {
   expireCatalog();
 }
 
+/** Removes the category; products that were in it simply stop being listed under it. */
 export async function deleteCategory(formData: FormData): Promise<void> {
   const admin = await requireAdmin();
   if (admin.role !== "owner") return;
@@ -330,17 +347,6 @@ export async function deleteCategory(formData: FormData): Promise<void> {
 
   const id = String(formData.get("id") ?? "");
   if (!id) return;
-
-  const { data: category } = await db.from("categories").select("slug").eq("id", id).maybeSingle();
-  if (!category) return;
-
-  // A category still holding products can't be deleted — the FK would
-  // reject it anyway, but this gives a clean no-op instead of a DB error.
-  const { count } = await db
-    .from("products")
-    .select("id", { count: "exact", head: true })
-    .eq("category", category.slug);
-  if (count && count > 0) return;
 
   await db.from("categories").delete().eq("id", id);
   revalidatePath("/admin/products");

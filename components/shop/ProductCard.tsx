@@ -96,7 +96,7 @@ export function ProductCard({
             decoding="async"
           />
         ))}
-        <span className={styles.tag}>{categoryLabel}</span>
+        {categoryLabel && <span className={styles.tag}>{categoryLabel}</span>}
         {photos.length > 1 && (
           <>
             <button type="button" className={`${styles.photoNav} ${styles.photoPrev}`} onClick={(e) => changePhoto(e, -1)} aria-label={t.prevPhoto}>

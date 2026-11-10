@@ -23,7 +23,7 @@ export interface Database {
           slug: string;
           name: string;
           description: string;
-          category: string;
+          category: string | null;
           allergens: string;
           image_urls: string[];
           active: boolean;
@@ -33,7 +33,6 @@ export interface Database {
         Insert: Partial<Database["public"]["Tables"]["products"]["Row"]> & {
           slug: string;
           name: string;
-          category: string;
         };
         Update: Partial<Database["public"]["Tables"]["products"]["Row"]>;
       };

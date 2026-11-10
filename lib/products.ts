@@ -18,7 +18,8 @@ export interface ProductView {
   nameEn: string | null;
   description: string;
   descriptionEn: string | null;
-  category: string;
+  /** Slugs of every shop category the product is listed under (in the owner's category order). */
+  categories: string[];
   /** Owner-chosen allergen tags (colored), in the owner's list order. */
   allergens: AllergenTag[];
   imageUrls: string[];
@@ -35,7 +36,7 @@ interface ProductRow {
   name_en: string | null;
   description: string;
   description_en: string | null;
-  category: string;
+  product_categories: { categories: { slug: string; sort_order: number } | null }[];
   product_allergens: {
     allergens: { id: string; label_he: string; label_en: string; color: string; sort_order: number } | null;
   }[];
@@ -52,7 +53,7 @@ interface ProductRow {
 }
 
 const PRODUCT_SELECT =
-  "id, slug, name, name_en, description, description_en, category, image_urls, lead_time_days, product_allergens(allergens(id, label_he, label_en, color, sort_order)), product_sizes(id, label, price_before_vat, stock_status, sort_order, is_default)";
+  "id, slug, name, name_en, description, description_en, image_urls, lead_time_days, product_categories(categories(slug, sort_order)), product_allergens(allergens(id, label_he, label_en, color, sort_order)), product_sizes(id, label, price_before_vat, stock_status, sort_order, is_default)";
 
 function mapProduct(row: ProductRow): ProductView {
   const ordered = [...row.product_sizes].sort((a, b) => a.sort_order - b.sort_order);
@@ -63,7 +64,10 @@ function mapProduct(row: ProductRow): ProductView {
     nameEn: row.name_en,
     description: row.description,
     descriptionEn: row.description_en,
-    category: row.category,
+    categories: row.product_categories
+      .flatMap((pc) => (pc.categories ? [pc.categories] : []))
+      .sort((a, b) => a.sort_order - b.sort_order)
+      .map((c) => c.slug),
     allergens: row.product_allergens
       .flatMap((pa) => (pa.allergens ? [pa.allergens] : []))
       .sort((a, b) => a.sort_order - b.sort_order)
