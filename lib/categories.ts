@@ -10,6 +10,7 @@ export interface CategoryView {
   labelHe: string;
   labelEn: string;
   sortOrder: number;
+  color: string; // "#rrggbb"
 }
 
 export function categoryLabel(category: CategoryView, locale: Locale): string {
@@ -21,7 +22,7 @@ export const getCategories = unstable_cache(
     const db = supabaseAdmin();
     const { data, error } = await db
       .from("categories")
-      .select("id, slug, label_he, label_en, sort_order")
+      .select("id, slug, label_he, label_en, sort_order, color")
       .order("sort_order", { ascending: true });
 
     if (error) throw new Error(error.message);
@@ -31,6 +32,7 @@ export const getCategories = unstable_cache(
       labelHe: row.label_he,
       labelEn: row.label_en,
       sortOrder: row.sort_order,
+      color: row.color,
     }));
   },
   ["categories"],

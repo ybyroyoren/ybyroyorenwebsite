@@ -37,7 +37,7 @@ export default async function ShopPage({ params }: { params: Promise<{ locale: s
       <div className="wrap">
         <ShopCatalog
           products={products}
-          categories={categories.map((c) => ({ slug: c.slug, label: categoryLabel(c, locale) }))}
+          categories={categories.map((c) => ({ slug: c.slug, label: categoryLabel(c, locale), color: c.color }))}
           allergens={allergens}
           locale={locale}
         />

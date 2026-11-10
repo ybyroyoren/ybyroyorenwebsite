@@ -20,6 +20,7 @@ import {
   removeProductImage,
   toggleSizeStock,
   updateAllergen,
+  updateCategory,
   updateProduct,
   updateProductSize,
 } from "@/lib/actions/admin/products";
@@ -110,35 +111,57 @@ export default async function AdminProductsPage() {
               <tr>
                 <th>עברית</th>
                 <th>אנגלית</th>
+                <th>צבע</th>
                 <th>מוצרים</th>
                 <th></th>
               </tr>
             </thead>
             <tbody>
-              {categories.map((c) => (
-                <tr key={c.id}>
-                  <td>{c.labelHe}</td>
-                  <td>{c.labelEn}</td>
-                  <td>{categoryCount.get(c.id) ?? 0}</td>
-                  <td>
-                    <form action={deleteCategory}>
-                      <input type="hidden" name="id" value={c.id} />
-                      <ConfirmButton
-                        className={styles.btnDanger}
-                        message={
-                          (categoryCount.get(c.id) ?? 0) > 0
-                            ? `למחוק את הקטגוריה "${c.labelHe}"? ${categoryCount.get(c.id)} מוצרים נמצאים בה כרגע; הם יישארו בחנות ויוסרו רק מהקטגוריה הזו.`
-                            : `למחוק את הקטגוריה "${c.labelHe}"?`
-                        }
-                      >
-                        מחיקה
-                      </ConfirmButton>
-                    </form>
-                  </td>
-                </tr>
-              ))}
+              {categories.map((c) => {
+                const formId = `category-form-${c.id}`;
+                const count = categoryCount.get(c.id) ?? 0;
+                return (
+                  <tr key={c.id}>
+                    <td>
+                      <input form={formId} name="labelHe" type="text" defaultValue={c.labelHe} required style={{ width: 130 }} />
+                    </td>
+                    <td>
+                      <input form={formId} name="labelEn" type="text" defaultValue={c.labelEn} required style={{ width: 130 }} />
+                    </td>
+                    <td>
+                      <input form={formId} name="color" type="color" defaultValue={c.color} aria-label="צבע" />
+                    </td>
+                    <td>{count}</td>
+                    <td>
+                      <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+                        <button form={formId} type="submit" className={styles.btnSecondary}>
+                          שמירה
+                        </button>
+                        <form action={deleteCategory}>
+                          <input type="hidden" name="id" value={c.id} />
+                          <ConfirmButton
+                            className={styles.btnDanger}
+                            message={
+                              count > 0
+                                ? `למחוק את הקטגוריה "${c.labelHe}"? ${count} מוצרים נמצאים בה כרגע; הם יישארו בחנות ויוסרו רק מהקטגוריה הזו.`
+                                : `למחוק את הקטגוריה "${c.labelHe}"?`
+                            }
+                          >
+                            מחיקה
+                          </ConfirmButton>
+                        </form>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
+          {categories.map((c) => (
+            <form key={c.id} id={`category-form-${c.id}`} action={updateCategory} style={{ display: "none" }}>
+              <input type="hidden" name="id" value={c.id} />
+            </form>
+          ))}
           <p className={styles.sectionNote}>מחיקת קטגוריה מסירה אותה מהמוצרים שבה, והמוצרים עצמם נשארים בחנות.</p>
           <form action={createCategory} className={styles.form} style={{ marginTop: 16 }}>
             <div className={styles.field}>
@@ -148,6 +171,10 @@ export default async function AdminProductsPage() {
             <div className={styles.field}>
               <label>שם הקטגוריה (אנגלית)</label>
               <input name="labelEn" type="text" required />
+            </div>
+            <div className={styles.field}>
+              <label>צבע</label>
+              <input name="color" type="color" defaultValue="#efe8d8" />
             </div>
             <button type="submit" className={styles.btn}>
               הוספת קטגוריה

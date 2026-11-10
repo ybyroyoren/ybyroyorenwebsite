@@ -48,16 +48,22 @@
   transform: scale(1.05);
 }
 
-.tag {
+/* All of the product's category labels, one after another from the start side (right in Hebrew). */
+.tags {
   position: absolute;
   top: 14px;
-  right: 14px;
+  inset-inline: 14px;
   z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.tag {
   font-size: 13px;
   letter-spacing: 0.05em;
   font-weight: 600;
-  background: var(--cream);
-  color: var(--olive-deep);
   padding: 5px 12px;
   border-radius: 999px;
 }

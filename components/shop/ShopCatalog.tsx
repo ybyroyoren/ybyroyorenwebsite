@@ -21,7 +21,7 @@ export function ShopCatalog({
   locale,
 }: {
   products: ProductView[];
-  categories: { slug: string; label: string }[];
+  categories: { slug: string; label: string; color: string }[];
   /** Allergen tags in use, for the "free of" filter. */
   allergens: AllergenTag[];
   locale: Locale;
@@ -60,16 +60,11 @@ export function ShopCatalog({
     );
   }
 
-  const categoryLabelBySlug = useMemo(
-    () => new Map(categories.map((c) => [c.slug, c.label])),
-    [categories]
-  );
+  const categoryBySlug = useMemo(() => new Map(categories.map((c) => [c.slug, c])), [categories]);
 
-  // The tag on a card: the category being browsed if the product is in it, else its first category.
-  const categoryTagLabel = (product: ProductView, active: string) => {
-    const slug = active !== "all" && product.categories.includes(active) ? active : product.categories[0];
-    return slug ? (categoryLabelBySlug.get(slug) ?? slug) : "";
-  };
+  // All of a product's category labels (colored), in the owner's category order.
+  const categoryTags = (product: ProductView) =>
+    product.categories.flatMap((slug) => categoryBySlug.get(slug) ?? []);
 
   const visible = useMemo(() => {
     const byCategory = category === "all" ? products : products.filter((p) => p.categories.includes(category));
@@ -113,7 +108,7 @@ export function ShopCatalog({
               autoplay={rotating}
               product={product}
               locale={locale}
-              categoryLabel={categoryTagLabel(product, category)}
+              categoryTags={categoryTags(product)}
             />
           ))}
         </div>

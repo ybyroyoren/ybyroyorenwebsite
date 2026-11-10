@@ -13,18 +13,20 @@ import { stagger } from "@/lib/motion";
 import { AUTOPLAY_MS, useAutoplay } from "@/lib/useAutoplay";
 import { ChevronIcon } from "@/components/site/ChevronIcon";
 import { AllergenTags } from "./AllergenTags";
+import { tagTextColor } from "@/lib/allergenTags";
 import styles from "./ProductCard.module.css";
 
 export function ProductCard({
   product,
   locale,
-  categoryLabel,
+  categoryTags,
   index = 0,
   autoplay = true,
 }: {
   product: ProductView;
   locale: Locale;
-  categoryLabel: string;
+  /** Every category the product is in, each with the owner's color. */
+  categoryTags: { slug: string; label: string; color: string }[];
   /** Position in the grid: the first row animates in at once, later cards as they scroll into view. */
   index?: number;
   /** Cycle through the product's photos on their own (the shop page can switch this off). */
@@ -96,7 +98,15 @@ export function ProductCard({
             decoding="async"
           />
         ))}
-        {categoryLabel && <span className={styles.tag}>{categoryLabel}</span>}
+        {categoryTags.length > 0 && (
+          <div className={styles.tags}>
+            {categoryTags.map((c) => (
+              <span key={c.slug} className={styles.tag} style={{ background: c.color, color: tagTextColor(c.color) }}>
+                {c.label}
+              </span>
+            ))}
+          </div>
+        )}
         {photos.length > 1 && (
           <>
             <button type="button" className={`${styles.photoNav} ${styles.photoPrev}`} onClick={(e) => changePhoto(e, -1)} aria-label={t.prevPhoto}>

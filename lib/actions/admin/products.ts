@@ -328,13 +328,28 @@ export async function createCategory(formData: FormData): Promise<void> {
 
   const { count } = await db.from("categories").select("id", { count: "exact", head: true });
 
+  const color = String(formData.get("color") ?? "");
   await db.from("categories").insert({
     slug: slugify(labelHe),
     label_he: labelHe,
     label_en: labelEn,
+    color: HEX_COLOR.test(color) ? color : "#efe8d8",
     sort_order: count ?? 0,
   });
 
+  revalidatePath("/admin/products");
+  expireCatalog();
+}
+
+export async function updateCategory(formData: FormData): Promise<void> {
+  const admin = await requireAdmin();
+  if (admin.role !== "owner") return;
+  const id = String(formData.get("id") ?? "");
+  const labelHe = String(formData.get("labelHe") ?? "").trim();
+  const labelEn = String(formData.get("labelEn") ?? "").trim();
+  const color = String(formData.get("color") ?? "");
+  if (!id || !labelHe || !labelEn || !HEX_COLOR.test(color)) return;
+  await supabaseAdmin().from("categories").update({ label_he: labelHe, label_en: labelEn, color }).eq("id", id);
   revalidatePath("/admin/products");
   expireCatalog();
 }

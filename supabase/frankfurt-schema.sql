@@ -619,3 +619,7 @@ on conflict do nothing;
 alter table products drop constraint if exists products_category_fkey;
 alter table products alter column category drop not null;
 
+-- ===== 0018_category_colors.sql =====
+-- Each shop category gets a color (shown on the category labels over product photos).
+alter table categories add column if not exists color text not null default '#efe8d8';
+
