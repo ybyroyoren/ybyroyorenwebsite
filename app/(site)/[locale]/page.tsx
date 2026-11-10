@@ -19,6 +19,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         <div className={styles.textCol}>
           <h1 className="enter" style={stagger(0)}>
             <span className={styles.bigY}>Y</span>
+            <span className={styles.byline}>by Roy Oren</span>
             <span className={styles.tagline}>{t.heading}</span>
           </h1>
           <div className={`${styles.actions} enter`} style={stagger(1)}>
@@ -32,7 +33,6 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               {t.ctaEvents}
             </Link>
           </div>
-          <div className={`${styles.eyebrow} enter`} style={stagger(2)}>{t.eyebrow}</div>
           <p className={`${styles.sub} enter`} style={stagger(3)}>{t.sub}</p>
         </div>
         {images.length > 0 && (

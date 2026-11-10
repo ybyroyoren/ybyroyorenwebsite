@@ -103,11 +103,12 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
-    padding: 16px 0 4px;
+    /* vertical only: the side padding comes from .wrap, so the links line up with the Y logo */
+    padding-block: 16px 4px;
   }
 
   .mobileMenu a {
-    padding: 12px 4px;
+    padding: 12px 0;
     font-size: 17px;
     font-weight: 500;
     border-bottom: 1px solid var(--line);

@@ -15,6 +15,7 @@ export function Footer({ locale }: { locale: Locale }) {
           <div className={styles.col}>
             <div className={styles.mark}>Y</div>
             <div className={styles.items}>
+              <div className={styles.brandLine}>by Roy Oren</div>
               <p>{t.tagline}</p>
             </div>
           </div>
