@@ -1,13 +1,10 @@
-/* One long page: the call-to-action first, then the intro, photos and event types. */
-.ctaSection {
-  display: flex;
-  justify-content: center;
-  padding: 80px 0 70px;
-  border-bottom: 1px solid var(--line);
-}
-
+/* One long page: intro, then the call-to-action, then the photos and event types. */
 .content {
   padding-block: 70px 120px;
+}
+
+.cta {
+  margin-bottom: 48px;
 }
 
 .eyebrow {
@@ -39,7 +36,7 @@
   font-size: 20px;
   line-height: 1.7;
   max-width: 640px;
-  margin-bottom: 44px;
+  margin-bottom: 36px;
 }
 
 /* A single photo at a time, wide on desktop and squarer on phones. */

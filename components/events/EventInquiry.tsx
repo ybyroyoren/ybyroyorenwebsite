@@ -12,7 +12,7 @@ export function EventInquiry({ locale }: { locale: Locale }) {
 
   return (
     <>
-      <button type="button" className={`ybtn ${styles.open}`} onClick={() => dialogRef.current?.showModal()}>
+      <button type="button" className={`ybtn ybtnGreen ${styles.open}`} onClick={() => dialogRef.current?.showModal()}>
         {t.ctaOpen}
       </button>
       <dialog

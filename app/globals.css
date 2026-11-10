@@ -191,6 +191,24 @@ html.js [data-reveal]:not([data-in]) {
   color: var(--cream);
 }
 
+.ybtn.ybtnGreen {
+  background: var(--olive-deep);
+  border-color: var(--olive-deep);
+  color: var(--cream);
+}
+
+.ybtn.ybtnGreen:not(:disabled):hover {
+  background: var(--olive);
+  border-color: var(--olive);
+  box-shadow: 0 0 0 1px var(--olive);
+}
+
+.ybtn.ybtnGreen:not(:disabled):active {
+  background: var(--ink);
+  border-color: var(--ink);
+  box-shadow: none;
+}
+
 .ybtn:disabled {
   opacity: 0.5;
   cursor: default;

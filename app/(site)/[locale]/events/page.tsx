@@ -16,10 +16,6 @@ export default async function EventsPage({ params }: { params: Promise<{ locale:
 
   return (
     <>
-      <div className={`wrap ${styles.ctaSection} enter`}>
-        <EventInquiry locale={locale} />
-      </div>
-
       <div className={`wrap ${styles.content}`}>
         <div className={`${styles.eyebrow} enter`}>{t.eyebrow}</div>
         <h1 className="enter" style={{ "--i": 1 } as React.CSSProperties}>
@@ -28,6 +24,10 @@ export default async function EventsPage({ params }: { params: Promise<{ locale:
         <p className={`${styles.intro} enter`} style={{ "--i": 2 } as React.CSSProperties}>
           {t.sub}
         </p>
+
+        <div className={`${styles.cta} enter`} style={{ "--i": 3 } as React.CSSProperties}>
+          <EventInquiry locale={locale} />
+        </div>
 
         {carouselImages.length > 0 && (
           <div className={styles.carouselWrap} data-reveal="">

@@ -25,7 +25,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             <Link className={`ybtn ${styles.btn}`} href={localePath(locale, "/meals")}>
               {t.ctaMeals}
             </Link>
-            <Link className={`ybtn ${styles.btn}`} href={localePath(locale, "/shop")}>
+            <Link className={`ybtn ybtnGreen ${styles.btn}`} href={localePath(locale, "/shop")}>
               {t.ctaShop}
             </Link>
             <Link className={`ybtn ${styles.btn}`} href={localePath(locale, "/events")}>
