@@ -5,6 +5,7 @@ import type { MediaItem } from "@/lib/media";
 import { getDict, type Locale } from "@/lib/dictionary";
 import { motionAllowed } from "@/lib/motion";
 import { PlayPauseIcon } from "./PlayPauseIcon";
+import { ChevronIcon } from "./ChevronIcon";
 import { AUTOPLAY_MS, useAutoplay } from "@/lib/useAutoplay";
 import styles from "./Carousel.module.css";
 
@@ -356,10 +357,10 @@ export function Carousel({
       {images.length > 1 && (
         <>
           <button type="button" className={`${styles.nav} ${styles.prev}`} onClick={() => onButton(-1)} aria-label={t.prev}>
-            ‹
+            <ChevronIcon dir="prev" />
           </button>
           <button type="button" className={`${styles.nav} ${styles.next}`} onClick={() => onButton(1)} aria-label={t.next}>
-            ›
+            <ChevronIcon dir="next" />
           </button>
         </>
       )}

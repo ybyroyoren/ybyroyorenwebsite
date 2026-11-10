@@ -101,11 +101,11 @@
 }
 
 .galleryPrev {
-  right: 14px;
+  inset-inline-start: 14px;
 }
 
 .galleryNext {
-  left: 14px;
+  inset-inline-end: 14px;
 }
 
 .galleryThumbs {
@@ -345,7 +345,7 @@
 }
 
 .relatedName {
-  font-family: var(--font-serif-family);
+  font-family: var(--font-sans-family);
   font-size: 18px;
   margin-bottom: 4px;
 }

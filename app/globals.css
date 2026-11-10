@@ -34,13 +34,14 @@ body {
   flex-direction: column;
 }
 
+/* Headings are sans-serif (the serif face is kept only for the Y logo mark). */
 h1,
 h2,
 h3,
 .serif {
-  font-family: var(--font-serif-family);
-  font-weight: 500;
-  letter-spacing: 0.01em;
+  font-family: var(--font-sans-family);
+  font-weight: 700;
+  letter-spacing: 0;
 }
 
 a {
@@ -202,6 +203,11 @@ html.js [data-reveal]:not([data-in]) {
 
 :where(.siteRoot) :where(button, input, select, textarea) {
   font-size: inherit;
+}
+
+/* Slider arrows mirror in right-to-left pages. */
+.chevron:dir(rtl) {
+  transform: scaleX(-1);
 }
 
 /* Press feedback for anything button-like. */

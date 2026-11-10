@@ -141,11 +141,11 @@
 }
 
 .prev {
-  right: 12px;
+  inset-inline-start: 12px;
 }
 
 .next {
-  left: 12px;
+  inset-inline-end: 12px;
 }
 
 @media (max-width: 860px) {

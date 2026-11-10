@@ -5,7 +5,7 @@ import "./globals.css";
 const frankRuhlLibre = Frank_Ruhl_Libre({
   variable: "--font-serif",
   subsets: ["latin", "hebrew"],
-  weight: ["300", "400", "500", "700", "900"],
+  weight: ["700", "900"], // only the Y logo mark still uses the serif face
   display: "swap",
 });
 

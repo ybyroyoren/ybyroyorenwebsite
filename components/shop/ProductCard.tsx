@@ -11,6 +11,7 @@ import { localizedProduct } from "@/lib/localizedProduct";
 import { useSwipe } from "@/lib/useSwipe";
 import { stagger } from "@/lib/motion";
 import { AUTOPLAY_MS, useAutoplay } from "@/lib/useAutoplay";
+import { ChevronIcon } from "@/components/site/ChevronIcon";
 import { AllergenTags } from "./AllergenTags";
 import styles from "./ProductCard.module.css";
 
@@ -99,10 +100,10 @@ export function ProductCard({
         {photos.length > 1 && (
           <>
             <button type="button" className={`${styles.photoNav} ${styles.photoPrev}`} onClick={(e) => changePhoto(e, -1)} aria-label={t.prevPhoto}>
-              ‹
+              <ChevronIcon dir="prev" size={16} />
             </button>
             <button type="button" className={`${styles.photoNav} ${styles.photoNext}`} onClick={(e) => changePhoto(e, 1)} aria-label={t.nextPhoto}>
-              ›
+              <ChevronIcon dir="next" size={16} />
             </button>
             <div className={styles.photoDots}>
               {photos.map((url, i) => (

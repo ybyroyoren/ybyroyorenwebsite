@@ -114,6 +114,7 @@
 
 /* Row 1: just the Y, as big as the hero allows. Row 2: the tagline. */
 .bigY {
+  font-family: var(--font-serif-family);
   font-size: clamp(130px, 19vw, 260px);
   font-weight: 700;
   line-height: 0.82;

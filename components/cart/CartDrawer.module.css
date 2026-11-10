@@ -89,7 +89,7 @@
 }
 
 .itemName {
-  font-family: var(--font-serif-family);
+  font-family: var(--font-sans-family);
   font-size: 18px;
   margin-bottom: 4px;
 }

@@ -85,11 +85,11 @@
 }
 
 .photoPrev {
-  right: 10px;
+  inset-inline-start: 10px;
 }
 
 .photoNext {
-  left: 10px;
+  inset-inline-end: 10px;
 }
 
 .photoDots {

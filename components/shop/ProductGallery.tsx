@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { getDict, type Locale } from "@/lib/dictionary";
 import { useSwipe } from "@/lib/useSwipe";
 import { PlayPauseIcon } from "@/components/site/PlayPauseIcon";
+import { ChevronIcon } from "@/components/site/ChevronIcon";
 import { AUTOPLAY_MS, useAutoplay } from "@/lib/useAutoplay";
 import styles from "@/app/(site)/[locale]/shop/[slug]/page.module.css";
 
@@ -76,10 +77,10 @@ export function ProductGallery({
         {imageUrls.length > 1 && (
           <>
             <button type="button" className={`${styles.galleryNav} ${styles.galleryPrev}`} onClick={() => changePhoto(-1)} aria-label={t.prevPhoto}>
-              ‹
+              <ChevronIcon dir="prev" size={20} />
             </button>
             <button type="button" className={`${styles.galleryNav} ${styles.galleryNext}`} onClick={() => changePhoto(1)} aria-label={t.nextPhoto}>
-              ›
+              <ChevronIcon dir="next" size={20} />
             </button>
           </>
         )}
