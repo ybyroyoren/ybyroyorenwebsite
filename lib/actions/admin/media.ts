@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/admin-auth";
 import { expireMedia } from "@/lib/cache";
+import { movedOrder, parseIds } from "@/lib/reorder";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { createUploadTicket, deleteImage, type UploadTicket } from "@/lib/storage";
 import type { MediaLocation } from "@/lib/media";
@@ -50,7 +51,15 @@ export async function attachMedia(location: string, url: string): Promise<void> 
     }
   }
 
-  await db.from("site_media").insert({ location, image_url: url });
+  // New photos go to the end of the carousel.
+  const { data: last } = await db
+    .from("site_media")
+    .select("sort_order")
+    .eq("location", location)
+    .order("sort_order", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  await db.from("site_media").insert({ location, image_url: url, sort_order: (last?.sort_order ?? -1) + 1 });
   revalidateMediaPaths();
 }
 
@@ -66,5 +75,19 @@ export async function deleteMedia(formData: FormData): Promise<void> {
   await db.from("site_media").delete().eq("id", id);
   await deleteImage(url);
 
+  revalidateMediaPaths();
+}
+
+/** Order of the photos in one carousel. `order` = the photo ids as currently listed. */
+export async function moveMedia(formData: FormData): Promise<void> {
+  const admin = await requireAdmin();
+  if (admin.role !== "owner") return;
+  const location = String(formData.get("location") ?? "");
+  const next = movedOrder(parseIds(formData.get("order")), String(formData.get("id") ?? ""), String(formData.get("direction") ?? ""));
+  if (!VALID_LOCATIONS.includes(location as MediaLocation) || !next) return;
+  const db = supabaseAdmin();
+  await Promise.all(
+    next.map((id, i) => db.from("site_media").update({ sort_order: i }).eq("id", id).eq("location", location))
+  );
   revalidateMediaPaths();
 }

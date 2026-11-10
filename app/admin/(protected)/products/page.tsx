@@ -14,6 +14,7 @@ import {
   deleteProduct,
   deleteProductSize,
   moveProduct,
+  moveProductImage,
   moveProductSize,
   setDefaultSize,
   getProductImageUploadTicket,
@@ -24,51 +25,10 @@ import {
   updateProduct,
   updateProductSize,
 } from "@/lib/actions/admin/products";
+import { OrderButtons } from "@/components/admin/OrderButtons";
 import { ConfirmButton } from "@/components/admin/ConfirmButton";
 import { ImageUploadButton } from "@/components/admin/ImageUploadButton";
 import styles from "../../admin.module.css";
-
-/** Move up / move down buttons for one row of an ordered list (server action; ids as currently listed). */
-function OrderButtons({
-  action,
-  id,
-  order,
-  extra,
-  isFirst,
-  isLast,
-  label,
-}: {
-  action: (formData: FormData) => Promise<void>;
-  id: string;
-  order: string;
-  extra?: Record<string, string>;
-  isFirst: boolean;
-  isLast: boolean;
-  label: string;
-}) {
-  return (
-    <div className={styles.orderButtons}>
-      {(["up", "down"] as const).map((direction) => (
-        <form key={direction} action={action}>
-          <input type="hidden" name="id" value={id} />
-          <input type="hidden" name="order" value={order} />
-          <input type="hidden" name="direction" value={direction} />
-          {Object.entries(extra ?? {}).map(([k, v]) => (
-            <input key={k} type="hidden" name={k} value={v} />
-          ))}
-          <button
-            type="submit"
-            className={styles.orderBtn}
-            disabled={direction === "up" ? isFirst : isLast}
-            aria-label={`${direction === "up" ? "הזזה למעלה" : "הזזה למטה"}: ${label}`}
-          >
-            {direction === "up" ? "↑" : "↓"}
-          </button>
-        </form>
-      ))}
-    </div>
-  );
-}
 
 export default async function AdminProductsPage() {
   const admin = await requireAdminSection("products");
@@ -408,7 +368,7 @@ export default async function AdminProductsPage() {
           {isOwner && (
             <>
               <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 16 }}>
-                {product.image_urls.map((url: string) => (
+                {product.image_urls.map((url: string, imgIdx: number) => (
                   <div key={url} style={{ position: "relative" }}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
@@ -416,6 +376,27 @@ export default async function AdminProductsPage() {
                       alt=""
                       style={{ width: 90, height: 90, objectFit: "cover", borderRadius: 6 }}
                     />
+                    {product.image_urls.length > 1 && (
+                      <div style={{ display: "flex", justifyContent: "center", marginTop: 4 }}>
+                        <div className={styles.orderButtons}>
+                          {(["up", "down"] as const).map((direction) => (
+                            <form key={direction} action={moveProductImage}>
+                              <input type="hidden" name="productId" value={product.id} />
+                              <input type="hidden" name="index" value={imgIdx} />
+                              <input type="hidden" name="direction" value={direction} />
+                              <button
+                                type="submit"
+                                className={styles.orderBtn}
+                                disabled={direction === "up" ? imgIdx === 0 : imgIdx === product.image_urls.length - 1}
+                                aria-label={direction === "up" ? "הזזה אחורה (מוקדם יותר)" : "הזזה קדימה (מאוחר יותר)"}
+                              >
+                                {direction === "up" ? "→" : "←"}
+                              </button>
+                            </form>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                     <form action={removeProductImage} style={{ marginTop: 4 }}>
                       <input type="hidden" name="productId" value={product.id} />
                       <input type="hidden" name="url" value={url} />

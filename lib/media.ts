@@ -17,7 +17,8 @@ export const getMediaByLocation = unstable_cache(
       .from("site_media")
       .select("id, image_url")
       .eq("location", location)
-      .order("sort_order", { ascending: true });
+      .order("sort_order", { ascending: true })
+      .order("created_at", { ascending: true });
 
     return (data ?? []).map((row) => ({ id: row.id, url: row.image_url }));
   },

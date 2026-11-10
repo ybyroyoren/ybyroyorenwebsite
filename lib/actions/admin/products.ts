@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/admin-auth";
 import { expireCatalog } from "@/lib/cache";
+import { movedOrder, parseIds } from "@/lib/reorder";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { createUploadTicket, deleteImage, type UploadTicket } from "@/lib/storage";
 
@@ -173,27 +174,6 @@ export async function updateProductSize(formData: FormData): Promise<void> {
   expireCatalog();
 }
 
-/**
- * Moves `id` one step up/down inside `order` (the ids exactly as the admin
- * page shows them) and returns the new list — or null when there is nothing to
- * move. Positions are then rewritten as 0..n-1, so rows that used to share a
- * sort_order end up with distinct ones.
- */
-function movedOrder(order: string[], id: string, direction: string): string[] | null {
-  const i = order.indexOf(id);
-  const j = direction === "up" ? i - 1 : direction === "down" ? i + 1 : -1;
-  if (i < 0 || j < 0 || j >= order.length) return null;
-  const next = [...order];
-  [next[i], next[j]] = [next[j], next[i]];
-  return next;
-}
-
-const parseIds = (raw: FormDataEntryValue | null) =>
-  String(raw ?? "")
-    .split(",")
-    .map((x) => x.trim())
-    .filter(Boolean);
-
 /** Shop order of the products. `order` = the ids as currently listed, `direction` = up | down. */
 export async function moveProduct(formData: FormData): Promise<void> {
   const admin = await requireAdmin();
@@ -231,6 +211,26 @@ export async function setDefaultSize(formData: FormData): Promise<void> {
   const db = supabaseAdmin();
   await db.from("product_sizes").update({ is_default: false }).eq("product_id", productId);
   await db.from("product_sizes").update({ is_default: true }).eq("id", id).eq("product_id", productId);
+  revalidatePath("/admin/products");
+  expireCatalog();
+}
+
+/** Moves one product photo earlier/later in the gallery (the order the shop shows them in). */
+export async function moveProductImage(formData: FormData): Promise<void> {
+  const admin = await requireAdmin();
+  if (admin.role !== "owner") return;
+  const productId = String(formData.get("productId") ?? "");
+  const index = Number(formData.get("index"));
+  const direction = String(formData.get("direction") ?? "");
+  if (!productId || !Number.isInteger(index)) return;
+  const db = supabaseAdmin();
+  const { data: product } = await db.from("products").select("image_urls").eq("id", productId).maybeSingle();
+  if (!product) return;
+  const target = direction === "up" ? index - 1 : direction === "down" ? index + 1 : -1;
+  const urls: string[] = [...product.image_urls];
+  if (index < 0 || index >= urls.length || target < 0 || target >= urls.length) return;
+  [urls[index], urls[target]] = [urls[target], urls[index]];
+  await db.from("products").update({ image_urls: urls }).eq("id", productId);
   revalidatePath("/admin/products");
   expireCatalog();
 }

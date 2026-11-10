@@ -1,6 +1,7 @@
 import { requireAdminSection } from "@/lib/admin-auth";
 import { getMediaByLocation, type MediaLocation } from "@/lib/media";
-import { attachMedia, deleteMedia, getMediaUploadTicket } from "@/lib/actions/admin/media";
+import { attachMedia, deleteMedia, getMediaUploadTicket, moveMedia } from "@/lib/actions/admin/media";
+import { OrderButtons } from "@/components/admin/OrderButtons";
 import { ImageUploadButton } from "@/components/admin/ImageUploadButton";
 import styles from "../../admin.module.css";
 
@@ -36,13 +37,15 @@ export default async function AdminMediaPage() {
       {await Promise.all(
         SECTIONS.map(async (section) => {
           const items = await getMediaByLocation(section.location);
+          const order = items.map((i) => i.id).join(",");
           return (
             <div key={section.location} className={styles.card}>
               <h2>{section.title}</h2>
               <p className={styles.muted}>{section.note}</p>
+              {items.length > 1 && <p className={styles.sectionNote}>סדר התמונות כאן הוא הסדר באתר: הראשונה מימין היא הראשונה שמוצגת. השתמש בחצים כדי להזיז.</p>}
 
               <div style={{ display: "flex", gap: 10, flexWrap: "wrap", margin: "16px 0" }}>
-                {items.map((item) => (
+                {items.map((item, i) => (
                   <div key={item.id} style={{ position: "relative" }}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
@@ -50,6 +53,20 @@ export default async function AdminMediaPage() {
                       alt=""
                       style={{ width: 110, height: 110, objectFit: "cover", borderRadius: 6 }}
                     />
+                    {items.length > 1 && (
+                      <div style={{ display: "flex", justifyContent: "center", marginTop: 4 }}>
+                        <OrderButtons
+                          action={moveMedia}
+                          id={item.id}
+                          order={order}
+                          extra={{ location: section.location }}
+                          isFirst={i === 0}
+                          isLast={i === items.length - 1}
+                          label={`תמונה ${i + 1}`}
+                          layout="row"
+                        />
+                      </div>
+                    )}
                     <form action={deleteMedia} style={{ marginTop: 4 }}>
                       <input type="hidden" name="id" value={item.id} />
                       <input type="hidden" name="url" value={item.url} />
