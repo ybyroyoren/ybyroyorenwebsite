@@ -31,6 +31,7 @@ export const ENTITY_LABELS: Record<string, string> = {
   kl_equipment: "ציוד",
   kl_guests: "סועד קבוע",
   kl_ingredients: "מרכיב",
+  kl_invoice_items: "פריט מהחשבונית",
   kl_recipes: "מתכון",
   kl_recipe_components: "רכיבי מתכון",
   kl_events: "אירוע",
@@ -94,6 +95,17 @@ export const FIELD_LABELS: Record<string, string> = {
   servings: "מנות",
   bring_offsite: "לקחת לאירוע חוץ",
   bring_items: "פריטים לקחת",
+  price_net: "מחיר נטו",
+  purchase_unit: "יחידת קנייה",
+  vat_rate: "מע״מ %",
+  units_per_purchase_unit: "כמות ביחידת קנייה",
+  yield_percent: "אחוז תפוקה",
+  invoice_date: "תאריך חשבונית",
+  invoice_no: "מס׳ חשבונית",
+  invoice_item_id: "פריט מהחשבונית",
+  supplier_id: "ספק",
+  purchase_name: "שם ברשימת קניות",
+  closed_at: "נסגר",
 };
 
 export const VALUE_LABELS: Record<string, string> = {

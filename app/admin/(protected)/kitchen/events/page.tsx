@@ -47,6 +47,11 @@ export default async function KitchenEventsPage() {
               <span className={ev.eventType === "offsite" ? styles.badgePending : styles.badgePaid}>
                 {ev.eventType === "offsite" ? "אירוע חוץ" : "אצלנו"}
               </span>
+              {ev.closedAt && (
+                <span className={styles.badgePending} style={{ marginInlineStart: 6 }}>
+                  נסגר
+                </span>
+              )}
               <h2 style={{ marginTop: 10 }}>{ev.name}</h2>
               <div className={kitchenStyles.eventMeta}>
                 <span>{formatEventDate(ev.date)}</span>

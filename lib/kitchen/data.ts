@@ -5,6 +5,7 @@ import type {
   KLEvent,
   KLGuest,
   KLIngredient,
+  KLInvoiceItem,
   KLRecipe,
   KLSupplier,
 } from "./types";
@@ -32,7 +33,7 @@ export async function getIngredients(): Promise<KLIngredient[]> {
   const db = supabaseAdmin();
   const { data } = await db
     .from("kl_ingredients")
-    .select("id, name, unit, supplier_id, purchase_name, purchase_unit, yield_percent, price")
+    .select("id, name, unit, supplier_id, purchase_name, purchase_unit, yield_percent, price, invoice_item_id, units_per_purchase_unit")
     .order("name");
   return (data ?? []).map((row) => ({
     id: row.id,
@@ -42,7 +43,29 @@ export async function getIngredients(): Promise<KLIngredient[]> {
     purchaseName: row.purchase_name,
     purchaseUnit: row.purchase_unit,
     yieldPercent: row.yield_percent,
-    price: row.price,
+    price: row.price === null ? null : Number(row.price),
+    invoiceItemId: row.invoice_item_id,
+    unitsPerPurchaseUnit: Number(row.units_per_purchase_unit ?? 1),
+  }));
+}
+
+export async function getInvoiceItems(): Promise<KLInvoiceItem[]> {
+  const db = supabaseAdmin();
+  const { data } = await db
+    .from("kl_invoice_items")
+    .select("id, name, supplier_id, purchase_unit, price_net, vat_rate, invoice_date, invoice_no, note, price_updated_at")
+    .order("name");
+  return (data ?? []).map((row) => ({
+    id: row.id,
+    name: row.name,
+    supplierId: row.supplier_id,
+    purchaseUnit: row.purchase_unit,
+    priceNet: row.price_net === null ? null : Number(row.price_net),
+    vatRate: Number(row.vat_rate),
+    invoiceDate: row.invoice_date,
+    invoiceNo: row.invoice_no,
+    note: row.note,
+    priceUpdatedAt: row.price_updated_at,
   }));
 }
 
@@ -91,7 +114,7 @@ export async function getEvents(): Promise<KLEvent[]> {
   const db = supabaseAdmin();
   const { data: eventRows } = await db
     .from("kl_events")
-    .select("id, name, date, event_type, location, guest_count, notes")
+    .select("id, name, date, event_type, location, guest_count, notes, closed_at, cost_snapshot")
     .order("date", { ascending: false });
   const { data: menuRows } = await db
     .from("kl_event_menu")
@@ -124,6 +147,8 @@ export async function getEvents(): Promise<KLEvent[]> {
     location: row.location,
     guestCount: row.guest_count,
     notes: row.notes,
+    closedAt: row.closed_at,
+    costSnapshot: row.cost_snapshot ?? null,
     menu: menuByEvent.get(row.id) ?? [],
     seats: (seatsByEvent.get(row.id) ?? []).sort((a, b) => a.seatIndex - b.seatIndex),
   }));

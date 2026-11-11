@@ -27,7 +27,26 @@ export interface KLIngredient {
   purchaseName: string;
   purchaseUnit: string;
   yieldPercent: number | null;
+  /** Price per `unit` (the cost engine's input). Computed by the database: invoice item price_net / unitsPerPurchaseUnit. */
   price: number | null;
+  /** The invoice item this ingredient is a "form" of (null only for legacy rows being relinked). */
+  invoiceItemId: string | null;
+  /** How many `unit`s (g, ml, pieces) one purchase unit of the invoice item yields, before yield loss. */
+  unitsPerPurchaseUnit: number;
+}
+
+/** One thing bought from a supplier, priced exactly as on the invoice (net, per purchase unit). */
+export interface KLInvoiceItem {
+  id: string;
+  name: string;
+  supplierId: string | null;
+  purchaseUnit: string;
+  priceNet: number | null;
+  vatRate: number;
+  invoiceDate: string | null;
+  invoiceNo: string;
+  note: string;
+  priceUpdatedAt: string | null;
 }
 
 export type KLRecipeType = "dish" | "prep";
@@ -96,6 +115,18 @@ export interface KLEvent {
   location: string;
   guestCount: number;
   notes: string;
+  /** Set when the event was closed: costs are then frozen in `costSnapshot`. */
+  closedAt: string | null;
+  costSnapshot: KLEventCostSnapshot | null;
   menu: KLEventMenuItem[];
   seats: KLEventGuestSeat[];
+}
+
+/** Cost of an event as it was when the event was closed (later price changes don't touch it). */
+export interface KLEventCostSnapshot {
+  takenAt: string;
+  total: number;
+  lines: { recipeId: string; recipeName: string; servings: number; unit: string; cost: number }[];
+  /** True when some ingredient had no price at that time (the total is understated). */
+  partial: boolean;
 }

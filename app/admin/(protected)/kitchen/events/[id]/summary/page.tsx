@@ -13,6 +13,8 @@ import {
 } from "@/lib/kitchen/algorithms";
 import { buildSummaryText } from "@/lib/kitchen/summaryText";
 import { toggleCompletedItem } from "@/lib/actions/admin/kitchen-checklist";
+import { closeKitchenEvent, reopenKitchenEvent } from "@/lib/actions/admin/kitchen-events";
+import { ConfirmButton } from "@/components/admin/ConfirmButton";
 import { CopySummaryButton } from "@/components/admin/kitchen/CopySummaryButton";
 import { PrintButton } from "@/components/admin/kitchen/PrintButton";
 import { formatCurrency } from "@/lib/pricing";
@@ -121,7 +123,12 @@ export default async function EventSummaryPage({ params }: { params: Promise<{ i
   const isOffsite = event.eventType === "offsite";
   const equipmentRows = isOffsite ? buildEquipmentList(event.menu, recipesById, equipmentById) : [];
   const bringItems = isOffsite ? buildBringItems(event.menu, recipesById, ingredientsById) : [];
-  const cost = isOwner ? eventCostBreakdown(event.menu, recipesById, ingredientsById) : null;
+  const liveCost = isOwner ? eventCostBreakdown(event.menu, recipesById, ingredientsById) : null;
+  // A closed event shows the cost frozen when it was closed, not today's prices.
+  const frozen = isOwner ? event.costSnapshot : null;
+  const cost = frozen
+    ? { total: frozen.total, lines: frozen.lines.map((l) => ({ recipeId: l.recipeId, servings: l.servings, cost: l.cost })) }
+    : liveCost;
 
   const summaryText = buildSummaryText(event, guestsById, shoppingGroups, prepForest, equipmentRows, bringItems, cost);
   const assignedSeats = event.seats.filter((s) => s.guestId);
@@ -252,6 +259,14 @@ export default async function EventSummaryPage({ params }: { params: Promise<{ i
       {isOwner && cost && (
         <div className={styles.section}>
           <h2>עלות חומרי גלם</h2>
+          {frozen && (
+            <p className={adminStyles.muted}>
+              האירוע נסגר ב-{new Date(frozen.takenAt).toLocaleDateString("he-IL", { timeZone: "Asia/Jerusalem" })}, והעלות נשמרה כפי שהייתה אז.
+              שינויי מחיר מאז לא משפיעים עליה. {frozen.partial ? "בזמן הסגירה לחלק מהמרכיבים עדיין לא היה מחיר, והסכום חלקי. " : ""}
+              שינוי בתפריט האירוע לא יעדכן אותה: פתחו מחדש וסגרו שוב.
+              {liveCost && Math.abs(liveCost.total - frozen.total) > 0.005 && ` (לפי המחירים של היום: ${formatCurrency(liveCost.total)})`}
+            </p>
+          )}
           {cost.lines.map((line) => {
             const recipe = recipesById.get(line.recipeId);
             return (
@@ -265,6 +280,21 @@ export default async function EventSummaryPage({ params }: { params: Promise<{ i
           <p className={styles.disclaimer}>
             עלות חומרי גלם בלבד — לא כולל עבודה, ציוד, הובלה או רווח.
           </p>
+          <form action={frozen ? reopenKitchenEvent : closeKitchenEvent} style={{ marginTop: 12 }}>
+            <input type="hidden" name="id" value={event.id} />
+            {frozen ? (
+              <ConfirmButton className={adminStyles.btnSecondary} message="לפתוח את האירוע מחדש? העלות השמורה תימחק והעלות תחושב שוב לפי המחירים הנוכחיים.">
+                פתיחה מחדש (חישוב לפי מחירים נוכחיים)
+              </ConfirmButton>
+            ) : (
+              <ConfirmButton
+                className={adminStyles.btnSecondary}
+                message="לסגור את האירוע ולשמור את העלות הנוכחית? שינויי מחיר בהמשך לא ישנו את העלות של האירוע הזה."
+              >
+                סגירת אירוע ושמירת העלות
+              </ConfirmButton>
+            )}
+          </form>
         </div>
       )}
     </>
