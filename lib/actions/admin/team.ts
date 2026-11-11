@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/admin-auth";
 import { supabaseAdmin } from "@/lib/supabase/server";
+import { logAdminEvent } from "@/lib/audit";
 import type { AdminRole } from "@/lib/supabase/types";
 
 const VALID_ROLES: AdminRole[] = ["owner", "kitchen", "sales"];
@@ -38,6 +39,7 @@ export async function createTeamMember(
     return { error: profileError.message };
   }
 
+  await logAdminEvent("create", { entityType: "team", entityLabel: email, changes: { role: [null, role] } });
   revalidatePath("/admin/team");
   return { error: null };
 }
@@ -51,7 +53,15 @@ export async function updateTeamMemberRole(formData: FormData): Promise<void> {
   const role = String(formData.get("role") ?? "") as AdminRole;
   if (!id || !VALID_ROLES.includes(role)) return;
 
+  const { data: member } = await db.auth.admin.getUserById(id);
+  const { data: previous } = await db.from("admin_profiles").select("role").eq("id", id).maybeSingle();
   await db.from("admin_profiles").update({ role }).eq("id", id);
+  await logAdminEvent("update", {
+    entityType: "team",
+    entityId: id,
+    entityLabel: member?.user?.email ?? id,
+    changes: { role: [previous?.role ?? null, role] },
+  });
   revalidatePath("/admin/team");
 }
 
@@ -63,7 +73,9 @@ export async function revokeTeamMember(formData: FormData): Promise<void> {
   const id = String(formData.get("id") ?? "");
   if (!id || id === admin.id) return;
 
+  const { data: member } = await db.auth.admin.getUserById(id);
   await db.from("admin_profiles").delete().eq("id", id);
   await db.auth.admin.deleteUser(id);
+  await logAdminEvent("delete", { entityType: "team", entityId: id, entityLabel: member?.user?.email ?? id });
   revalidatePath("/admin/team");
 }

@@ -1,5 +1,6 @@
 import "server-only";
 import { createClient } from "@supabase/supabase-js";
+import { withAudit } from "@/lib/audit";
 
 // Service-role client. This is the ONLY way the app touches Supabase for
 // data (see supabase/migrations/0001_init.sql for why RLS has no policies).
@@ -21,7 +22,10 @@ export function supabaseAdmin() {
     );
   }
 
-  return createClient(url, key, {
-    auth: { persistSession: false },
-  });
+  // Wrapped so admin-panel writes are recorded in the audit log (lib/audit.ts).
+  return withAudit(
+    createClient(url, key, {
+      auth: { persistSession: false },
+    })
+  );
 }

@@ -300,7 +300,7 @@ const dictionary = {
     },
     cookieNotice: {
       ariaLabel: "הודעה על שימוש בעוגיות",
-      textBefore: "האתר משתמש בעוגייה חיונית אחת בלבד לתפעול עגלת הקניות, ללא אנליטיקס או פרסום. פרטים נוספים ב",
+      textBefore: "האתר משתמש בעוגייה חיונית אחת בלבד לתפעול עגלת הקניות, ואוסף סטטיסטיקות שימוש אנונימיות ללא עוגיות וללא פרסום. פרטים נוספים ב",
       linkText: "מדיניות העוגיות",
       textAfter: " שלנו.",
       accept: "הבנתי",
@@ -617,7 +617,7 @@ const dictionary = {
     },
     cookieNotice: {
       ariaLabel: "Cookie usage notice",
-      textBefore: "This site uses a single essential cookie to run the shopping cart, with no analytics or advertising. More details in our ",
+      textBefore: "This site uses a single essential cookie to run the shopping cart, and collects anonymous usage statistics without cookies and with no advertising. More details in our ",
       linkText: "Cookie Policy",
       textAfter: ".",
       accept: "Got it",

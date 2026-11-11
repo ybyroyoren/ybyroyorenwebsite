@@ -5,6 +5,7 @@ import { finalizeOrder, getOrderById } from "@/lib/orders";
 import { formatCurrency } from "@/lib/pricing";
 import { resolveLocale, localePath } from "@/lib/i18n";
 import { getDict } from "@/lib/dictionary";
+import { TrackEvent } from "@/components/site/TrackEvent";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = { title: "ההזמנה התקבלה" };
@@ -32,6 +33,7 @@ export default async function CheckoutSuccessPage({
 
   return (
     <div className={styles.wrap}>
+      <TrackEvent type="purchase" props={{ order_id: order.id }} value={order.total} dedupe={`purchase:${order.id}`} />
       <h1>{order.status === "paid" ? t.paidHeading : t.pendingHeading}</h1>
       <p>{t.thanks(order.customerName)}</p>
       <p>{t.orderNumber(order.id)}</p>

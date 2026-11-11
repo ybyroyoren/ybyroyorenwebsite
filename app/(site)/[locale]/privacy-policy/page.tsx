@@ -10,7 +10,7 @@ export default async function PrivacyPolicyPage({ params }: { params: Promise<{ 
   const { locale: rawLocale } = await params;
   const locale = resolveLocale(rawLocale);
   return (
-    <LegalLayout eyebrow="מדיניות" title="מדיניות פרטיות" updated="20.07.2026" locale={locale}>
+    <LegalLayout eyebrow="מדיניות" title="מדיניות פרטיות" updated="11.11.2026" locale={locale}>
       <h2>כללי</h2>
       <p>
         אתר Y by Roy Oren (&quot;האתר&quot;) מופעל על ידי רוי אורן, עוסק מורשה מס&apos; 203310750
@@ -30,6 +30,11 @@ export default async function PrivacyPolicyPage({ params }: { params: Promise<{ 
         </li>
         <li>כתובת אימייל — במידה ונרשמתם לניוזלטר.</li>
         <li>עוגיית דפדפן חיונית לתפעול עגלת הקניות — ראו את <a href={localePath(locale, "/cookie-policy")}>מדיניות העוגיות</a>.</li>
+        <li>
+          נתוני שימוש אנונימיים באתר (עמודים שנצפו, זמן שהייה, לחיצות, סוג מכשיר ודפדפן, מדינה
+          בקירוב, מקור ההגעה) — ללא עוגיות, ללא כתובת IP וללא פרטים מזהים. ראו את{" "}
+          <a href={localePath(locale, "/cookie-policy")}>מדיניות העוגיות</a>.
+        </li>
       </ul>
       <p>
         אנחנו <strong>לא</strong> אוספים ולא שומרים פרטי כרטיס אשראי — הסליקה מתבצעת ישירות מול

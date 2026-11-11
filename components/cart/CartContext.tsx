@@ -1,5 +1,6 @@
 "use client";
 
+import { track } from "@/lib/analytics/client";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { CartItemView } from "@/lib/cart";
 import { computeCartTotals, GREETING_CARD_FEE } from "@/lib/pricing";
@@ -107,6 +108,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const removeItem = useCallback(async (cartItemId: string) => {
+    track("remove_from_cart");
     setIsLoading(true);
     try {
       const updated = await cartRequest("DELETE", { cartItemId });
@@ -129,6 +131,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       body: JSON.stringify({ code }),
     });
     const data = await res.json();
+    track("coupon_apply", { valid: Boolean(data.valid) });
     if (data.valid) {
       setDiscountPct(data.discountPct);
       setCouponCode(code.trim().toUpperCase());
@@ -156,7 +159,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setGreetingCardMessage: (message: string) => setGreetingCardMessage(message.slice(0, GREETING_CARD_MAX_LENGTH)),
     isOpen,
     isLoading,
-    open: () => setIsOpen(true),
+    open: () => {
+      track("cart_open");
+      setIsOpen(true);
+    },
     close: () => setIsOpen(false),
     addItem,
     updateQty,

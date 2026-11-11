@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { ProductView } from "@/lib/products";
 import { useCart } from "@/components/cart/CartContext";
+import { track } from "@/lib/analytics/client";
 import { formatCurrency, priceIncludingVat } from "@/lib/pricing";
 import { getDict, type Locale } from "@/lib/dictionary";
 import styles from "@/app/(site)/[locale]/shop/[slug]/page.module.css";
@@ -18,6 +19,7 @@ export function ProductPurchase({ product, locale }: { product: ProductView; loc
 
   async function handleAdd() {
     if (!size || !inStock) return;
+    track("add_to_cart", { name: product.name, size: size.label, qty }, { value: priceIncludingVat(size.priceBeforeVat) * qty });
     await cart.addItem(size.id, qty);
   }
 

@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import { getDict, type Locale } from "@/lib/dictionary";
+import { track } from "@/lib/analytics/client";
 import { EventsForm } from "./EventsForm";
 import styles from "./EventInquiry.module.css";
 
@@ -12,7 +13,10 @@ export function EventInquiry({ locale }: { locale: Locale }) {
 
   return (
     <>
-      <button type="button" className={`ybtn ybtnGreen ${styles.open}`} onClick={() => dialogRef.current?.showModal()}>
+      <button type="button" className={`ybtn ybtnGreen ${styles.open}`} onClick={() => {
+          track("event_inquiry_open");
+          dialogRef.current?.showModal();
+        }}>
         {t.ctaOpen}
       </button>
       <dialog

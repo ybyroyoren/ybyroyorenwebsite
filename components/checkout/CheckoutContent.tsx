@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCart } from "@/components/cart/CartContext";
+import { TrackEvent } from "@/components/site/TrackEvent";
 import { CheckoutSummary } from "./CheckoutSummary";
 import { CheckoutForm } from "./CheckoutForm";
 import { getDict, type Locale } from "@/lib/dictionary";
@@ -23,6 +24,7 @@ export function CheckoutContent({ locale }: { locale: Locale }) {
 
   return (
     <div className={`wrap ${styles.layout}`}>
+      <TrackEvent type="checkout_start" />
       <CheckoutSummary locale={locale} />
       <CheckoutForm locale={locale} />
     </div>

@@ -14,6 +14,8 @@ const NAV: { section: AdminSection; href: string; label: string }[] = [
   { section: "notifications", href: "/admin/notifications", label: "התראות אימייל" },
   { section: "kitchen_ledger", href: "/admin/kitchen", label: "ניהול אירועים" },
   { section: "team", href: "/admin/team", label: "צוות" },
+  { section: "analytics", href: "/admin/analytics", label: "סטטיסטיקות אתר" },
+  { section: "logs", href: "/admin/logs", label: "יומן פעולות" },
 ];
 
 const ROLE_LABELS = { owner: "בעלים", kitchen: "מטבח", sales: "מכירות" };

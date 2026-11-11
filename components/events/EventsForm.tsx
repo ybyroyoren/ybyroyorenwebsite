@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { getDict, type Locale } from "@/lib/dictionary";
+import { track } from "@/lib/analytics/client";
 import styles from "@/app/(site)/[locale]/events/page.module.css";
 
 const HOURS = Array.from({ length: 16 }, (_, i) => `${String(i + 8).padStart(2, "0")}:00`);
@@ -97,6 +98,7 @@ export function EventsForm({ locale }: { locale: Locale }) {
         setError(result.error ?? f.errorGeneric);
         return;
       }
+      track("event_inquiry_submit", { event_type: eventType ?? "", guests });
       setSubmitted(true);
     } catch {
       setError(f.errorGeneric);

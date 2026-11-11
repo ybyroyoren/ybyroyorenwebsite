@@ -9,6 +9,7 @@ import { CookieNotice } from "@/components/site/CookieNotice";
 import { AccessibilityWidget } from "@/components/site/AccessibilityWidget";
 import { RevealObserver } from "@/components/site/RevealObserver";
 import { ScrollToTop } from "@/components/site/ScrollToTop";
+import { Analytics } from "@/components/site/Analytics";
 
 export function generateStaticParams() {
   return LOCALES.map((locale) => ({ locale }));
@@ -47,6 +48,7 @@ export default async function SiteLayout({
         <CookieNotice locale={locale} />
         <RevealObserver />
         <ScrollToTop />
+        <Analytics />
       </div>
     </CartProvider>
   );

@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
+import { track } from "@/lib/analytics/client";
 import { subscribeToNewsletter, type NewsletterState } from "@/lib/actions/newsletter";
 import { getDict, type Locale } from "@/lib/dictionary";
 import styles from "./Footer.module.css";
@@ -15,6 +16,9 @@ export function NewsletterForm({
   locale: Locale;
 }) {
   const [state, action, pending] = useActionState(subscribeToNewsletter, initialState);
+  useEffect(() => {
+    if (state.status === "success") track("newsletter_signup", { source });
+  }, [state]);
   const t = getDict(locale).footer;
 
   return (

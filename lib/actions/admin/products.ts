@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/admin-auth";
 import { expireCatalog } from "@/lib/cache";
 import { movedOrder, parseIds } from "@/lib/reorder";
+import { logAdminEvent } from "@/lib/audit";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { createUploadTicket, deleteImage, type UploadTicket } from "@/lib/storage";
 
@@ -24,12 +25,41 @@ async function setProductCategories(
   raw: FormDataEntryValue[]
 ): Promise<void> {
   const categoryIds = raw.map(String).filter(Boolean);
+  const before = await relationLabels(db, "product_categories", "categories(label_he)", productId);
   await db.from("product_categories").delete().eq("product_id", productId);
   if (categoryIds.length > 0) {
     await db
       .from("product_categories")
       .insert(categoryIds.map((category_id) => ({ product_id: productId, category_id })));
   }
+  const after = await relationLabels(db, "product_categories", "categories(label_he)", productId);
+  await logRelationChange(db, productId, "categories", before, after);
+}
+
+type Db = ReturnType<typeof supabaseAdmin>;
+
+/** Hebrew names of a product's categories / allergens (for the audit log). */
+async function relationLabels(db: Db, table: string, select: string, productId: string): Promise<string[]> {
+  try {
+    const { data } = await db.from(table).select(select).eq("product_id", productId);
+    return ((data ?? []) as unknown as Record<string, { label_he: string } | null>[])
+      .flatMap((row) => Object.values(row).flatMap((v) => (v && typeof v === "object" ? [v.label_he] : [])))
+      .sort();
+  } catch {
+    return [];
+  }
+}
+
+/** Audit entry for a product's category / allergen tags, shown with their names. */
+async function logRelationChange(db: Db, productId: string, field: string, before: string[], after: string[]): Promise<void> {
+  if (JSON.stringify(before) === JSON.stringify(after)) return;
+  const { data: product } = await db.from("products").select("name").eq("id", productId).maybeSingle();
+  await logAdminEvent("update", {
+    entityType: "products",
+    entityId: productId,
+    entityLabel: product?.name ?? null,
+    changes: { [field]: [before.join(", ") || null, after.join(", ") || null] },
+  });
 }
 
 export async function createProduct(formData: FormData): Promise<void> {
@@ -106,12 +136,14 @@ export async function updateProduct(formData: FormData): Promise<void> {
 
   // Allergen tags: the ticked ones replace whatever was set before.
   const allergenIds = formData.getAll("allergenIds").map(String).filter(Boolean);
+  const allergensBefore = await relationLabels(db, "product_allergens", "allergens(label_he)", id);
   await db.from("product_allergens").delete().eq("product_id", id);
   if (allergenIds.length > 0) {
     await db
       .from("product_allergens")
       .insert(allergenIds.map((allergen_id) => ({ product_id: id, allergen_id })));
   }
+  await logRelationChange(db, id, "allergens", allergensBefore, await relationLabels(db, "product_allergens", "allergens(label_he)", id));
 
   revalidatePath("/admin/products");
   expireCatalog();

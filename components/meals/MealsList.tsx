@@ -1,5 +1,6 @@
 "use client";
 
+import { track } from "@/lib/analytics/client";
 import { useState } from "react";
 import type { MealView, DinerInput } from "@/lib/meals";
 import { seatsLabel, seatsDisplayPct, isLowSeats } from "@/lib/seats";
@@ -28,6 +29,7 @@ export function MealsList({ meals, locale }: { meals: MealView[]; locale: Locale
   const RESTRICTION_OPTIONS = d.restrictions;
 
   function openMeal(meal: MealView) {
+    track("meal_register_open", { meal_date: meal.date, remaining: meal.remainingSeats });
     setSelectedMeal(meal);
     setSeatsCount(1);
     setDiners([emptyDiner()]);
@@ -85,6 +87,7 @@ export function MealsList({ meals, locale }: { meals: MealView[]; locale: Locale
 
     setSubmitting(true);
     setError(null);
+    track("meal_register_submit", { meal_date: selectedMeal.date, seats: seatsCount }, { value: seatsCount });
     try {
       const res = await fetch("/api/meals/register", {
         method: "POST",

@@ -1,5 +1,6 @@
 "use client";
 
+import { track } from "@/lib/analytics/client";
 import { useActionState } from "react";
 import { submitCheckout, type CheckoutState } from "@/lib/actions/checkout";
 import { useCart } from "@/components/cart/CartContext";
@@ -15,7 +16,7 @@ export function CheckoutForm({ locale }: { locale: Locale }) {
   const f = getDict(locale).checkout.form;
 
   return (
-    <form className={styles.form} action={action}>
+    <form className={styles.form} action={action} onSubmit={() => track("checkout_submit")}>
       <input type="hidden" name="locale" value={locale} />
       <input type="hidden" name="couponCode" value={cart.couponCode} />
       <input

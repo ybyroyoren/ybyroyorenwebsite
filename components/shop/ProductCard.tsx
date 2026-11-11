@@ -13,6 +13,7 @@ import { stagger } from "@/lib/motion";
 import { AUTOPLAY_MS, useAutoplay } from "@/lib/useAutoplay";
 import { ChevronIcon } from "@/components/site/ChevronIcon";
 import { AllergenTags } from "./AllergenTags";
+import { track } from "@/lib/analytics/client";
 import { tagTextColor } from "@/lib/allergenTags";
 import styles from "./ProductCard.module.css";
 
@@ -47,6 +48,7 @@ export function ProductCard({
     if (!size || !inStock) return;
     setJustAdded(true);
     setTimeout(() => setJustAdded(false), 1200);
+    track("add_to_cart", { name: product.name, size: size.label, qty: 1 }, { value: priceIncludingVat(size.priceBeforeVat) });
     try {
       await cart.addItem(size.id, 1);
     } catch {

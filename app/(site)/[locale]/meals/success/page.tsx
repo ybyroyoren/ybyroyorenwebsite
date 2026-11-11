@@ -5,6 +5,7 @@ import { finalizeMealRegistration, getRegistrationById } from "@/lib/meals";
 import { formatCurrency } from "@/lib/pricing";
 import { resolveLocale, localePath } from "@/lib/i18n";
 import { getDict } from "@/lib/dictionary";
+import { TrackEvent } from "@/components/site/TrackEvent";
 import styles from "../../checkout/success/page.module.css";
 
 export const metadata: Metadata = { title: "ההרשמה התקבלה" };
@@ -32,6 +33,12 @@ export default async function MealSuccessPage({
 
   return (
     <div className={styles.wrap}>
+      <TrackEvent
+        type="meal_paid"
+        props={{ registration_id: registration.id, seats: registration.seatsCount }}
+        value={registration.depositTotal}
+        dedupe={`meal_paid:${registration.id}`}
+      />
       <h1>{registration.status === "paid" ? t.paidHeading : t.pendingHeading}</h1>
       <p>{t.thanks(registration.customerName)}</p>
       <p>{t.mealLine(registration.mealTitle, registration.mealDate)}</p>

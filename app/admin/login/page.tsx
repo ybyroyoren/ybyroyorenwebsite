@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabaseBrowser } from "@/lib/supabase/browser";
+import { recordAdminLogin, recordFailedLogin } from "@/lib/actions/admin/session";
 import styles from "../admin.module.css";
 
 export default function AdminLoginPage() {
@@ -21,11 +22,13 @@ export default function AdminLoginPage() {
     const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
 
     if (signInError) {
+      void recordFailedLogin(email);
       setError("אימייל או סיסמה שגויים");
       setPending(false);
       return;
     }
 
+    await recordAdminLogin();
     router.push("/admin");
     router.refresh();
   }

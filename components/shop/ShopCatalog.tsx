@@ -5,6 +5,7 @@ import type { ProductView } from "@/lib/products";
 import type { AllergenTag } from "@/lib/allergenTags";
 import { getDict, type Locale } from "@/lib/dictionary";
 import { useRowAlign } from "@/lib/useRowAlign";
+import { track } from "@/lib/analytics/client";
 import { ShopFilters } from "./ShopFilters";
 import { ProductCard } from "./ProductCard";
 import styles from "@/app/(site)/[locale]/shop/page.module.css";
@@ -47,6 +48,8 @@ export function ShopCatalog({
   }, []);
 
   function update(nextCategory: string, nextSort: string) {
+    if (nextCategory !== category) track("filter_use", { filter: "category", value: nextCategory });
+    if (nextSort !== sort) track("filter_use", { filter: "sort", value: nextSort });
     setCategory(nextCategory);
     setSort(nextSort);
     const params = new URLSearchParams();
@@ -93,7 +96,10 @@ export function ShopCatalog({
         onSortChange={(next) => update(category, next)}
         allergens={allergens}
         excludedAllergens={excluded}
-        onToggleAllergen={(id) => setExcluded((cur) => (cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id]))}
+        onToggleAllergen={(id) => {
+          if (!excluded.includes(id)) track("filter_use", { filter: "allergen_free", value: allergens.find((a) => a.id === id)?.labelHe ?? id });
+          setExcluded((cur) => (cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id]));
+        }}
         onClearAllergens={() => setExcluded([])}
         rotation={hasGalleries ? { playing: rotating, onToggle: () => setRotating((r) => !r) } : undefined}
       />

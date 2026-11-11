@@ -6,6 +6,7 @@ import { localizedProduct } from "@/lib/localizedProduct";
 import { resolveLocale, localePath } from "@/lib/i18n";
 import { getDict } from "@/lib/dictionary";
 import { ProductPurchase } from "@/components/shop/ProductPurchase";
+import { TrackEvent } from "@/components/site/TrackEvent";
 import { AllergenTags } from "@/components/shop/AllergenTags";
 import { ProductGallery } from "@/components/shop/ProductGallery";
 import { formatCurrency, priceIncludingVat } from "@/lib/pricing";
@@ -50,6 +51,7 @@ export default async function ProductPage({
 
   return (
     <>
+      <TrackEvent type="product_view" props={{ slug: product.slug, name: product.name }} />
       <div className={`wrap ${styles.breadcrumb} enter`}>
         <Link href={localePath(locale, "/shop")}>{t.shop.eyebrow}</Link> / {p.name}
       </div>

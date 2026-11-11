@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
+import { track } from "@/lib/analytics/client";
 import { submitContactForm, type ContactState } from "@/lib/actions/contact";
 import { getDict, type Locale } from "@/lib/dictionary";
 import styles from "@/app/(site)/[locale]/contact/page.module.css";
@@ -9,6 +10,9 @@ const initialState: ContactState = { status: "idle", message: "" };
 
 export function ContactForm({ locale }: { locale: Locale }) {
   const [state, action, pending] = useActionState(submitContactForm, initialState);
+  useEffect(() => {
+    if (state.status === "success") track("contact_submit");
+  }, [state]);
   const f = getDict(locale).contact.form;
 
   return (
