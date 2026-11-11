@@ -171,6 +171,8 @@ export interface Database {
           status: RegistrationStatus;
           grow_payment_id: string | null;
           receipt_doc_id: string | null;
+          /** 'admin' = entered or touched by the owner: always holds its seats. 'web' = site checkout. */
+          source: "web" | "admin";
           created_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["meal_registrations"]["Row"]> & {

@@ -50,6 +50,7 @@ export async function createManualRegistration(formData: FormData): Promise<void
       seats_count: 1,
       deposit_total: paid ? DEPOSIT_PER_SEAT : 0,
       status: paid ? "paid" : "pending",
+      source: "admin",
     })
     .select("id")
     .single();
@@ -133,6 +134,8 @@ export async function addDinerToRegistration(formData: FormData): Promise<void> 
     deposit_paid: paid,
   });
 
+  // Once the owner adds someone by hand, the registration keeps its seats.
+  await db.from("meal_registrations").update({ source: "admin" }).eq("id", registrationId);
   await syncRegistrationSeats(db, registrationId);
   revalidatePath("/admin/meals");
   expireMeals();
