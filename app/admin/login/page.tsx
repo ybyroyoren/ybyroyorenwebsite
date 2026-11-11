@@ -1,13 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import { recordAdminLogin, recordFailedLogin } from "@/lib/actions/admin/session";
 import styles from "../admin.module.css";
 
 export default function AdminLoginPage() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -18,27 +16,37 @@ export default function AdminLoginPage() {
     setPending(true);
     setError(null);
 
-    const supabase = supabaseBrowser();
-    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+    try {
+      const supabase = supabaseBrowser();
+      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
 
-    if (signInError) {
-      void recordFailedLogin(email);
-      setError("אימייל או סיסמה שגויים");
+      if (signInError) {
+        void recordFailedLogin(email).catch(() => {});
+        setError("אימייל או סיסמה שגויים");
+        setPending(false);
+        return;
+      }
+
+      // Note the sign-in in the activity log, but never let that hold the user up: at most ~1.5 seconds.
+      await Promise.race([
+        (async () => {
+          for (let attempt = 0; attempt < 3; attempt++) {
+            const ok = await recordAdminLogin().catch(() => false);
+            if (ok) return;
+            await new Promise((r) => setTimeout(r, 300));
+          }
+        })(),
+        new Promise((r) => setTimeout(r, 1500)),
+      ]);
+    } catch {
+      setError("משהו השתבש בכניסה. נסו לרענן את הדף ולהיכנס שוב.");
       setPending(false);
       return;
     }
 
-    // Logging the sign-in must never hold the user up: it runs in the background, retrying while the
-    // session cookie isn't visible to the server yet.
-    void (async () => {
-      for (let attempt = 0; attempt < 4; attempt++) {
-        const ok = await recordAdminLogin().catch(() => false);
-        if (ok) return;
-        await new Promise((r) => setTimeout(r, 800));
-      }
-    })();
-    router.push("/admin");
-    router.refresh();
+    // A full page load (not a client-side navigation): the new session cookie is sent for sure, and
+    // the form can never be left "connecting" by a router that is waiting on something.
+    window.location.assign("/admin");
   }
 
   return (
