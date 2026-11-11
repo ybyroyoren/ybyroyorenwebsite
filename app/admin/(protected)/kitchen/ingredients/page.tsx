@@ -107,10 +107,30 @@ export default async function KitchenIngredientsPage({
   return (
     <>
       <h1>מרכיבים ופריטים מהחשבונית</h1>
-      <p className={styles.muted}>
-        כל מחיר מוזן פעם אחת לפריט מהחשבונית, נטו וליחידת הקנייה כמו בחשבונית (ק״ג, קלח, שק). המרכיבים שהמתכונים משתמשים בהם הם צורות של הפריט:
-        לכל צורה כמות משלה ביחידת קנייה ואחוז תפוקה משלה. מחיר ליחידת מדידה מחושב אוטומטית. שום מחיר לא משתנה בלי אישור שלך, ולפני שמירה אפשר לראות בתצוגה מקדימה איך עלויות המתכונים ישתנו.
-      </p>
+      <div className={styles.helpBox}>
+        <b>איך זה עובד, בקצרה:</b> מזינים את המחיר פעם אחת, כמו בחשבונית: מה קנית ובכמה. אחר כך מגדירים איזה מרכיבים במתכונים יוצאים ממנו ומה אחוז הפחת. המערכת מחשבת לבד כמה עולה גרם שמיש. שום מחיר לא משתנה בלי אישור שלך, ולפני שמירה רואים איך עלויות המתכונים ישתנו.
+        <details style={{ marginTop: 8 }}>
+          <summary style={{ cursor: "pointer", fontWeight: 600 }}>דוגמאות: ביצים, תירס, בצל (לחץ לפתיחה)</summary>
+          <div style={{ marginTop: 10, lineHeight: 1.7 }}>
+            <p>
+              <b>ביצים L (מחיר ביצה 1.21).</b> פריט: ״ביצים L״, קונים לפי <b>ביצה</b>, מחיר <b>1.21</b>. אחר כך שלושה מרכיבים מאותו פריט, כל אחד עם &quot;כמה יוצא מ-1 ביצה&quot; = 60 גרם (המשקל עם קליפה):
+              <br />• ״ביצה (בלי קליפה)״: 60 גרם, מתוכם <b>50</b> שמישים
+              <br />• ״חלמון״: 60 גרם, מתוכם <b>20</b> שמישים
+              <br />• ״חלבון״: 60 גרם, מתוכם <b>30</b> שמישים
+              <br />התוצאה: גרם ביצה 0.0242, גרם חלמון 0.0605, גרם חלבון 0.0403 ₪.
+            </p>
+            <p>
+              <b>תירס.</b> פריט: ״קלחי תירס״, קונים לפי <b>ק״ג</b>, מחיר ל-ק״ג לפי החשבונית. מרכיב: ״גרעיני תירס״: יוצאים 1000 גרם (קילו קלחים), מתוכם <b>440</b> שמישים (גרעינים).
+            </p>
+            <p>
+              <b>בצל סגול.</b> פריט: ״בצל סגול״, קונים לפי <b>ק״ג</b>, מחיר ל-ק״ג. מרכיבים: ״בצל סגול מקולף״: 1000 גרם, מתוכם למשל <b>850</b> שמישים. ״בצל סגול פרוס דק״: 1000 גרם, מתוכם למשל <b>800</b> שמישים.
+            </p>
+            <p className={styles.muted}>
+              הפריטים הקיימים נשמרו כמו שהיו: ״קונים לפי גרם״ ומחיר לגרם, כדי שהעלויות לא ישתנו. כשמעדכנים מחיר מחשבונית, לחצו ״עריכה״ ואז ״המר לק״ג״ כדי להזין את המחיר לקילו כמו בחשבונית.
+            </p>
+          </div>
+        </details>
+      </div>
       <p className={styles.muted}>
         {items.length} פריטים · {missingPrice} בלי מחיר{warningCount > 0 ? ` · ${warningCount} עם אזהרה (⚠, אזהרה בלבד, שום דבר לא נשנה אוטומטית)` : ""}
       </p>
@@ -145,11 +165,11 @@ export default async function KitchenIngredientsPage({
             </select>
           </div>
           <div className={styles.field}>
-            <label>יחידת קנייה</label>
-            <input name="purchaseUnit" type="text" list="purchase-units" placeholder="ק״ג / קלח / שק" required style={{ width: 110 }} />
+            <label>קונים לפי (ק״ג, ביצה, קלח...)</label>
+            <input name="purchaseUnit" type="text" list="purchase-units" placeholder="ק״ג / ביצה / קלח" required style={{ width: 110 }} />
           </div>
           <div className={styles.field}>
-            <label>מחיר נטו ליחידת קנייה</label>
+            <label>מחיר ליחידת קנייה אחת, לפני מע״מ</label>
             <input name="priceNet" type="number" min="0" step="0.0001" style={{ width: 130 }} />
           </div>
           <div className={styles.field}>
@@ -165,23 +185,23 @@ export default async function KitchenIngredientsPage({
             <input name="invoiceNo" type="text" style={{ width: 100 }} />
           </div>
           <p className={styles.sectionNote} style={{ width: "100%", margin: "4px 0" }}>
-            המרכיב הראשון של הפריט (אפשר להוסיף צורות נוספות אחר כך):
+            המרכיב הראשון שמשתמשים בו במתכונים (אפשר להוסיף מרכיבים נוספים מאותו פריט אחר כך, למשל חלמון וחלבון מביצה):
           </p>
           <div className={styles.field}>
-            <label>שם המרכיב (ריק = כמו הפריט)</label>
+            <label>שם המרכיב במתכונים (ריק = כמו הפריט)</label>
             <input name="formName" type="text" />
           </div>
           <div className={styles.field}>
-            <label>יחידת מדידה</label>
+            <label>מודדים במתכון ב-</label>
             <input name="formUnit" type="text" list="measure-units" defaultValue="גרם" required style={{ width: 90 }} />
           </div>
           <div className={styles.field}>
-            <label>כמות ביחידת קנייה</label>
+            <label>כמה יוצא מיחידת קנייה אחת (לפני פחת)</label>
             <input name="unitsPerPurchaseUnit" type="number" min="0.00001" step="any" defaultValue={1000} required style={{ width: 110 }} />
           </div>
           <div className={styles.field}>
-            <label>אחוז תפוקה</label>
-            <input name="yieldPercent" type="number" min="1" max="100" step="0.1" style={{ width: 90 }} />
+            <label>כמה אחוז שמיש אחרי פחת (ריק = 100%)</label>
+            <input name="yieldPercent" type="number" min="1" max="100" step="0.1" placeholder="למשל 85" style={{ width: 110 }} />
           </div>
           <button type="submit" className={styles.btn}>
             הוספה
@@ -196,24 +216,24 @@ export default async function KitchenIngredientsPage({
         head={
           <tr>
             <th>
-              <Link href={sortHref(sp, "name")}>פריט / מרכיב{sortArrow(sp, "name")}</Link>
+              <Link href={sortHref(sp, "name")}>פריט מהחשבונית{sortArrow(sp, "name")}</Link>
             </th>
             <th>
               <Link href={sortHref(sp, "supplier")}>ספק{sortArrow(sp, "supplier")}</Link>
             </th>
             <th>
-              <Link href={sortHref(sp, "purchaseUnit")}>יחידת קנייה{sortArrow(sp, "purchaseUnit")}</Link>
+              <Link href={sortHref(sp, "purchaseUnit")}>קונים לפי{sortArrow(sp, "purchaseUnit")}</Link>
             </th>
             <th>
-              <Link href={sortHref(sp, "price")}>מחיר נטו{sortArrow(sp, "price")}</Link>
+              <Link href={sortHref(sp, "price")}>מחיר ליחידה (לפני מע״מ){sortArrow(sp, "price")}</Link>
             </th>
             <th>מע״מ</th>
             <th>
               <Link href={sortHref(sp, "updated")}>עודכן{sortArrow(sp, "updated")}</Link>
             </th>
-            <th>כמות ביחידה</th>
-            <th>תפוקה %</th>
-            <th>מחיר ליחידת מדידה</th>
+            <th>יוצא מיחידה אחת</th>
+            <th>מתוכו שמיש</th>
+            <th>עלות ל-1 גרם שמיש</th>
             <th></th>
           </tr>
         }

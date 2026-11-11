@@ -22,7 +22,10 @@ export interface InvoiceActions {
 
 type Mode = "combined" | "item" | "form" | "newForm" | "move";
 
+const round = (n: number) => Math.round(n * 100000) / 100000;
 const money = (n: number | null) => (n === null ? "—" : formatNum(n));
+/** What 1 usable gram (or ml / piece) really costs: price per unit divided by the usable share. */
+const perUsable = (f: KLIngredient) => (f.price === null ? null : f.price / ((f.yieldPercent ?? 100) / 100));
 const dateText = (iso: string | null) => (iso ? new Date(iso).toLocaleDateString("he-IL", { timeZone: "Asia/Jerusalem" }) : "—");
 
 /** Rows for one invoice item: a single simple row when it has one form, otherwise the item row with its forms below. */
@@ -71,15 +74,15 @@ export function InvoiceItemRows({
             <td>
               {formatNum(single.unitsPerPurchaseUnit)} {single.unit}
             </td>
-            <td>{single.yieldPercent ?? "—"}</td>
-            <td>{money(single.price)}</td>
+            <td>{formatNum(single.unitsPerPurchaseUnit * ((single.yieldPercent ?? 100) / 100))} {single.unit}</td>
+            <td>{money(perUsable(single))}</td>
             <td>
               <div className={styles.rowActions}>
                 <button type="button" className={styles.btnSecondary} onClick={() => setModal({ mode: "combined", form: single })}>
                   עריכה
                 </button>
                 <button type="button" className={styles.btnSecondary} onClick={() => setModal({ mode: "newForm" })} title="צורה נוספת של אותו פריט, עם אותו מחיר">
-                  + צורה
+                  + מרכיב
                 </button>
               </div>
             </td>
@@ -87,7 +90,7 @@ export function InvoiceItemRows({
         ) : (
           <>
             <td colSpan={3} className={styles.muted}>
-              {forms.length} צורות
+              {forms.length} מרכיבים לאותו פריט
             </td>
             <td>
               <div className={styles.rowActions}>
@@ -95,7 +98,7 @@ export function InvoiceItemRows({
                   עריכת הפריט
                 </button>
                 <button type="button" className={styles.btnSecondary} onClick={() => setModal({ mode: "newForm" })}>
-                  + צורה
+                  + מרכיב
                 </button>
               </div>
             </td>
@@ -107,7 +110,7 @@ export function InvoiceItemRows({
         forms.map((f) => (
           <tr key={f.id} className={styles.formRow}>
             <td>
-              ↳ {f.name}
+              ↳ מרכיב: {f.name}
               {(warnings[f.id] ?? []).length > 0 && (
                 <span className={styles.warnBadge} title={(warnings[f.id] ?? []).join("\n")}>
                   ⚠
@@ -118,8 +121,8 @@ export function InvoiceItemRows({
             <td>
               {formatNum(f.unitsPerPurchaseUnit)} {f.unit}
             </td>
-            <td>{f.yieldPercent ?? "—"}</td>
-            <td>{money(f.price)}</td>
+            <td>{formatNum(f.unitsPerPurchaseUnit * ((f.yieldPercent ?? 100) / 100))} {f.unit}</td>
+            <td>{money(perUsable(f))}</td>
             <td>
               <div className={styles.rowActions}>
                 <button type="button" className={styles.btnSecondary} onClick={() => setModal({ mode: "form", form: f })}>
@@ -174,7 +177,20 @@ function EditModal({
   const showItem = mode === "combined" || mode === "item";
   const showForm = mode === "combined" || mode === "form" || mode === "newForm";
   const title =
-    mode === "newForm" ? `צורה נוספת של ${item.name}` : mode === "move" ? `העברת ${form?.name} לפריט אחר` : mode === "item" ? `עריכת ${item.name}` : `עריכת ${form?.name ?? item.name}`;
+    mode === "newForm" ? `מרכיב נוסף מהפריט ״${item.name}״` : mode === "move" ? `העברת ${form?.name} לפריט אחר` : mode === "item" ? `עריכת הפריט ״${item.name}״` : `עריכת ${form?.name ?? item.name}`;
+
+  // Values that feed the live explanation ("what does this cost me per gram?").
+  const [priceNet, setPriceNet] = useState(item.priceNet === null ? "" : String(item.priceNet));
+  const [purchaseUnit, setPurchaseUnit] = useState(item.purchaseUnit);
+  const [formName, setFormName] = useState(mode === "newForm" ? "" : (form?.name ?? item.name));
+  const [formUnit, setFormUnit] = useState(form?.unit ?? "גרם");
+  const [units, setUnits] = useState(String(form?.unitsPerPurchaseUnit ?? 1000));
+  const [usable, setUsable] = useState(form ? String(round(form.unitsPerPurchaseUnit * ((form.yieldPercent ?? 100) / 100))) : "");
+  const unitsN = Number(units);
+  const usableN = usable === "" ? unitsN : Number(usable);
+  const yieldPct = unitsN > 0 && usableN > 0 && usableN < unitsN ? Math.round((usableN / unitsN) * 10000) / 100 : null;
+  const priceN = priceNet === "" ? null : Number(priceNet);
+  const costPerUsable = priceN !== null && usableN > 0 ? priceN / usableN : null;
 
   const saveAction: Action =
     mode === "combined" ? actions.updateItemAndForm : mode === "item" ? actions.updateInvoiceItem : mode === "form" ? actions.updateForm : mode === "newForm" ? actions.addForm : actions.moveFormToItem;
@@ -234,10 +250,30 @@ function EditModal({
 
         {showItem && (
           <>
+            <p className={styles.helpBox} style={{ width: "100%" }}>
+              <b>שלב 1: מה קונים ובכמה?</b> כמו שכתוב בחשבונית של הספק.
+            </p>
             <div className={styles.field} style={{ width: "100%" }}>
-              <label>שם הפריט (כמו בחשבונית)</label>
-              <input name="itemName" type="text" defaultValue={item.name} required />
+              <label>שם הפריט בחשבונית</label>
+              <input name="itemName" type="text" defaultValue={item.name} required placeholder="למשל: ביצים L / בצל סגול / קלחי תירס" />
             </div>
+            {mode === "combined" && /^גרם$/.test(purchaseUnit.trim()) && Number(units) === 1 && priceN !== null && (
+              <div style={{ width: "100%" }}>
+                <button
+                  type="button"
+                  className={styles.btnSecondary}
+                  onClick={() => {
+                    // Same cost, expressed the way the invoice reads: per kg (price x 1000, 1000 g per kg).
+                    setPurchaseUnit("ק״ג");
+                    setPriceNet(String(round((priceN ?? 0) * 1000)));
+                    setUnits("1000");
+                    if (usable !== "") setUsable(String(round(Number(usable) * 1000)));
+                  }}
+                >
+                  המר לק״ג (כמו בחשבונית), העלות לא משתנה
+                </button>
+              </div>
+            )}
             <div className={styles.field} style={{ flex: 1 }}>
               <label>ספק</label>
               <select name="supplierId" defaultValue={item.supplierId ?? ""}>
@@ -250,15 +286,36 @@ function EditModal({
               </select>
             </div>
             <div className={styles.field}>
-              <label>יחידת קנייה</label>
-              <input name="purchaseUnit" type="text" list="purchase-units" defaultValue={item.purchaseUnit} required style={{ width: 110 }} />
+              <label>קונים לפי (יחידת קנייה)</label>
+              <input
+                name="purchaseUnit"
+                type="text"
+                list="purchase-units"
+                value={purchaseUnit}
+                onChange={(e) => setPurchaseUnit(e.target.value)}
+                required
+                style={{ width: 130 }}
+                placeholder="ק״ג / ביצה / קלח"
+              />
+              <small className={styles.hint}>מה הספק סופר בחשבונית: ק״ג, ביצה, קלח, שק...</small>
             </div>
             <div className={styles.field}>
-              <label>מחיר נטו ליחידת קנייה</label>
-              <input name="priceNet" type="number" min="0" step="0.0001" defaultValue={item.priceNet ?? ""} style={{ width: 130 }} />
+              <label>מחיר ליחידת קנייה אחת, לפני מע״מ</label>
+              <input
+                name="priceNet"
+                type="number"
+                min="0"
+                step="0.0001"
+                value={priceNet}
+                onChange={(e) => setPriceNet(e.target.value)}
+                style={{ width: 150 }}
+              />
+              <small className={styles.hint}>
+                {purchaseUnit ? `כמה עולה 1 ${purchaseUnit} (למשל 1.21 לביצה אחת, או 7.5 לק״ג)` : "למשל 1.21 לביצה אחת, או 7.5 לק״ג"}
+              </small>
             </div>
             <div className={styles.field}>
-              <label>מע״מ % (מידע בלבד)</label>
+              <label>מע״מ % (לידיעה בלבד)</label>
               <input name="vatRate" type="number" min="0" max="99" step="0.1" defaultValue={item.vatRate} style={{ width: 90 }} />
             </div>
             <div className={styles.field}>
@@ -278,49 +335,102 @@ function EditModal({
 
         {showForm && (
           <>
-            {mode === "combined" && (
-              <p className={styles.sectionNote} style={{ width: "100%" }}>
-                המרכיב שמתכונים משתמשים בו: כמה גרם (או מ״ל / יחידות) מתקבלים מיחידת קנייה אחת, ואחוז התפוקה אחרי קילוף וגזירה.
-              </p>
-            )}
+            <p className={styles.helpBox} style={{ width: "100%" }}>
+              <b>{mode === "newForm" ? "המרכיב החדש:" : "שלב 2: מה משתמשים במתכונים?"}</b> זה השם שיופיע בעריכת מתכון. מאותו פריט אפשר להכין כמה מרכיבים, למשל מביצה: ״ביצה (בלי קליפה)״, ״חלמון״ ו״חלבון״.
+            </p>
             <div className={styles.field} style={{ width: "100%" }}>
-              <label>שם המרכיב</label>
-              <input name="formName" type="text" defaultValue={mode === "newForm" ? "" : (form?.name ?? item.name)} required placeholder={mode === "newForm" ? "למשל: בצל מקולף" : ""} />
+              <label>שם המרכיב במתכונים</label>
+              <input
+                name="formName"
+                type="text"
+                value={formName}
+                onChange={(e) => setFormName(e.target.value)}
+                required
+                placeholder="למשל: חלמון / בצל סגול מקולף / גרעיני תירס"
+              />
             </div>
             <div className={styles.field}>
-              <label>יחידת מדידה במתכון</label>
-              <input name="formUnit" type="text" list="measure-units" defaultValue={form?.unit ?? "גרם"} required style={{ width: 100 }} />
+              <label>במה מודדים אותו במתכון?</label>
+              <input
+                name="formUnit"
+                type="text"
+                list="measure-units"
+                value={formUnit}
+                onChange={(e) => setFormUnit(e.target.value)}
+                required
+                style={{ width: 100 }}
+              />
+              <small className={styles.hint}>בדרך כלל גרם</small>
             </div>
             <div className={styles.field}>
-              <label>כמות ביחידת קנייה</label>
-              <input name="unitsPerPurchaseUnit" type="number" min="0.00001" step="any" defaultValue={form?.unitsPerPurchaseUnit ?? 1000} required style={{ width: 120 }} />
+              <label>כמה {formUnit || "גרם"} יוצאים מ-1 {purchaseUnit || "יחידת קנייה"}? (לפני פחת)</label>
+              <input
+                name="unitsPerPurchaseUnit"
+                type="number"
+                min="0.00001"
+                step="any"
+                value={units}
+                onChange={(e) => setUnits(e.target.value)}
+                required
+                style={{ width: 150 }}
+              />
+              <small className={styles.hint}>המשקל המלא של מה שקנית, כולל קליפה / עצם / גבעולים. ביצה L: 60. קילו: 1000.</small>
             </div>
             <div className={styles.field}>
-              <label>אחוז תפוקה (ריק = 100%)</label>
-              <input name="yieldPercent" type="number" min="1" max="100" step="0.1" defaultValue={form?.yieldPercent ?? ""} style={{ width: 120 }} />
+              <label>ומתוכם כמה {formUnit || "גרם"} שמישים אחרי הפחת?</label>
+              <input
+                type="number"
+                min="0.00001"
+                step="any"
+                value={usable}
+                onChange={(e) => setUsable(e.target.value)}
+                placeholder={`ריק = הכול שמיש (${units || 0})`}
+                style={{ width: 150 }}
+              />
+              <input type="hidden" name="yieldPercent" value={yieldPct ?? ""} />
+              <small className={styles.hint}>
+                מה נשאר אחרי קילוף / קליפה / גזירה, מה שבאמת נכנס למתכון. {yieldPct !== null ? `(זה ${yieldPct}% תפוקה)` : ""}
+              </small>
             </div>
+
+            <div className={styles.explainBox} style={{ width: "100%" }}>
+              <b>איך המערכת תחשב:</b>{" "}
+              {priceN !== null && purchaseUnit && unitsN > 0 ? (
+                <>
+                  קונים 1 {purchaseUnit} ב-₪{formatNum(priceN)}. ממנו יוצאים {formatNum(unitsN)} {formUnit}, ומתוכם {formatNum(usableN)} {formUnit} שמישים
+                  {yieldPct !== null ? ` (${yieldPct}%)` : ""}. לכן 1 {formUnit} של ״{formName || "המרכיב"}״ עולה{" "}
+                  <b>₪{costPerUsable !== null ? formatNum(Math.round(costPerUsable * 1e6) / 1e6) : "?"}</b>.
+                </>
+              ) : (
+                <>מלאו מחיר, יחידת קנייה וכמות כדי לראות כאן כמה עולה 1 {formUnit || "גרם"}.</>
+              )}
+            </div>
+
             {mode !== "newForm" && (
-              <>
-                <div className={styles.field} style={{ flex: 1 }}>
-                  <label>שם ברשימת קניות (אם שונה)</label>
-                  <input name="purchaseName" type="text" defaultValue={form?.purchaseName ?? ""} />
+              <details style={{ width: "100%" }}>
+                <summary className={styles.muted}>רשימת קניות (לא חובה)</summary>
+                <div className={styles.form} style={{ marginTop: 8 }}>
+                  <div className={styles.field} style={{ flex: 1 }}>
+                    <label>שם ברשימת קניות (אם שונה)</label>
+                    <input name="purchaseName" type="text" defaultValue={form?.purchaseName ?? ""} />
+                  </div>
+                  <div className={styles.field}>
+                    <label>יחידה ברשימת קניות</label>
+                    <input name="listUnit" type="text" defaultValue={form?.purchaseUnit ?? ""} style={{ width: 100 }} />
+                  </div>
                 </div>
-                <div className={styles.field}>
-                  <label>יחידה ברשימת קניות</label>
-                  <input name="listUnit" type="text" defaultValue={form?.purchaseUnit ?? ""} style={{ width: 100 }} />
-                </div>
-              </>
+              </details>
             )}
           </>
         )}
 
         {mode === "move" && (
           <>
-            <p className={styles.sectionNote} style={{ width: "100%" }}>
-              המרכיב יהפוך לצורה של פריט אחר מהחשבונית, וייקח את המחיר שלו. זה שינוי ידני בלבד, ואפשר לראות בתצוגה המקדימה איך העלויות ישתנו.
+            <p className={styles.helpBox} style={{ width: "100%" }}>
+              המרכיב ״{form?.name}״ יהפוך למרכיב של פריט אחר מהחשבונית וייקח את המחיר שלו. למשל: להעביר את ״חלמון״ ו״חלבון״ לפריט ״ביצים L״, כדי שמחיר אחד יעדכן את שלושתם. אפשר לראות בתצוגה המקדימה איך העלויות ישתנו לפני שמירה.
             </p>
             <div className={styles.field} style={{ flex: 1 }}>
-              <label>הפריט שאליו מעבירים</label>
+              <label>העבר לפריט</label>
               <select name="targetItemId" required defaultValue="">
                 <option value="" disabled>
                   בחירת פריט...
@@ -333,8 +443,9 @@ function EditModal({
               </select>
             </div>
             <div className={styles.field}>
-              <label>כמות ביחידת הקנייה של הפריט החדש</label>
+              <label>כמה {form?.unit ?? "גרם"} יוצאים מיחידת קנייה אחת של הפריט החדש? (לפני פחת)</label>
               <input name="unitsPerPurchaseUnit" type="number" min="0.00001" step="any" defaultValue={form?.unitsPerPurchaseUnit ?? 1000} required style={{ width: 150 }} />
+              <small className={styles.hint}>אחרי ההעברה אפשר לערוך את המרכיב ולהגדיר כמה ממנו שמיש.</small>
             </div>
           </>
         )}

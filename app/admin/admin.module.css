@@ -849,3 +849,29 @@
   color: #7a5b00;
   font-weight: 600;
 }
+
+.helpBox {
+  background: var(--olive-mist);
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 14.5px;
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+
+.explainBox {
+  background: rgba(79, 134, 198, 0.12);
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 14.5px;
+  line-height: 1.7;
+}
+
+.hint {
+  display: block;
+  margin-top: 4px;
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--ink-soft);
+  max-width: 260px;
+}
