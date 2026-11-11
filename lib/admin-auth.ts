@@ -10,6 +10,21 @@ export interface AdminUser {
   role: AdminRole;
 }
 
+/** Like requireAdmin(), but returns null instead of redirecting. */
+export async function getAdminOrNull(): Promise<AdminUser | null> {
+  try {
+    const auth = await supabaseServerAuth();
+    const {
+      data: { user },
+    } = await auth.auth.getUser();
+    if (!user) return null;
+    const { data: profile } = await supabaseAdmin().from("admin_profiles").select("role").eq("id", user.id).maybeSingle();
+    return profile ? { id: user.id, email: user.email ?? "", role: profile.role } : null;
+  } catch {
+    return null;
+  }
+}
+
 /** Redirects to /admin/login if there's no session or no admin_profiles row. */
 export async function requireAdmin(): Promise<AdminUser> {
   const auth = await supabaseServerAuth();

@@ -10,9 +10,10 @@ export function SignOutButton() {
 
   async function handleSignOut() {
     try {
-      await recordAdminLogout();
+      // Never block signing out on the log entry: give it a moment, then carry on.
+      await Promise.race([recordAdminLogout(), new Promise((resolve) => setTimeout(resolve, 1500))]);
     } catch {
-      // never block signing out
+      /* ignore */
     }
     await supabaseBrowser().auth.signOut();
     router.push("/admin/login");

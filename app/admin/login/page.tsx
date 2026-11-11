@@ -28,7 +28,15 @@ export default function AdminLoginPage() {
       return;
     }
 
-    await recordAdminLogin();
+    // Logging the sign-in must never hold the user up: it runs in the background, retrying while the
+    // session cookie isn't visible to the server yet.
+    void (async () => {
+      for (let attempt = 0; attempt < 4; attempt++) {
+        const ok = await recordAdminLogin().catch(() => false);
+        if (ok) return;
+        await new Promise((r) => setTimeout(r, 800));
+      }
+    })();
     router.push("/admin");
     router.refresh();
   }
