@@ -110,7 +110,7 @@ export function InvoiceItemRows({
             <td>
               <div className={styles.rowActions}>
                 <button type="button" className={styles.btnSecondary} onClick={() => setModal({ mode: "item" })}>
-                  עריכת הפריט
+                  עריכת מחיר הפריט
                 </button>
                 <button type="button" className={styles.btnSecondary} onClick={() => setModal({ mode: "newForm" })}>
                   + מרכיב
@@ -141,7 +141,7 @@ export function InvoiceItemRows({
             <td>
               <div className={styles.rowActions}>
                 <button type="button" className={styles.btnSecondary} onClick={() => setModal({ mode: "form", form: f })}>
-                  עריכה
+                  עריכת המרכיב
                 </button>
               </div>
             </td>
