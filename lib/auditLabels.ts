@@ -40,6 +40,7 @@ export const ENTITY_LABELS: Record<string, string> = {
   kl_event_completed_items: "סימון הכנות",
   team: "חבר צוות",
   login: "חשבון",
+  password_reset: "איפוס סיסמה",
 };
 
 export const FIELD_LABELS: Record<string, string> = {
@@ -84,6 +85,7 @@ export const FIELD_LABELS: Record<string, string> = {
   seats_count: "מספר מקומות",
   location: "מיקום",
   role: "תפקיד",
+  password: "סיסמה",
   email: "אימייל",
   categories: "קטגוריות",
   allergens: "אלרגנים",

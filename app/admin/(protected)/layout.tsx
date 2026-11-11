@@ -45,6 +45,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             </Link>
           ))}
         </nav>
+        <Link href="/admin/account" className={styles.siteLink} style={{ marginTop: "auto", marginBottom: 8 }}>
+          החשבון שלי · החלפת סיסמה
+        </Link>
         <SignOutButton />
       </aside>
       <div className={styles.content}>{children}</div>

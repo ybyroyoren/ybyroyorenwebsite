@@ -882,3 +882,11 @@
   background: rgba(79, 134, 198, 0.08);
   white-space: nowrap;
 }
+
+.success {
+  color: var(--olive-deep);
+  background: var(--olive-mist);
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+}

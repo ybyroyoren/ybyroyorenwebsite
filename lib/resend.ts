@@ -72,3 +72,19 @@ export async function sendMealRegistrationConfirmationEmail(params: {
     `,
   });
 }
+
+export async function sendPasswordResetEmail(params: { to: string; link: string }): Promise<void> {
+  await sendEmail({
+    to: params.to,
+    subject: "איפוס סיסמה לתוכנת הניהול — Y by Roy Oren",
+    html: `
+      <div dir="rtl" style="font-family: sans-serif; line-height: 1.7;">
+        <h2>איפוס סיסמה</h2>
+        <p>התקבלה בקשה לאיפוס הסיסמה לתוכנת הניהול של Y by Roy Oren.</p>
+        <p><a href="${params.link}" style="display:inline-block;padding:12px 24px;background:#3d4828;color:#fff;border-radius:999px;text-decoration:none;font-weight:600;">בחירת סיסמה חדשה</a></p>
+        <p>הקישור תקף לשעה אחת ואפשר להשתמש בו פעם אחת בלבד.</p>
+        <p style="color:#666;">אם לא ביקשת לאפס את הסיסמה, אפשר להתעלם מהמייל. הסיסמה הנוכחית לא תשתנה.</p>
+      </div>
+    `,
+  });
+}

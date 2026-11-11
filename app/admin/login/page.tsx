@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import { recordAdminLogin, recordFailedLogin } from "@/lib/actions/admin/session";
@@ -90,6 +91,9 @@ export default function AdminLoginPage() {
           <button type="submit" className={styles.btn} disabled={pending}>
             {pending ? "מתחבר..." : "כניסה"}
           </button>
+          <Link href="/admin/forgot-password" className={styles.muted} style={{ textAlign: "center" }}>
+            שכחתי סיסמה
+          </Link>
         </div>
       </form>
     </div>
