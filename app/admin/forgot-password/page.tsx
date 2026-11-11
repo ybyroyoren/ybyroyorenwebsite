@@ -34,9 +34,14 @@ export default function ForgotPasswordPage() {
               אם הכתובת <b>{email}</b> שייכת למשתמש בתוכנת הניהול, נשלח אליה עכשיו מייל עם קישור לבחירת סיסמה חדשה. הקישור תקף לשעה.
             </p>
             <p className={styles.muted}>לא הגיע? בדקו בתיקיית הספאם, או נסו שוב בעוד כמה דקות.</p>
-            <Link href="/admin/login" className={styles.btnSecondary} style={{ display: "inline-block", marginTop: 8 }}>
-              חזרה לכניסה
-            </Link>
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 8 }}>
+              <Link href="/admin/login" className={styles.btnSecondary}>
+                חזרה לכניסה
+              </Link>
+              <Link href="/" className={styles.btnSecondary}>
+                חזרה לאתר
+              </Link>
+            </div>
           </>
         ) : (
           <div className={styles.form} style={{ flexDirection: "column", alignItems: "stretch" }}>
@@ -51,6 +56,9 @@ export default function ForgotPasswordPage() {
             </button>
             <Link href="/admin/login" className={styles.muted} style={{ textAlign: "center" }}>
               חזרה לכניסה
+            </Link>
+            <Link href="/" className={styles.btnSecondary} style={{ display: "block", textAlign: "center", marginTop: 4 }}>
+              חזרה לאתר
             </Link>
           </div>
         )}

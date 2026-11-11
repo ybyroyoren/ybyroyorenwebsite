@@ -94,6 +94,9 @@ export default function AdminLoginPage() {
           <Link href="/admin/forgot-password" className={styles.muted} style={{ textAlign: "center" }}>
             שכחתי סיסמה
           </Link>
+          <Link href="/" className={styles.btnSecondary} style={{ display: "block", textAlign: "center", marginTop: 4 }}>
+            חזרה לאתר
+          </Link>
         </div>
       </form>
     </div>

@@ -51,9 +51,14 @@ function ResetForm() {
       <>
         <h2>הקישור לא תקף</h2>
         <p>הקישור פג תוקף או שכבר נעשה בו שימוש. אפשר לבקש קישור חדש.</p>
-        <Link href="/admin/forgot-password" className={styles.btn} style={{ display: "inline-block", marginTop: 8 }}>
-          בקשת קישור חדש
-        </Link>
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 8 }}>
+          <Link href="/admin/forgot-password" className={styles.btn}>
+            בקשת קישור חדש
+          </Link>
+          <Link href="/" className={styles.btnSecondary}>
+            חזרה לאתר
+          </Link>
+        </div>
       </>
     );
   }
@@ -74,6 +79,9 @@ function ResetForm() {
         <button type="submit" className={styles.btn} disabled={pending}>
           {pending ? "שומר..." : "שמירה וכניסה"}
         </button>
+        <Link href="/" className={styles.btnSecondary} style={{ display: "block", textAlign: "center" }}>
+          חזרה לאתר
+        </Link>
       </div>
     </form>
   );
