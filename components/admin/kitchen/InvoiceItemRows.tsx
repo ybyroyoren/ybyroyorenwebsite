@@ -26,6 +26,21 @@ const round = (n: number) => Math.round(n * 100000) / 100000;
 const money = (n: number | null) => (n === null ? "—" : formatNum(n));
 /** What 1 usable gram (or ml / piece) really costs: price per unit divided by the usable share. */
 const perUsable = (f: KLIngredient) => (f.price === null ? null : f.price / ((f.yieldPercent ?? 100) / 100));
+const isBulk = (unit: string) => /^גרם|^מ["״']?ל/.test(unit.trim());
+/** The final, calculated cost shown next to each form. A plain read-only cell: there is no field to type it into. */
+function FinalCost({ form }: { form: KLIngredient }) {
+  const c = perUsable(form);
+  return (
+    <>
+      <td className={styles.finalCost} title="מחושב אוטומטית ממחיר הפריט, הכמות והפחת. אי אפשר לערוך ידנית.">
+        {c === null ? "אין מחיר" : `₪${formatNum(Math.round(c * 1e6) / 1e6)}`}
+      </td>
+      <td className={styles.finalCost} title="מחושב אוטומטית. אי אפשר לערוך ידנית.">
+        {c !== null && isBulk(form.unit) ? `₪${formatNum(Math.round(c * 1000 * 100) / 100)}` : "—"}
+      </td>
+    </>
+  );
+}
 const dateText = (iso: string | null) => (iso ? new Date(iso).toLocaleDateString("he-IL", { timeZone: "Asia/Jerusalem" }) : "—");
 
 /** Rows for one invoice item: a single simple row when it has one form, otherwise the item row with its forms below. */
@@ -75,7 +90,7 @@ export function InvoiceItemRows({
               {formatNum(single.unitsPerPurchaseUnit)} {single.unit}
             </td>
             <td>{formatNum(single.unitsPerPurchaseUnit * ((single.yieldPercent ?? 100) / 100))} {single.unit}</td>
-            <td>{money(perUsable(single))}</td>
+            <FinalCost form={single} />
             <td>
               <div className={styles.rowActions}>
                 <button type="button" className={styles.btnSecondary} onClick={() => setModal({ mode: "combined", form: single })}>
@@ -89,8 +104,8 @@ export function InvoiceItemRows({
           </>
         ) : (
           <>
-            <td colSpan={3} className={styles.muted}>
-              {forms.length} מרכיבים לאותו פריט
+            <td colSpan={4} className={styles.muted}>
+              {forms.length} מרכיבים לאותו פריט (העלות הסופית של כל אחד מוצגת בשורה שלו)
             </td>
             <td>
               <div className={styles.rowActions}>
@@ -122,7 +137,7 @@ export function InvoiceItemRows({
               {formatNum(f.unitsPerPurchaseUnit)} {f.unit}
             </td>
             <td>{formatNum(f.unitsPerPurchaseUnit * ((f.yieldPercent ?? 100) / 100))} {f.unit}</td>
-            <td>{money(perUsable(f))}</td>
+            <FinalCost form={f} />
             <td>
               <div className={styles.rowActions}>
                 <button type="button" className={styles.btnSecondary} onClick={() => setModal({ mode: "form", form: f })}>
@@ -394,7 +409,7 @@ function EditModal({
             </div>
 
             <div className={styles.explainBox} style={{ width: "100%" }}>
-              <b>איך המערכת תחשב:</b>{" "}
+              <b>איך המערכת תחשב (העלות הסופית מחושבת לבד, אי אפשר לערוך אותה ידנית):</b>{" "}
               {priceN !== null && purchaseUnit && unitsN > 0 ? (
                 <>
                   קונים 1 {purchaseUnit} ב-₪{formatNum(priceN)}. ממנו יוצאים {formatNum(unitsN)} {formUnit}, ומתוכם {formatNum(usableN)} {formUnit} שמישים

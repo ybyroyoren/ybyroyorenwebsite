@@ -875,3 +875,10 @@
   color: var(--ink-soft);
   max-width: 260px;
 }
+
+/* The calculated final cost: bold, tinted, and not an input. */
+.finalCost {
+  font-weight: 700;
+  background: rgba(79, 134, 198, 0.08);
+  white-space: nowrap;
+}
