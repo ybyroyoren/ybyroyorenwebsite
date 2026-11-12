@@ -890,3 +890,98 @@
   border-radius: 8px;
   font-weight: 600;
 }
+
+/* ---------- product edit form: a 12-column grid so rows line up ---------- */
+.productForm {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 18px 16px;
+  align-items: start;
+}
+
+.productForm .field input[type="text"],
+.productForm .field input[type="number"],
+.productForm .field select {
+  width: 100%;
+}
+
+.span12 {
+  grid-column: span 12;
+}
+
+.span6 {
+  grid-column: span 6;
+}
+
+.span3 {
+  grid-column: span 3;
+}
+
+/* A setting: boxed, same height in a row, label on top, hint underneath. */
+.settingBox {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  height: 100%;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.settingBox > label,
+.settingTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.settingBox input[type="number"] {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--cream);
+  font-family: inherit;
+  font-size: 15px;
+  color: var(--ink);
+}
+
+.settingBox .hint {
+  max-width: none;
+  margin-top: 0;
+}
+
+.settingCheck {
+  cursor: pointer;
+}
+
+.settingTitle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.settingTitle input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--olive-deep);
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-start;
+}
+
+@media (max-width: 1100px) {
+  .span3 {
+    grid-column: span 6;
+  }
+}
+
+@media (max-width: 640px) {
+  .span6,
+  .span3 {
+    grid-column: span 12;
+  }
+}

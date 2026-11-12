@@ -299,17 +299,28 @@ export default async function AdminProductsPage() {
       {products.map((product) => (
         <div key={product.id} className={styles.card}>
           {isOwner ? (
-            <form action={updateProduct} className={styles.form}>
+            <form action={updateProduct} className={styles.productForm}>
               <input type="hidden" name="id" value={product.id} />
-              <div className={styles.field}>
+
+              <div className={`${styles.field} ${styles.span6}`}>
                 <label>שם (עברית)</label>
                 <input name="name" type="text" defaultValue={product.name} required />
               </div>
-              <div className={styles.field}>
+              <div className={`${styles.field} ${styles.span6}`}>
                 <label>שם (אנגלית)</label>
                 <input name="nameEn" type="text" defaultValue={product.name_en ?? ""} />
               </div>
-              <div className={styles.field} style={{ flexBasis: "100%" }}>
+
+              <div className={`${styles.field} ${styles.span6}`}>
+                <label>תיאור (עברית)</label>
+                <input name="description" type="text" defaultValue={product.description} />
+              </div>
+              <div className={`${styles.field} ${styles.span6}`}>
+                <label>תיאור (אנגלית)</label>
+                <input name="descriptionEn" type="text" defaultValue={product.description_en ?? ""} />
+              </div>
+
+              <div className={`${styles.field} ${styles.span12}`}>
                 <label>קטגוריות (אפשר כמה)</label>
                 <div className={styles.tagPicker}>
                   {categories.map((c) => (
@@ -325,39 +336,9 @@ export default async function AdminProductsPage() {
                   ))}
                 </div>
               </div>
-              <div className={styles.field}>
-                <label>תיאור (עברית)</label>
-                <input name="description" type="text" defaultValue={product.description} />
-              </div>
-              <div className={styles.field}>
-                <label>תיאור (אנגלית)</label>
-                <input name="descriptionEn" type="text" defaultValue={product.description_en ?? ""} />
-              </div>
-              <div className={styles.field}>
-                <label>ימי הכנה מראש</label>
-                <input
-                  name="leadTimeDays"
-                  type="number"
-                  min="0"
-                  defaultValue={product.lead_time_days}
-                  style={{ width: 80 }}
-                />
-              </div>
-              <div className={styles.field}>
-                <label>מקסימום ליום איסוף</label>
-                <input
-                  name="dailyLimit"
-                  type="number"
-                  min="1"
-                  step="1"
-                  defaultValue={product.daily_limit ?? ""}
-                  placeholder="ללא הגבלה"
-                  style={{ width: 120 }}
-                />
-                <small className={styles.hint}>כמה יחידות מהמוצר (כל הגדלים יחד) אפשר להזמין לתאריך איסוף אחד. ריק = בלי הגבלה.</small>
-              </div>
+
               {allergens.length > 0 && (
-                <div className={styles.field} style={{ flexBasis: "100%" }}>
+                <div className={`${styles.field} ${styles.span12}`}>
                   <label>אלרגנים</label>
                   <div className={styles.tagPicker}>
                     {allergens.map((a) => (
@@ -374,26 +355,50 @@ export default async function AdminProductsPage() {
                   </div>
                 </div>
               )}
-              <div className={styles.field}>
-                <label>
-                  <input type="checkbox" name="active" defaultChecked={product.active} /> פעיל
-                </label>
-                <small className={styles.hint}>מוצר לא פעיל מוסתר מהחנות לגמרי.</small>
+
+              {/* Settings: four equal boxes on one row. */}
+              <div className={`${styles.settingBox} ${styles.span3}`}>
+                <label htmlFor={`lead-${product.id}`}>ימי הכנה מראש</label>
+                <input id={`lead-${product.id}`} name="leadTimeDays" type="number" min="0" defaultValue={product.lead_time_days} />
+                <small className={styles.hint}>כמה ימים מראש צריך להזמין. קובע את תאריך האיסוף המוקדם.</small>
               </div>
-              <div className={styles.field}>
-                <label>
+              <div className={`${styles.settingBox} ${styles.span3}`}>
+                <label htmlFor={`limit-${product.id}`}>מקסימום ליום איסוף</label>
+                <input
+                  id={`limit-${product.id}`}
+                  name="dailyLimit"
+                  type="number"
+                  min="1"
+                  step="1"
+                  defaultValue={product.daily_limit ?? ""}
+                  placeholder="ללא הגבלה"
+                />
+                <small className={styles.hint}>כמה יחידות מהמוצר (כל הגדלים יחד) אפשר להזמין לתאריך איסוף אחד. ריק = בלי הגבלה.</small>
+              </div>
+              <label className={`${styles.settingBox} ${styles.settingCheck} ${styles.span3}`}>
+                <span className={styles.settingTitle}>
                   <input
                     type="checkbox"
                     name="soldOut"
                     defaultChecked={product.product_sizes.length > 0 && product.product_sizes.every((s) => s.stock_status === "out_of_stock")}
-                  />{" "}
+                  />
                   אזל מהמלאי
-                </label>
+                </span>
                 <small className={styles.hint}>המוצר נשאר בחנות, אפור ועם הכיתוב ״אזל מהמלאי״, ואי אפשר להוסיף אותו לעגלה. מסמן את כל הגדלים כאזלו.</small>
+              </label>
+              <label className={`${styles.settingBox} ${styles.settingCheck} ${styles.span3}`}>
+                <span className={styles.settingTitle}>
+                  <input type="checkbox" name="active" defaultChecked={product.active} />
+                  פעיל
+                </span>
+                <small className={styles.hint}>מוצר לא פעיל מוסתר מהחנות לגמרי.</small>
+              </label>
+
+              <div className={`${styles.formActions} ${styles.span12}`}>
+                <button type="submit" className={styles.btn}>
+                  שמירה
+                </button>
               </div>
-              <button type="submit" className={styles.btnSecondary}>
-                שמירה
-              </button>
             </form>
           ) : (
             <h2>{product.name}</h2>
