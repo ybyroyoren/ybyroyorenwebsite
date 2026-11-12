@@ -7,6 +7,8 @@ import { issueReceipt } from "@/lib/green-invoice";
 import { sendOrderConfirmationEmail } from "@/lib/resend";
 import { notifyNewOrder } from "@/lib/notifications";
 import { addDaysIso } from "@/lib/date";
+import { checkAvailability, type AvailabilityLine } from "@/lib/availability";
+import { expireCatalog } from "@/lib/cache";
 
 export interface CreateOrderParams {
   sessionId: string;
@@ -41,6 +43,17 @@ export async function createPendingOrder(params: CreateOrderParams): Promise<Cre
   if (params.pickupDate < earliestPickupDate) {
     throw new Error(`בהתאם למוצרים בעגלה, האיסוף המוקדם ביותר האפשרי הוא ${earliestPickupDate}`);
   }
+
+  // Stock and the daily limits of limited products, for the chosen pickup date.
+  const lines: AvailabilityLine[] = items.map((i) => ({
+    productSizeId: i.productSizeId,
+    productId: i.productId,
+    productName: i.productName,
+    sizeLabel: i.sizeLabel,
+    qty: i.qty,
+  }));
+  const problems = await checkAvailability(lines, params.pickupDate);
+  if (problems.length > 0) throw new Error(problems[0]);
 
   const subtotal = items.reduce((sum, item) => sum + item.priceBeforeVat * item.qty, 0);
 
@@ -91,6 +104,7 @@ export async function createPendingOrder(params: CreateOrderParams): Promise<Cre
 
   const orderItems = items.map((item) => ({
     order_id: order.id,
+    product_size_id: item.productSizeId,
     product_name: item.productName,
     size_label: item.sizeLabel,
     unit_price: item.priceBeforeVat,
@@ -99,6 +113,19 @@ export async function createPendingOrder(params: CreateOrderParams): Promise<Cre
 
   const { error: itemsError } = await db.from("order_items").insert(orderItems);
   if (itemsError) throw new Error(itemsError.message);
+
+  // Re-check now that the order is saved: if someone else took the last units a moment ago, this order is dropped
+  // instead of being sold twice.
+  const recheck = await checkAvailability(lines, params.pickupDate, true);
+  if (recheck.length > 0) {
+    await db.from("orders").delete().eq("id", order.id);
+    throw new Error(recheck[0]);
+  }
+  try {
+    expireCatalog(); // stock shown in the shop changes with every order
+  } catch {
+    /* only possible inside a server action */
+  }
 
   return { orderId: order.id, total: totals.total, items, greetingCardFee };
 }

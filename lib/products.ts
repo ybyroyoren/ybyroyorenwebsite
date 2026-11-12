@@ -8,7 +8,10 @@ export interface ProductSizeView {
   id: string;
   label: string;
   priceBeforeVat: number;
+  /** Sold out: set by hand, or because the stock quantity ran out. */
   stockStatus: "in_stock" | "out_of_stock";
+  /** Units left when a stock quantity is set (never negative); null = no stock limit. */
+  stockRemaining: number | null;
 }
 
 export interface ProductView {
@@ -55,7 +58,7 @@ interface ProductRow {
 const PRODUCT_SELECT =
   "id, slug, name, name_en, description, description_en, image_urls, lead_time_days, product_categories(categories(slug, sort_order)), product_allergens(allergens(id, label_he, label_en, color, sort_order)), product_sizes(id, label, price_before_vat, stock_status, sort_order, is_default)";
 
-function mapProduct(row: ProductRow): ProductView {
+function mapProduct(row: ProductRow, remainingBySize: Map<string, number>): ProductView {
   const ordered = [...row.product_sizes].sort((a, b) => a.sort_order - b.sort_order);
   return {
     id: row.id,
@@ -74,14 +77,24 @@ function mapProduct(row: ProductRow): ProductView {
       .map((a) => ({ id: a.id, labelHe: a.label_he, labelEn: a.label_en, color: a.color })),
     imageUrls: row.image_urls,
     leadTimeDays: row.lead_time_days,
-    sizes: ordered.map((s) => ({
-      id: s.id,
-      label: s.label,
-      priceBeforeVat: s.price_before_vat,
-      stockStatus: s.stock_status,
-    })),
+    sizes: ordered.map((s) => {
+      const remaining = remainingBySize.has(s.id) ? Math.max(0, remainingBySize.get(s.id)!) : null;
+      return {
+        id: s.id,
+        label: s.label,
+        priceBeforeVat: s.price_before_vat,
+        stockStatus: s.stock_status === "out_of_stock" || remaining === 0 ? ("out_of_stock" as const) : ("in_stock" as const),
+        stockRemaining: remaining,
+      };
+    }),
     defaultSizeIndex: Math.max(0, ordered.findIndex((s) => s.is_default)),
   };
+}
+
+/** Units left per size, for the sizes that have a stock quantity (see the product_size_stock view). */
+async function fetchRemainingBySize(): Promise<Map<string, number>> {
+  const { data } = await supabaseAdmin().from("product_size_stock").select("product_size_id, remaining");
+  return new Map((data ?? []).map((r) => [r.product_size_id as string, Number(r.remaining)]));
 }
 
 export const getActiveProducts = unstable_cache(
@@ -95,7 +108,8 @@ export const getActiveProducts = unstable_cache(
       .order("created_at", { ascending: true });
 
     if (error) throw new Error(error.message);
-    return ((data ?? []) as unknown as ProductRow[]).map(mapProduct);
+    const remaining = await fetchRemainingBySize();
+    return ((data ?? []) as unknown as ProductRow[]).map((row) => mapProduct(row, remaining));
   },
   ["active-products"],
   { tags: [CACHE_TAGS.products], revalidate: 300 }
@@ -126,7 +140,7 @@ export const getProductBySlug = unstable_cache(
 
     if (error) throw new Error(error.message);
     if (!data) return null;
-    return mapProduct(data as unknown as ProductRow);
+    return mapProduct(data as unknown as ProductRow, await fetchRemainingBySize());
   },
   ["product-by-slug"],
   { tags: [CACHE_TAGS.products], revalidate: 300 }

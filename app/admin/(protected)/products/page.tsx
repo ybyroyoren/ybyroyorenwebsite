@@ -2,6 +2,7 @@ import { requireAdminSection } from "@/lib/admin-auth";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { getCategories } from "@/lib/categories";
 import { getAllergens } from "@/lib/allergens";
+import { todayIsraelIso } from "@/lib/date";
 import { tagTextColor } from "@/lib/allergenTags";
 import {
   addProductSize,
@@ -40,7 +41,7 @@ export default async function AdminProductsPage() {
     db
       .from("products")
       .select(
-        "id, slug, name, name_en, description, description_en, active, lead_time_days, image_urls, product_categories(category_id), product_allergens(allergen_id), product_sizes(id, label, price_before_vat, stock_status, sort_order, is_default)"
+        "id, slug, name, name_en, description, description_en, active, lead_time_days, daily_limit, image_urls, product_categories(category_id), product_allergens(allergen_id), product_sizes(id, label, price_before_vat, stock_status, stock_qty, sort_order, is_default)"
       )
       .order("sort_order", { ascending: true })
       .order("created_at", { ascending: true }),
@@ -54,6 +55,14 @@ export default async function AdminProductsPage() {
     product_sizes: [...p.product_sizes].sort((a, b) => a.sort_order - b.sort_order),
   }));
   const productOrder = products.map((p) => p.id).join(",");
+  // Units left per size (for sizes with a stock quantity) and units already ordered per product per pickup date.
+  const [{ data: stockRows }, { data: usageRows }] = await Promise.all([
+    db.from("product_size_stock").select("product_size_id, remaining"),
+    db.from("product_day_usage").select("product_id, pickup_date, qty").gte("pickup_date", todayIsraelIso()).order("pickup_date"),
+  ]);
+  const remainingBySize = new Map((stockRows ?? []).map((r) => [r.product_size_id as string, Number(r.remaining)]));
+  const usageByProduct = new Map<string, { date: string; qty: number }[]>();
+  for (const u of usageRows ?? []) usageByProduct.set(u.product_id, [...(usageByProduct.get(u.product_id) ?? []), { date: u.pickup_date, qty: Number(u.qty) }]);
   // How many products sit in each category (a product can be in several).
   const categoryCount = new Map<string, number>();
   for (const p of products) for (const pc of p.product_categories) categoryCount.set(pc.category_id, (categoryCount.get(pc.category_id) ?? 0) + 1);
@@ -334,6 +343,19 @@ export default async function AdminProductsPage() {
                   style={{ width: 80 }}
                 />
               </div>
+              <div className={styles.field}>
+                <label>מקסימום ליום איסוף</label>
+                <input
+                  name="dailyLimit"
+                  type="number"
+                  min="1"
+                  step="1"
+                  defaultValue={product.daily_limit ?? ""}
+                  placeholder="ללא הגבלה"
+                  style={{ width: 120 }}
+                />
+                <small className={styles.hint}>כמה יחידות מהמוצר (כל הגדלים יחד) אפשר להזמין לתאריך איסוף אחד. ריק = בלי הגבלה.</small>
+              </div>
               {allergens.length > 0 && (
                 <div className={styles.field} style={{ flexBasis: "100%" }}>
                   <label>אלרגנים</label>
@@ -424,6 +446,7 @@ export default async function AdminProductsPage() {
                 <th>גודל</th>
                 <th>מחיר (לפני מע&quot;מ)</th>
                 <th>מלאי</th>
+                {isOwner && <th>כמות במלאי</th>}
                 {isOwner && <th>ברירת מחדל</th>}
                 {isOwner && <th></th>}
               </tr>
@@ -476,6 +499,23 @@ export default async function AdminProductsPage() {
                           </form>
                         </td>
                         <td>
+                          <input
+                            form={formId}
+                            name="stockQty"
+                            type="number"
+                            min="0"
+                            step="1"
+                            defaultValue={size.stock_qty ?? ""}
+                            placeholder="ללא הגבלה"
+                            style={{ width: 110 }}
+                          />
+                          {remainingBySize.has(size.id) && (
+                            <div className={styles.muted}>
+                              {Math.max(0, remainingBySize.get(size.id)!) === 0 ? "אזל, הכמות נגמרה" : `נשארו ${remainingBySize.get(size.id)}`}
+                            </div>
+                          )}
+                        </td>
+                        <td>
                           {isDefault ? (
                             <span className={styles.badgePaid}>ברירת מחדל</span>
                           ) : (
@@ -523,6 +563,18 @@ export default async function AdminProductsPage() {
               })}
             </tbody>
           </table>
+
+          {isOwner && product.daily_limit !== null && (
+            <p className={styles.sectionNote} style={{ marginTop: 10 }}>
+              <b>מגבלה יומית: {product.daily_limit} ליום איסוף.</b>{" "}
+              {(usageByProduct.get(product.id) ?? []).length === 0
+                ? "אין עדיין הזמנות לתאריכים הקרובים."
+                : (usageByProduct.get(product.id) ?? [])
+                    .slice(0, 14)
+                    .map((u) => `${u.date.split("-").reverse().slice(0, 2).join(".")}: ${u.qty}/${product.daily_limit}${u.qty >= (product.daily_limit ?? 0) ? " (מלא)" : ""}`)
+                    .join(" · ")}
+            </p>
+          )}
 
           {isOwner &&
             product.product_sizes.map((size) => (

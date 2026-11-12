@@ -50,6 +50,10 @@ export function ProductPurchase({ product, locale }: { product: ProductView; loc
         </div>
       )}
 
+      {inStock && size && size.stockRemaining !== null && size.stockRemaining <= 5 && (
+        <p className={styles.lowStock}>{t.shop.lowStock(size.stockRemaining)}</p>
+      )}
+
       {inStock ? (
         <>
           <div className={styles.qtyAddRow}>

@@ -157,6 +157,9 @@ export function ProductCard({
           <span className={styles.price}>
             {formatCurrency(priceIncludingVat(size.priceBeforeVat))}{" "}
             <span className={styles.priceVat}>{t.inclVat}</span>
+            {size.stockRemaining !== null && size.stockRemaining > 0 && size.stockRemaining <= 5 && (
+              <span className={styles.lowStock}>{t.lowStock(size.stockRemaining)}</span>
+            )}
           </span>
         )}
         {inStock ? (

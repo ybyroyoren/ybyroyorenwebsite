@@ -18,6 +18,16 @@ function slugify(name: string): string {
   );
 }
 
+function optionalPositiveInt(value: FormDataEntryValue | null): number | null {
+  const n = Number(String(value ?? "").trim());
+  return String(value ?? "").trim() !== "" && Number.isInteger(n) && n > 0 ? n : null;
+}
+
+function optionalNonNegativeInt(value: FormDataEntryValue | null): number | null {
+  const n = Number(String(value ?? "").trim());
+  return String(value ?? "").trim() !== "" && Number.isInteger(n) && n >= 0 ? n : null;
+}
+
 /** The ticked categories replace whatever categories the product was in before. */
 async function setProductCategories(
   db: ReturnType<typeof supabaseAdmin>,
@@ -129,6 +139,7 @@ export async function updateProduct(formData: FormData): Promise<void> {
       description_en: String(formData.get("descriptionEn") ?? "").trim() || null,
       active: formData.get("active") === "on",
       lead_time_days: Math.max(0, Number(formData.get("leadTimeDays") ?? 0)),
+      daily_limit: optionalPositiveInt(formData.get("dailyLimit")),
     })
     .eq("id", id);
 
@@ -194,11 +205,18 @@ export async function updateProductSize(formData: FormData): Promise<void> {
   const id = String(formData.get("id") ?? "");
   if (!id) return;
 
+  // "Units left in stock": blank = no stock limit. The number is "as of now": only orders placed from this
+  // moment on use it up, so it's re-stamped whenever the owner changes it.
+  const stockQty = optionalNonNegativeInt(formData.get("stockQty"));
+  const { data: current } = await db.from("product_sizes").select("stock_qty").eq("id", id).maybeSingle();
+  const stockChanged = (current?.stock_qty ?? null) !== stockQty;
+
   await db
     .from("product_sizes")
     .update({
       label: String(formData.get("label") ?? "").trim(),
       price_before_vat: Number(formData.get("price") ?? 0),
+      ...(stockChanged ? { stock_qty: stockQty, stock_as_of: stockQty === null ? null : new Date().toISOString() } : {}),
     })
     .eq("id", id);
 

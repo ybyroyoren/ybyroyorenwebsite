@@ -28,3 +28,9 @@ export function addDaysIso(days: number): string {
 export function todayIsraelIso(): string {
   return new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Jerusalem" });
 }
+
+/** `iso` (YYYY-MM-DD) plus `days` calendar days, as YYYY-MM-DD. */
+export function shiftIso(iso: string, days: number): string {
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(Date.UTC(y, m - 1, d + days)).toISOString().slice(0, 10);
+}

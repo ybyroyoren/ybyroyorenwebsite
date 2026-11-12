@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { expireCatalog } from "@/lib/cache";
 import { requireAdmin } from "@/lib/admin-auth";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { computeCartTotals } from "@/lib/pricing";
@@ -17,6 +18,7 @@ export async function deleteOrder(formData: FormData): Promise<void> {
 
   await db.from("orders").delete().eq("id", id);
   revalidatePath("/admin/orders");
+  expireCatalog(); // the shop's stock and daily limits follow orders
 }
 
 export async function updateOrderPayment(formData: FormData): Promise<void> {
@@ -32,6 +34,7 @@ export async function updateOrderPayment(formData: FormData): Promise<void> {
 
   await db.from("orders").update({ status, payment_method: paymentMethod }).eq("id", id);
   revalidatePath("/admin/orders");
+  expireCatalog(); // the shop's stock and daily limits follow orders
 }
 
 const FULFILLMENT_STATUSES = [
@@ -54,6 +57,7 @@ export async function updateOrderFulfillmentStatus(formData: FormData): Promise<
 
   await db.from("orders").update({ fulfillment_status: fulfillmentStatus }).eq("id", id);
   revalidatePath("/admin/orders");
+  expireCatalog(); // the shop's stock and daily limits follow orders
 }
 
 export interface ManualOrderItemInput {
@@ -123,6 +127,7 @@ export async function createManualOrder(formData: FormData): Promise<void> {
       total: totals.total,
       status,
       payment_method: paymentMethod,
+      source: "admin",
       fulfillment_status: status === "paid" ? "open" : "awaiting_payment",
     })
     .select("id")
@@ -134,6 +139,7 @@ export async function createManualOrder(formData: FormData): Promise<void> {
     const product = size.products as unknown as { name: string } | null;
     return {
       order_id: order.id,
+      product_size_id: i.productSizeId,
       product_name: product?.name ?? "",
       size_label: size.label,
       unit_price: size.price_before_vat,
@@ -143,4 +149,5 @@ export async function createManualOrder(formData: FormData): Promise<void> {
   await db.from("order_items").insert(orderItems);
 
   revalidatePath("/admin/orders");
+  expireCatalog(); // the shop's stock and daily limits follow orders
 }

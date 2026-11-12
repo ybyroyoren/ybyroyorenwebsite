@@ -12,6 +12,8 @@ export interface CartItemView {
   priceBeforeVat: number;
   qty: number;
   stockStatus: "in_stock" | "out_of_stock";
+  /** Most units that can be in the cart (the stock left); null = no stock limit. */
+  maxQty: number | null;
   leadTimeDays: number;
 }
 
@@ -32,6 +34,15 @@ interface CartItemRow {
     } | null;
   } | null;
 }
+
+/** Units left for the given sizes that have a stock quantity (others are absent: no limit). */
+async function remainingStock(sizeIds: string[]): Promise<Map<string, number>> {
+  if (sizeIds.length === 0) return new Map();
+  const { data } = await supabaseAdmin().from("product_size_stock").select("product_size_id, remaining").in("product_size_id", sizeIds);
+  return new Map((data ?? []).map((r) => [r.product_size_id as string, Number(r.remaining)]));
+}
+
+export class SoldOutError extends Error {}
 
 async function getOrCreateCartId(sessionUserId: string): Promise<string> {
   const db = supabaseAdmin();
@@ -77,11 +88,15 @@ export async function getCart(sessionUserId: string, knownCartId?: string): Prom
 
   if (error) throw new Error(error.message);
 
-  return ((data ?? []) as unknown as CartItemRow[])
-    .filter((row) => row.product_sizes && row.product_sizes.products)
+  const rows = ((data ?? []) as unknown as CartItemRow[]).filter((row) => row.product_sizes && row.product_sizes.products);
+  const remainingBySize = await remainingStock(rows.map((r) => r.product_sizes!.id));
+
+  return rows
     .map((row) => {
       const size = row.product_sizes!;
       const product = size.products!;
+      const remaining = remainingBySize.get(size.id);
+      const maxQty = remaining === undefined ? null : Math.max(0, remaining);
       return {
         id: row.id,
         productSizeId: size.id,
@@ -92,7 +107,8 @@ export async function getCart(sessionUserId: string, knownCartId?: string): Prom
         sizeLabel: size.label,
         priceBeforeVat: size.price_before_vat,
         qty: row.qty,
-        stockStatus: size.stock_status,
+        stockStatus: size.stock_status === "out_of_stock" || maxQty === 0 ? ("out_of_stock" as const) : ("in_stock" as const),
+        maxQty,
         leadTimeDays: product.lead_time_days,
       };
     });
@@ -112,6 +128,14 @@ export async function addCartItem(
     .eq("cart_id", cartId)
     .eq("product_size_id", productSizeId)
     .maybeSingle();
+
+  // Never more in the cart than what is left in stock.
+  const remaining = (await remainingStock([productSizeId])).get(productSizeId);
+  if (remaining !== undefined) {
+    const room = remaining - (existing?.qty ?? 0);
+    if (room <= 0) throw new SoldOutError("המוצר אזל מהמלאי");
+    qty = Math.min(qty, room);
+  }
 
   if (existing) {
     const { error } = await db
@@ -145,6 +169,13 @@ export async function updateCartItemQty(
       .eq("cart_id", cartId);
     if (error) throw new Error(error.message);
     return cartId;
+  }
+
+  // ...and the quantity can't be raised past what is left in stock.
+  const { data: item } = await db.from("cart_items").select("product_size_id").eq("id", cartItemId).eq("cart_id", cartId).maybeSingle();
+  if (item) {
+    const remaining = (await remainingStock([item.product_size_id])).get(item.product_size_id);
+    if (remaining !== undefined) qty = Math.min(qty, Math.max(1, remaining));
   }
 
   const { error } = await db

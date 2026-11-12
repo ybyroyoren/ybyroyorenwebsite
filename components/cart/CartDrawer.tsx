@@ -62,11 +62,12 @@ export function CartDrawer({ locale }: { locale: Locale }) {
                       <button
                         type="button"
                         onClick={() => cart.updateQty(item.id, item.qty + 1)}
-                        disabled={cart.isLoading}
+                        disabled={cart.isLoading || (item.maxQty !== null && item.qty >= item.maxQty)}
                       >
                         +
                       </button>
                     </div>
+                    {item.maxQty !== null && item.qty >= item.maxQty && <div className={styles.itemPrice}>{t.maxReached}</div>}
                   </div>
                   <div>
                     <div className={styles.itemTotal}>{formatCurrency(lineTotalIncl)}</div>

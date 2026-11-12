@@ -239,3 +239,12 @@
   font-weight: 600;
   color: var(--danger);
 }
+
+/* "Only N left": shown only when a stock quantity is set and it is really low. */
+.lowStock {
+  color: var(--danger);
+  font-size: 14.5px;
+  font-weight: 600;
+  display: block;
+  white-space: normal;
+}
