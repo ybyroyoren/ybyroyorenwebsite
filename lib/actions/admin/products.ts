@@ -143,6 +143,14 @@ export async function updateProduct(formData: FormData): Promise<void> {
     })
     .eq("id", id);
 
+  // "Sold out" ticks / unticks every size (the product stays in the shop either way). Unticking only brings
+  // the sizes back if the box had been ticked, so per-size sold-out marks set separately are left alone.
+  const soldOut = formData.get("soldOut") === "on";
+  const { data: sizes } = await db.from("product_sizes").select("id, stock_status").eq("product_id", id);
+  const allOut = (sizes ?? []).length > 0 && (sizes ?? []).every((s) => s.stock_status === "out_of_stock");
+  if (soldOut && !allOut) await db.from("product_sizes").update({ stock_status: "out_of_stock" }).eq("product_id", id);
+  if (!soldOut && allOut) await db.from("product_sizes").update({ stock_status: "in_stock" }).eq("product_id", id);
+
   await setProductCategories(db, id, formData.getAll("categoryIds"));
 
   // Allergen tags: the ticked ones replace whatever was set before.

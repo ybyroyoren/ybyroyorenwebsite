@@ -378,6 +378,18 @@ export default async function AdminProductsPage() {
                 <label>
                   <input type="checkbox" name="active" defaultChecked={product.active} /> פעיל
                 </label>
+                <small className={styles.hint}>מוצר לא פעיל מוסתר מהחנות לגמרי.</small>
+              </div>
+              <div className={styles.field}>
+                <label>
+                  <input
+                    type="checkbox"
+                    name="soldOut"
+                    defaultChecked={product.product_sizes.length > 0 && product.product_sizes.every((s) => s.stock_status === "out_of_stock")}
+                  />{" "}
+                  אזל מהמלאי
+                </label>
+                <small className={styles.hint}>המוצר נשאר בחנות, אפור ועם הכיתוב ״אזל מהמלאי״, ואי אפשר להוסיף אותו לעגלה. מסמן את כל הגדלים כאזלו.</small>
               </div>
               <button type="submit" className={styles.btnSecondary}>
                 שמירה

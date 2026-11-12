@@ -248,3 +248,40 @@
   display: block;
   white-space: normal;
 }
+
+/* Sold out: the product stays in the shop, greyed out and labelled. */
+.soldOut {
+  background: rgba(23, 20, 16, 0.04);
+}
+
+.soldOut .photo {
+  filter: grayscale(1) contrast(0.9);
+}
+
+.soldOut .name,
+.soldOut .desc,
+.soldOut .price {
+  color: var(--ink-soft);
+}
+
+.soldOut .card:hover .photo,
+.soldOut:hover .photo {
+  transform: none;
+}
+
+.soldOutBadge {
+  position: absolute;
+  inset-inline: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  margin-inline: auto;
+  width: fit-content;
+  padding: 8px 22px;
+  border-radius: 999px;
+  background: rgba(23, 20, 16, 0.82);
+  color: var(--cream);
+  font-size: 18px;
+  font-weight: 700;
+  pointer-events: none;
+}

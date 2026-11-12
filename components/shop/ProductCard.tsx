@@ -79,7 +79,7 @@ export function ProductCard({
     <div
       ref={rootRef}
       {...handlers}
-      className={`${styles.card} ${index < 3 ? "enter" : ""}`}
+      className={`${styles.card} ${product.soldOut ? styles.soldOut : ""} ${index < 3 ? "enter" : ""}`}
       {...(index >= 3 ? { "data-reveal": "" } : {})}
       style={index < 3 ? stagger(index) : undefined}
     >
@@ -100,6 +100,7 @@ export function ProductCard({
             decoding="async"
           />
         ))}
+        {product.soldOut && <span className={styles.soldOutBadge}>{t.outOfStock}</span>}
         {categoryTags.length > 0 && (
           <div className={styles.tags}>
             {categoryTags.map((c) => (

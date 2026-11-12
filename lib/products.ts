@@ -30,6 +30,8 @@ export interface ProductView {
   sizes: ProductSizeView[];
   /** Index into `sizes` of the size that is preselected (the owner's choice; the first one if none was picked). */
   defaultSizeIndex: number;
+  /** Every size is sold out (by hand or because the stock ran out): the product stays in the shop, shown greyed out. */
+  soldOut: boolean;
 }
 
 interface ProductRow {
@@ -60,6 +62,16 @@ const PRODUCT_SELECT =
 
 function mapProduct(row: ProductRow, remainingBySize: Map<string, number>): ProductView {
   const ordered = [...row.product_sizes].sort((a, b) => a.sort_order - b.sort_order);
+  const sizes = ordered.map((s) => {
+      const remaining = remainingBySize.has(s.id) ? Math.max(0, remainingBySize.get(s.id)!) : null;
+      return {
+        id: s.id,
+        label: s.label,
+        priceBeforeVat: s.price_before_vat,
+        stockStatus: s.stock_status === "out_of_stock" || remaining === 0 ? ("out_of_stock" as const) : ("in_stock" as const),
+        stockRemaining: remaining,
+      };
+    });
   return {
     id: row.id,
     slug: row.slug,
@@ -77,17 +89,9 @@ function mapProduct(row: ProductRow, remainingBySize: Map<string, number>): Prod
       .map((a) => ({ id: a.id, labelHe: a.label_he, labelEn: a.label_en, color: a.color })),
     imageUrls: row.image_urls,
     leadTimeDays: row.lead_time_days,
-    sizes: ordered.map((s) => {
-      const remaining = remainingBySize.has(s.id) ? Math.max(0, remainingBySize.get(s.id)!) : null;
-      return {
-        id: s.id,
-        label: s.label,
-        priceBeforeVat: s.price_before_vat,
-        stockStatus: s.stock_status === "out_of_stock" || remaining === 0 ? ("out_of_stock" as const) : ("in_stock" as const),
-        stockRemaining: remaining,
-      };
-    }),
+    sizes,
     defaultSizeIndex: Math.max(0, ordered.findIndex((s) => s.is_default)),
+    soldOut: sizes.length > 0 && sizes.every((s) => s.stockStatus === "out_of_stock"),
   };
 }
 

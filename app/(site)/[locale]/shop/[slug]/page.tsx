@@ -58,7 +58,7 @@ export default async function ProductPage({
 
       <div className={`wrap ${styles.layout}`}>
         <div className="enterScale">
-          <ProductGallery imageUrls={product.imageUrls} alt={p.name} locale={locale} />
+          <ProductGallery imageUrls={product.imageUrls} alt={p.name} locale={locale} soldOut={product.soldOut} />
         </div>
 
         <div className={`${styles.info} enter`} style={{ "--i": 2 } as React.CSSProperties}>

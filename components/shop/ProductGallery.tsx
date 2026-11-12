@@ -12,10 +12,13 @@ export function ProductGallery({
   imageUrls,
   alt,
   locale,
+  soldOut = false,
 }: {
   imageUrls: string[];
   alt: string;
   locale: Locale;
+  /** The product is sold out: photos greyed, with a label. */
+  soldOut?: boolean;
 }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [userPaused, setUserPaused] = useState(false);
@@ -47,7 +50,7 @@ export function ProductGallery({
   return (
     <div ref={rootRef} {...handlers}>
       <div
-        className={`${styles.galleryMain} ${styles.hasPhoto}`}
+        className={`${styles.galleryMain} ${styles.hasPhoto} ${soldOut ? styles.gallerySoldOut : ""}`}
         onTouchStart={imageUrls.length > 1 ? swipe.onTouchStart : undefined}
         onTouchEnd={imageUrls.length > 1 ? swipe.onTouchEnd : undefined}
       >
@@ -63,6 +66,7 @@ export function ProductGallery({
             decoding="async"
           />
         ))}
+        {soldOut && <span className={styles.gallerySoldOutBadge}>{t.outOfStock}</span>}
         {imageUrls.length > 1 && (
           <button
             type="button"
