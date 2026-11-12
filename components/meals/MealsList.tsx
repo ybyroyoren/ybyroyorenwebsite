@@ -3,7 +3,7 @@
 import { track } from "@/lib/analytics/client";
 import { useState } from "react";
 import type { MealView, DinerInput } from "@/lib/meals";
-import { seatsLabel, seatsDisplayPct, isLowSeats } from "@/lib/seats";
+import { seatsDisplay } from "@/lib/seats";
 import { formatCurrency } from "@/lib/pricing";
 import { formatMealDateParts, formatMealDateFull } from "@/lib/date";
 import { getDict, type Locale } from "@/lib/dictionary";
@@ -120,9 +120,10 @@ export function MealsList({ meals, locale }: { meals: MealView[]; locale: Locale
 
   return (
     <>
-      {meals.map((meal, index) => {
-        const isFull = meal.remainingSeats <= 0;
-        const pct = seatsDisplayPct(meal.remainingSeats, meal.totalSeats, meal.takenSeats);
+      {meals.map((m, index) => {
+        const meal = { ...m, display: seatsDisplay({ remaining: m.remainingSeats, total: m.totalSeats, taken: m.takenSeats, textMode: m.seatsTextMode, textHe: m.seatsTextHe, textEn: m.seatsTextEn, meterMode: m.seatsMeterMode }, locale) };
+        const display = meal.display;
+        const isFull = display.closed;
         const { day, num, month } = formatMealDateParts(meal.date, locale);
         return (
           <div
@@ -142,12 +143,12 @@ export function MealsList({ meals, locale }: { meals: MealView[]; locale: Locale
               <div className={styles.desc}>{meal.description}</div>
             </div>
             <div className={styles.seatsBlock}>
-              <div className={styles.seatsBar}>
-                <div className={styles.seatsBarFill} style={{ width: `${pct}%` }} />
-              </div>
-              <div className={`${styles.seatsText} ${isLowSeats(meal.remainingSeats) ? styles.low : ""}`}>
-                {seatsLabel(meal.remainingSeats, locale)}
-              </div>
+              {display.pct !== null && (
+                <div className={styles.seatsBar}>
+                  <div className={styles.seatsBarFill} style={{ width: `${display.pct}%` }} />
+                </div>
+              )}
+              {display.label !== null && <div className={`${styles.seatsText} ${display.low ? styles.low : ""}`}>{display.label}</div>}
             </div>
             <div className={styles.ctaCol}>
               <div className={styles.price}>
@@ -184,7 +185,22 @@ export function MealsList({ meals, locale }: { meals: MealView[]; locale: Locale
               <div className={styles.seatsPicker}>
                 <div className={styles.seatsPickerLabel}>
                   {d.seatsPickerLabel}
-                  <small>{seatsLabel(selectedMeal.remainingSeats, locale)}</small>
+                  <small>
+                    {
+                      seatsDisplay(
+                        {
+                          remaining: selectedMeal.remainingSeats,
+                          total: selectedMeal.totalSeats,
+                          taken: selectedMeal.takenSeats,
+                          textMode: selectedMeal.seatsTextMode,
+                          textHe: selectedMeal.seatsTextHe,
+                          textEn: selectedMeal.seatsTextEn,
+                          meterMode: selectedMeal.seatsMeterMode,
+                        },
+                        locale
+                      ).label
+                    }
+                  </small>
                 </div>
                 <div className={styles.qtyControl}>
                   <button type="button" onClick={() => changeSeats(-1)}>

@@ -73,3 +73,28 @@ export async function deleteMeal(formData: FormData): Promise<void> {
   revalidatePath("/admin/meals");
   expireMeals();
 }
+
+const TEXT_MODES = ["auto", "open", "few", "exact", "full", "custom", "hidden"];
+const METER_MODES = ["auto", "real", "hidden"];
+
+/** How this meal's seats are shown on the public page: the text and the meter are chosen separately. */
+export async function updateMealDisplay(formData: FormData): Promise<void> {
+  const admin = await requireAdmin();
+  if (admin.role !== "owner") return;
+  const id = String(formData.get("id") ?? "");
+  const textMode = String(formData.get("textMode") ?? "auto");
+  const meterMode = String(formData.get("meterMode") ?? "auto");
+  if (!id || !TEXT_MODES.includes(textMode) || !METER_MODES.includes(meterMode)) return;
+
+  await supabaseAdmin()
+    .from("meals")
+    .update({
+      seats_text_mode: textMode,
+      seats_text_he: String(formData.get("textHe") ?? "").trim().slice(0, 120),
+      seats_text_en: String(formData.get("textEn") ?? "").trim().slice(0, 120),
+      seats_meter_mode: meterMode,
+    })
+    .eq("id", id);
+  revalidatePath("/admin/meals");
+  expireMeals();
+}

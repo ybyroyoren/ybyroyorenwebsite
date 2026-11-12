@@ -108,9 +108,19 @@ export const FIELD_LABELS: Record<string, string> = {
   supplier_id: "ספק",
   purchase_name: "שם ברשימת קניות",
   closed_at: "נסגר",
+  seats_text_mode: "טקסט המקומות באתר",
+  seats_text_he: "טקסט מותאם (עברית)",
+  seats_text_en: "טקסט מותאם (אנגלית)",
+  seats_meter_mode: "המד באתר",
 };
 
 export const VALUE_LABELS: Record<string, string> = {
+  auto: "אוטומטי",
+  few: "נשארו מעט",
+  exact: "מספר מדויק",
+  custom: "טקסט מותאם",
+  hidden: "מוסתר",
+  real: "המצב האמיתי",
   true: "כן",
   false: "לא",
   paid: "שולם",

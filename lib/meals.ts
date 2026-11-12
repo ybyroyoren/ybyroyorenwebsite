@@ -2,7 +2,7 @@ import "server-only";
 import { unstable_cache } from "next/cache";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { CACHE_TAGS } from "@/lib/cache";
-import type { MealMenuItem } from "@/lib/supabase/types";
+import type { MealMenuItem, SeatsMeterMode, SeatsTextMode } from "@/lib/supabase/types";
 import { issueReceipt } from "@/lib/green-invoice";
 import { sendMealRegistrationConfirmationEmail } from "@/lib/resend";
 import { notifyNewMealRegistration } from "@/lib/notifications";
@@ -21,6 +21,11 @@ export interface MealView {
   remainingSeats: number;
   pricePerSeat: number;
   menu: MealMenuItem[];
+  /** How the seats are shown to visitors (see lib/seats.ts seatsDisplay). */
+  seatsTextMode: SeatsTextMode;
+  seatsTextHe: string;
+  seatsTextEn: string;
+  seatsMeterMode: SeatsMeterMode;
 }
 
 // Always hits the database. Use this wherever the answer gates a write
@@ -30,7 +35,7 @@ async function fetchOpenMeals(): Promise<MealView[]> {
   const db = supabaseAdmin();
   const { data: meals, error } = await db
     .from("meals")
-    .select("id, title, description, date, total_seats, price_per_seat, menu")
+    .select("id, title, description, date, total_seats, price_per_seat, menu, seats_text_mode, seats_text_he, seats_text_en, seats_meter_mode")
     .eq("status", "open")
     .order("date", { ascending: true });
 
@@ -55,6 +60,10 @@ async function fetchOpenMeals(): Promise<MealView[]> {
       remainingSeats: avail?.remaining_seats ?? m.total_seats,
       pricePerSeat: m.price_per_seat,
       menu: (m.menu ?? []) as MealMenuItem[],
+      seatsTextMode: m.seats_text_mode ?? "auto",
+      seatsTextHe: m.seats_text_he ?? "",
+      seatsTextEn: m.seats_text_en ?? "",
+      seatsMeterMode: m.seats_meter_mode ?? "auto",
     };
   });
 }
@@ -91,6 +100,7 @@ export async function createPendingRegistration(
 ): Promise<{ registrationId: string; depositTotal: number }> {
   const meal = await getMealById(params.mealId);
   if (!meal) throw new Error("הארוחה לא נמצאה");
+  if (meal.seatsTextMode === "full") throw new Error("ההרשמה לארוחה הזו סגורה");
 
   const seats = params.diners.length;
   if (seats < 1) throw new Error("יש לבחור לפחות סועד אחד");

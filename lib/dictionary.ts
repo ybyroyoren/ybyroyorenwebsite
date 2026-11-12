@@ -128,6 +128,7 @@ const dictionary = {
         full: "מלא",
         fewLeft: "נשארו מעט מקומות פנויים",
         available: "פתוח להרשמה",
+        filling: "מתמלא",
         remaining: (n: number) => `נשארו ${n} מקומות`,
       },
       drawer: {
@@ -445,6 +446,7 @@ const dictionary = {
         full: "Full",
         fewLeft: "Only a few seats left",
         available: "Open for registration",
+        filling: "Filling up",
         remaining: (n: number) => `${n} seats left`,
       },
       drawer: {

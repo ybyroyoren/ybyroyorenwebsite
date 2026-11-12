@@ -1,6 +1,6 @@
 import { requireAdminSection } from "@/lib/admin-auth";
 import { supabaseAdmin } from "@/lib/supabase/server";
-import { closeMeal, createMeal, deleteMeal, reopenMeal } from "@/lib/actions/admin/meals";
+import { closeMeal, createMeal, deleteMeal, reopenMeal, updateMealDisplay } from "@/lib/actions/admin/meals";
 import {
   addDinerToRegistration,
   createManualRegistration,
@@ -13,6 +13,7 @@ import {
   updateRegistrationContact,
 } from "@/lib/actions/admin/meal-registrations";
 import { MealRegistrationsTable, type RegistrationData } from "@/components/admin/meals/MealRegistrationsTable";
+import { MealSeatsDisplay } from "@/components/admin/meals/MealSeatsDisplay";
 import { NewRegistrationButton } from "@/components/admin/meals/NewRegistrationButton";
 import { formatCurrency } from "@/lib/pricing";
 import { todayIsraelIso } from "@/lib/date";
@@ -38,8 +39,12 @@ export default async function AdminMealsPage({ searchParams }: { searchParams: P
   const db = supabaseAdmin();
   const { data: meals } = await db
     .from("meals")
-    .select("id, title, description, date, total_seats, price_per_seat, status")
+    .select("id, title, description, date, total_seats, price_per_seat, status, seats_text_mode, seats_text_he, seats_text_en, seats_meter_mode")
     .order("date", { ascending: true });
+
+  // The seat numbers the public page uses (see meal_availability).
+  const { data: availability } = await db.from("meal_availability").select("meal_id, taken_seats, remaining_seats");
+  const availabilityByMeal = new Map((availability ?? []).map((a) => [a.meal_id, a]));
 
   const { data: registrations } = await db
     .from("meal_registrations")
@@ -156,6 +161,17 @@ export default async function AdminMealsPage({ searchParams }: { searchParams: P
               </h2>
               {isOwner && <NewRegistrationButton mealId={meal.id} mealTitle={meal.title} createAction={createManualRegistration} />}
             </div>
+
+            {isOwner && (
+              <MealSeatsDisplay
+                mealId={meal.id}
+                total={meal.total_seats}
+                taken={availabilityByMeal.get(meal.id)?.taken_seats ?? 0}
+                remaining={availabilityByMeal.get(meal.id)?.remaining_seats ?? meal.total_seats}
+                initial={{ textMode: meal.seats_text_mode, textHe: meal.seats_text_he, textEn: meal.seats_text_en, meterMode: meal.seats_meter_mode }}
+                saveAction={updateMealDisplay}
+              />
+            )}
 
             <MealRegistrationsTable
               registrations={regs}

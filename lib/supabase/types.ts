@@ -8,6 +8,8 @@ export type RegistrationStatus = "pending" | "paid" | "cancelled";
 export type NewsletterSource = "footer" | "events_form";
 export type AdminRole = "owner" | "kitchen" | "sales";
 export type MealStatus = "open" | "closed";
+export type SeatsTextMode = "auto" | "open" | "few" | "exact" | "full" | "custom" | "hidden";
+export type SeatsMeterMode = "auto" | "real" | "hidden";
 
 export interface MealMenuItem {
   name: string;
@@ -149,6 +151,10 @@ export interface Database {
           price_per_seat: number;
           menu: MealMenuItem[];
           status: MealStatus;
+          seats_text_mode: SeatsTextMode;
+          seats_text_he: string;
+          seats_text_en: string;
+          seats_meter_mode: SeatsMeterMode;
           created_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["meals"]["Row"]> & {
