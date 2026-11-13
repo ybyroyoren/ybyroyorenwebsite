@@ -1,6 +1,7 @@
 import "server-only";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { sendEmail } from "@/lib/resend";
+import { sendWhatsAppAlert, type WhatsAppAlert } from "@/lib/whatsapp";
 
 export type NotificationType = "shop_order" | "event_inquiry" | "meal_registration" | "contact_message";
 
@@ -47,9 +48,73 @@ async function getRecipientEmails(type: NotificationType): Promise<string[]> {
     .map((r) => r.email);
 }
 
-async function alert(type: NotificationType, subject: string, html: string): Promise<void> {
-  const recipients = await getRecipientEmails(type);
-  await Promise.all(recipients.map((to) => sendEmail({ to, subject, html })));
+export interface WhatsAppRecipient {
+  id: string;
+  name: string;
+  phone: string;
+  notifyShopOrder: boolean;
+  notifyEventInquiry: boolean;
+  notifyMealRegistration: boolean;
+  notifyContactMessage: boolean;
+}
+
+export async function getWhatsAppRecipients(): Promise<WhatsAppRecipient[]> {
+  const { data } = await supabaseAdmin()
+    .from("whatsapp_recipients")
+    .select("id, name, phone, notify_shop_order, notify_event_inquiry, notify_meal_registration, notify_contact_message")
+    .order("created_at", { ascending: true });
+  return (data ?? []).map((r) => ({
+    id: r.id,
+    name: r.name,
+    phone: r.phone,
+    notifyShopOrder: r.notify_shop_order,
+    notifyEventInquiry: r.notify_event_inquiry,
+    notifyMealRegistration: r.notify_meal_registration,
+    notifyContactMessage: r.notify_contact_message,
+  }));
+}
+
+async function getWhatsAppPhones(type: NotificationType): Promise<string[]> {
+  const { data } = await supabaseAdmin()
+    .from("whatsapp_recipients")
+    .select("phone, notify_shop_order, notify_event_inquiry, notify_meal_registration, notify_contact_message");
+  return (data ?? []).filter((r) => (r as unknown as Record<string, boolean>)[COLUMN[type]]).map((r) => r.phone);
+}
+
+/** Sends one WhatsApp alert and records the result (shown on the notifications admin page). Never throws. */
+export async function sendAndLogWhatsApp(type: NotificationType | "test", phone: string, alert: WhatsAppAlert): Promise<{ ok: boolean; error?: string }> {
+  let result: { ok: boolean; error?: string };
+  try {
+    result = await sendWhatsAppAlert(phone, alert);
+  } catch (e) {
+    result = { ok: false, error: e instanceof Error ? e.message : "שגיאה לא ידועה" };
+  }
+  if (!result.ok) console.error(`[whatsapp] ${type} to ${phone.slice(0, 5)}… failed:`, result.error);
+  try {
+    await supabaseAdmin().from("notification_log").insert({
+      channel: "whatsapp",
+      type,
+      recipient: phone,
+      ok: result.ok,
+      error: result.ok ? null : (result.error ?? null),
+    });
+  } catch {
+    // the log is a convenience; a failed insert must not affect the customer's order
+  }
+  return result;
+}
+
+async function alert(type: NotificationType, subject: string, html: string, whatsapp: WhatsAppAlert): Promise<void> {
+  try {
+    const [emails, phones] = await Promise.all([getRecipientEmails(type), getWhatsAppPhones(type)]);
+    // Email and WhatsApp go out in parallel, and one failing never stops the others (or the customer's order).
+    await Promise.allSettled([
+      ...emails.map((to) => sendEmail({ to, subject, html })),
+      ...phones.map((phone) => sendAndLogWhatsApp(type, phone, whatsapp)),
+    ]);
+  } catch (e) {
+    console.error("[notifications] alert failed", e);
+  }
 }
 
 export async function notifyNewOrder(params: {
@@ -74,7 +139,12 @@ export async function notifyNewOrder(params: {
         <ul>${params.items.map((i) => `<li>${i.name} × ${i.qty}</li>`).join("")}</ul>
         <p><b>סה&quot;כ שולם:</b> ${params.totalFormatted}</p>
       </div>
-    `
+    `,
+    {
+      kind: "הזמנה חדשה בחנות",
+      customer: `${params.customerName} · ${params.customerPhone}`,
+      details: `${params.items.map((i) => `${i.name} × ${i.qty}`).join(", ")} · סה״כ ${params.totalFormatted} · איסוף ${params.pickupDate}`,
+    }
   );
 }
 
@@ -94,7 +164,12 @@ export async function notifyNewEventInquiry(params: {
         <p><b>אימייל:</b> ${params.email}</p>
         <p style="white-space: pre-line;">${params.summary}</p>
       </div>
-    `
+    `,
+    {
+      kind: "פנייה חדשה לאירוע פרטי",
+      customer: `${params.fullName} · ${params.phone}`,
+      details: params.summary.split("\n").slice(1).join(" | "),
+    }
   );
 }
 
@@ -116,7 +191,12 @@ export async function notifyNewMealRegistration(params: {
         <p><b>ארוחה:</b> ${params.mealTitle} — ${params.mealDate}</p>
         <p><b>מספר סועדים:</b> ${params.seats}</p>
       </div>
-    `
+    `,
+    {
+      kind: "הרשמה חדשה לארוחה פתוחה",
+      customer: `${params.customerName} · ${params.customerPhone}`,
+      details: `${params.mealTitle} · ${params.mealDate} · ${params.seats} סועדים`,
+    }
   );
 }
 
@@ -136,6 +216,11 @@ export async function notifyNewContactMessage(params: {
         <p><b>אימייל:</b> ${params.email}</p>
         <p><b>הודעה:</b> ${params.message}</p>
       </div>
-    `
+    `,
+    {
+      kind: "הודעה חדשה מ״צרו קשר״",
+      customer: `${params.name} · ${params.phone}`,
+      details: params.message,
+    }
   );
 }

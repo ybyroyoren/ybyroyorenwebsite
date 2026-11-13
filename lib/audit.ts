@@ -33,6 +33,7 @@ const SKIP_TABLES = new Set([
   "admin_profiles", // logged explicitly in lib/actions/admin/team.ts (with the e-mail)
   "product_categories", // logged explicitly, with names, in lib/actions/admin/products.ts
   "product_allergens",
+  "notification_log", // send results written by the site itself
 ]);
 
 // Join / child tables that are rewritten wholesale (delete everything, insert again) on every
