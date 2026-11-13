@@ -2,6 +2,7 @@ import "server-only";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { getRecipes } from "./data";
 import { wouldCreateCycle } from "./algorithms";
+import { deriveBase } from "./yield";
 import type { KLBringNote, KLEquipRef, KLPrepStep, KLRecipeType } from "./types";
 
 export interface RecipeComponentInput {
@@ -15,9 +16,10 @@ export interface RecipeComponentInput {
 export interface RecipeInput {
   name: string;
   type: KLRecipeType;
-  baseAmount: number;
-  baseUnit: string;
+  /** Total grams the recipe yields. */
   totalGrams?: number | null;
+  /** Number of portions it yields (from the portion size, or typed directly). */
+  portions?: number | null;
   components: RecipeComponentInput[];
   prepSteps: KLPrepStep[];
   prepEquipment: KLEquipRef[];
@@ -35,9 +37,8 @@ function cleanBringItems(items: KLBringNote[] | undefined): KLBringNote[] {
 
 function validate(input: RecipeInput): string | null {
   if (!input.name.trim()) return "שם חסר";
-  if (!input.baseUnit.trim()) return "יחידת בסיס חסרה";
-  if (!(input.baseAmount > 0)) return "כמות בסיס חייבת להיות גדולה מ-0";
   if (input.totalGrams != null && !(input.totalGrams > 0)) return "כמות הגרמים חייבת להיות גדולה מ-0";
+  if (input.portions != null && !(input.portions > 0)) return "כמות המנות חייבת להיות גדולה מ-0";
   for (const c of input.components) {
     if (!(c.amount > 0)) return "כמות רכיב חייבת להיות גדולה מ-0";
     if (c.kind === "ingredient" && !c.ingredientId) return "רכיב חסר בחירת מרכיב";
@@ -80,14 +81,17 @@ export async function createRecipe(input: RecipeInput): Promise<{ id: string } |
     if (!recipesById.has(childId)) return { error: "מתכון-רכיב לא נמצא" };
   }
 
+  const base = deriveBase(input.totalGrams ?? null, input.portions ?? null);
+  if (!base) return { error: "נא להזין כמה גרם יוצא מהמתכון (או כמה מנות)" };
+
   const db = supabaseAdmin();
   const { data, error } = await db
     .from("kl_recipes")
     .insert({
       name: input.name.trim(),
       type: input.type,
-      base_amount: input.baseAmount,
-      base_unit: input.baseUnit.trim(),
+      base_amount: base.amount,
+      base_unit: base.unit,
       total_grams: input.totalGrams && input.totalGrams > 0 ? input.totalGrams : null,
       prep_steps: input.prepSteps,
       prep_equipment: input.prepEquipment,
@@ -117,14 +121,39 @@ export async function updateRecipe(recipeId: string, input: RecipeInput): Promis
     return { error: "השינוי הזה היה יוצר מעגליות (מתכון שמכיל את עצמו, ישירות או דרך שרשרת)" };
   }
 
+  // Neither grams nor portions entered: a recipe still on an old unit ("מיכלים", "תבנית"...) keeps it.
+  const existing = recipesById.get(recipeId);
+  const base = deriveBase(input.totalGrams ?? null, input.portions ?? null) ?? (existing ? { amount: existing.baseAmount, unit: existing.baseUnit } : null);
+  if (!base) return { error: "נא להזין כמה גרם יוצא מהמתכון (או כמה מנות)" };
+
   const db = supabaseAdmin();
+
+  // The unit changed (e.g. 2 "מיכלים" -> 1200 "גרם"). The recipe still yields the same food, so every amount
+  // that was written in the old unit (recipes using this one, event menus) is converted, and no cost changes.
+  if (existing && existing.baseUnit.trim() !== base.unit.trim() && existing.baseAmount > 0) {
+    const ratio = base.amount / existing.baseAmount;
+    const round3 = (n: number) => Math.max(0.001, Math.round(n * 1000) / 1000);
+    const [{ data: uses }, { data: menus }] = await Promise.all([
+      db.from("kl_recipe_components").select("id, amount").eq("component_recipe_id", recipeId),
+      db.from("kl_event_menu").select("id, servings").eq("recipe_id", recipeId),
+    ]);
+    for (const u of uses ?? []) {
+      const { error: e } = await db.from("kl_recipe_components").update({ amount: round3(Number(u.amount) * ratio) }).eq("id", u.id);
+      if (e) return { error: e.message };
+    }
+    for (const m of menus ?? []) {
+      const { error: e } = await db.from("kl_event_menu").update({ servings: round3(Number(m.servings) * ratio) }).eq("id", m.id);
+      if (e) return { error: e.message };
+    }
+  }
+
   const { error } = await db
     .from("kl_recipes")
     .update({
       name: input.name.trim(),
       type: input.type,
-      base_amount: input.baseAmount,
-      base_unit: input.baseUnit.trim(),
+      base_amount: base.amount,
+      base_unit: base.unit,
       total_grams: input.totalGrams && input.totalGrams > 0 ? input.totalGrams : null,
       prep_steps: input.prepSteps,
       prep_equipment: input.prepEquipment,

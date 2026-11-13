@@ -3,12 +3,9 @@ import { requireAdmin } from "@/lib/admin-auth";
 import { getKitchenGraph } from "@/lib/kitchen/data";
 import { recipeBaseCost, recipeCostPerBaseUnit, recipeHasMissingPrices } from "@/lib/kitchen/algorithms";
 import { formatCurrencyExact } from "@/lib/pricing";
+import { formatPerGram, recipeGrams, recipePortions } from "@/lib/kitchen/yield";
 import { AdminSearchGrid } from "@/components/admin/kitchen/AdminSearch";
 import styles from "../../../admin.module.css";
-
-function formatPerGram(amount: number): string {
-  return `₪${amount.toLocaleString("he-IL", { minimumFractionDigits: 2, maximumFractionDigits: 4 })}`;
-}
 
 const TYPE_LABEL = { dish: "מנה סופית", prep: "הכנה" };
 
@@ -35,6 +32,8 @@ export default async function KitchenRecipesPage() {
         emptyMessage="אין מתכונים עדיין."
         items={recipes.map((r) => {
           const baseCost = isOwner ? recipeBaseCost(r.id, recipesById, ingredientsById) : 0;
+          const grams = recipeGrams(r);
+          const portions = recipePortions(r);
           const perUnitCost = isOwner ? recipeCostPerBaseUnit(r.id, recipesById, ingredientsById) : 0;
           const missingPrices = isOwner && recipeHasMissingPrices(r.id, recipesById, ingredientsById);
           const card = (
@@ -44,20 +43,26 @@ export default async function KitchenRecipesPage() {
               </span>
               <h2 style={{ marginTop: 10 }}>{r.name}</h2>
               <p className={styles.muted}>
-                {r.baseAmount} {r.baseUnit} · {r.components.length} רכיבים · {r.prepSteps.length} שלבים
+                {[grams ? `${grams} גרם` : null, portions ? `${Number(portions.toFixed(2))} מנות` : null, !grams && !portions ? `${r.baseAmount} ${r.baseUnit}` : null]
+                  .filter(Boolean)
+                  .join(" · ")}{" "}
+                · {r.components.length} רכיבים · {r.prepSteps.length} שלבים
               </p>
               {isOwner && (
                 <div style={{ marginTop: 10 }}>
-                  <p style={{ fontWeight: 700, fontSize: 16 }}>
-                    מחיר המתכון: {formatCurrencyExact(baseCost)}
-                  </p>
-                  <p className={styles.muted}>
-                    {formatCurrencyExact(perUnitCost)} ל{r.baseUnit}
-                    {r.totalGrams ? ` · ${formatPerGram(baseCost / r.totalGrams)} לגרם (${r.totalGrams} גרם)` : ""}
-                    {missingPrices && (
-                      <span style={{ color: "var(--danger)" }}> · חסר מחיר למרכיב — הסכום חלקי</span>
-                    )}
-                  </p>
+                  <p style={{ fontWeight: 700, fontSize: 16 }}>מחיר למתכון: {formatCurrencyExact(baseCost)}</p>
+                  {portions && <p className={styles.muted}>מחיר למנה: {formatCurrencyExact(baseCost / portions)}</p>}
+                  {grams && (
+                    <p className={styles.muted}>
+                      מחיר לגרם: {formatPerGram(baseCost / grams)} ({formatCurrencyExact((baseCost / grams) * 1000)} לק&quot;ג)
+                    </p>
+                  )}
+                  {!grams && !portions && (
+                    <p className={styles.muted}>
+                      {formatCurrencyExact(perUnitCost)} ל{r.baseUnit}
+                    </p>
+                  )}
+                  {missingPrices && <p style={{ color: "var(--danger)", fontSize: 13 }}>חסר מחיר למרכיב — הסכום חלקי</p>}
                 </div>
               )}
             </div>

@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { KLEquipment, KLIngredient, KLRecipe, KLRecipeType } from "@/lib/kitchen/types";
 import { ingredientLineCost } from "@/lib/kitchen/algorithms";
+import { formatPerGram, recipeGrams, recipePortions } from "@/lib/kitchen/yield";
 import { formatCurrencyExact } from "@/lib/pricing";
 import { SearchSelect, type SearchOption } from "./SearchSelect";
 import styles from "@/app/admin/admin.module.css";
@@ -49,11 +50,6 @@ interface LineCost {
   approximate: boolean;
 }
 
-/** Cost per gram needs more decimals than ordinary prices (₪0.0123 per gram is normal). */
-function formatPerGram(amount: number): string {
-  return `₪${amount.toLocaleString("he-IL", { minimumFractionDigits: 2, maximumFractionDigits: 4 })}`;
-}
-
 function newId(): string {
   return crypto.randomUUID();
 }
@@ -74,9 +70,17 @@ export function RecipeEditorForm({
   const router = useRouter();
   const [name, setName] = useState(initial?.name ?? "");
   const [type, setType] = useState<KLRecipeType>(initial?.type ?? "dish");
-  const [baseAmount, setBaseAmount] = useState(initial ? String(initial.baseAmount) : "");
-  const [baseUnit, setBaseUnit] = useState(initial?.baseUnit ?? "");
-  const [totalGrams, setTotalGrams] = useState(initial?.totalGrams ? String(initial.totalGrams) : "");
+  const initialPortions = initial ? recipePortions(initial) : null;
+  const initialGrams = initial ? recipeGrams(initial) : null;
+  const [totalGrams, setTotalGrams] = useState(initialGrams ? String(initialGrams) : "");
+  const [portions, setPortions] = useState(initialPortions ? String(initialPortions) : "");
+  const [portionSize, setPortionSize] = useState(
+    initialPortions && initialGrams ? String(Math.round((initialGrams / initialPortions) * 100) / 100) : ""
+  );
+  // Which of "portion size" / "number of portions" was typed last: that one stays fixed and the other is calculated.
+  const [source, setSource] = useState<"size" | "count">("count");
+  // A recipe still measured in an old unit ("מיכלים", "תבנית"...) until grams or portions are entered.
+  const legacyBase = initial && !initialPortions && !initialGrams ? `${initial.baseAmount} ${initial.baseUnit}` : null;
   const [components, setComponents] = useState<ComponentRow[]>(
     (initial?.components ?? []).map((c) => ({
       kind: c.kind,
@@ -117,8 +121,30 @@ export function RecipeEditorForm({
   const lineCosts = components.map(lineCost);
   const totalCost = lineCosts.reduce((sum, l) => sum + (l?.cost ?? 0), 0);
   const unpricedLines = lineCosts.filter((l) => l && (l.cost === null || l.approximate)).length;
-  const baseAmountNumber = Number(baseAmount);
   const totalGramsNumber = Number(totalGrams);
+  const sizeNumber = Number(portionSize);
+  const countNumber = Number(portions);
+  const portionsEffective =
+    source === "size" && sizeNumber > 0 && totalGramsNumber > 0 ? totalGramsNumber / sizeNumber : countNumber > 0 ? countNumber : 0;
+  const round = (n: number, digits: number) => String(Math.round(n * 10 ** digits) / 10 ** digits);
+
+  function changeTotal(value: string) {
+    setTotalGrams(value);
+    const total = Number(value);
+    if (!(total > 0)) return;
+    if (source === "size" && sizeNumber > 0) setPortions(round(total / sizeNumber, 3));
+    else if (countNumber > 0) setPortionSize(round(total / countNumber, 2));
+  }
+  function changeSize(value: string) {
+    setSource("size");
+    setPortionSize(value);
+    if (totalGramsNumber > 0 && Number(value) > 0) setPortions(round(totalGramsNumber / Number(value), 3));
+  }
+  function changeCount(value: string) {
+    setSource("count");
+    setPortions(value);
+    if (totalGramsNumber > 0 && Number(value) > 0) setPortionSize(round(totalGramsNumber / Number(value), 2));
+  }
 
   // One search box for both raw ingredients and recipes: value "i:<id>" / "r:<id>".
   const componentOptions = useMemo<SearchOption[]>(
@@ -169,9 +195,9 @@ export function RecipeEditorForm({
     setError(null);
 
     if (!name.trim()) return setError("נא להזין שם");
-    if (!baseUnit.trim()) return setError("נא להזין יחידת בסיס");
-    if (!(Number(baseAmount) > 0)) return setError("כמות בסיס חייבת להיות גדולה מ-0");
-    if (totalGrams.trim() && !(Number(totalGrams) > 0)) return setError("כמות הגרמים חייבת להיות גדולה מ-0");
+    if (totalGrams.trim() && !(totalGramsNumber > 0)) return setError("כמות הגרמים חייבת להיות גדולה מ-0");
+    if (portionSize.trim() && !(totalGramsNumber > 0)) return setError("כדי לחשב מנות לפי גודל מנה צריך להזין גם כמה גרם יוצא מהמתכון");
+    if (!(totalGramsNumber > 0) && !(portionsEffective > 0) && !legacyBase) return setError("נא להזין כמה גרם יוצא מהמתכון (או כמה מנות)");
     for (const c of components) {
       if (!(Number(c.amount) > 0)) return setError("כל רכיב חייב כמות גדולה מ-0");
       if (!c.ingredientId && !c.componentRecipeId) return setError("נא לבחור מרכיב או מתכון בכל שורה");
@@ -181,9 +207,8 @@ export function RecipeEditorForm({
     const payload = {
       name: name.trim(),
       type,
-      baseAmount: Number(baseAmount),
-      baseUnit: baseUnit.trim(),
-      totalGrams: totalGrams.trim() ? Number(totalGrams) : null,
+      totalGrams: totalGramsNumber > 0 ? totalGramsNumber : null,
+      portions: portionsEffective > 0 ? portionsEffective : null,
       components: components.map((c) => ({
         kind: c.kind,
         ingredientId: c.kind === "ingredient" ? c.ingredientId : null,
@@ -271,38 +296,49 @@ export function RecipeEditorForm({
         <input value={name} onChange={(e) => setName(e.target.value)} required style={{ width: 220 }} />
       </div>
       <div className={styles.field}>
-        <label>כמות בסיס</label>
-        <input
-          type="number"
-          step="0.001"
-          value={baseAmount}
-          onChange={(e) => setBaseAmount(e.target.value)}
-          style={{ width: 90 }}
-        />
-      </div>
-      <div className={styles.field}>
-        <label>יחידת בסיס</label>
-        <input
-          value={baseUnit}
-          onChange={(e) => setBaseUnit(e.target.value)}
-          placeholder="מנות / גרם / ליטר"
-          style={{ width: 110 }}
-        />
-      </div>
-
-      <div className={styles.field}>
         <label>סה&quot;כ גרם שיוצא מהמתכון</label>
         <input
           type="number"
           step="0.001"
           min="0"
           value={totalGrams}
-          onChange={(e) => setTotalGrams(e.target.value)}
+          onChange={(e) => changeTotal(e.target.value)}
           placeholder="למשל 1500"
           style={{ width: 130 }}
-          title="כמה גרם יוצא בסך הכול מהמתכון (בכמות הבסיס). משמש לחישוב עלות לגרם"
         />
       </div>
+      <div className={styles.field}>
+        <label>גודל מנה (גרם)</label>
+        <input
+          type="number"
+          step="0.01"
+          min="0"
+          value={portionSize}
+          onChange={(e) => changeSize(e.target.value)}
+          placeholder="למשל 150"
+          style={{ width: 110 }}
+          title="מקלידים גודל מנה והכמות מתחשבת אוטומטית"
+        />
+      </div>
+      <div className={styles.field}>
+        <label>כמות מנות</label>
+        <input
+          type="number"
+          step="0.001"
+          min="0"
+          value={portions}
+          onChange={(e) => changeCount(e.target.value)}
+          placeholder="למשל 10"
+          style={{ width: 100 }}
+          title="אפשר גם להקליד כמה מנות יוצאות, וגודל המנה מתחשב אוטומטית"
+        />
+      </div>
+      {legacyBase && (
+        <p className={styles.muted} style={{ width: "100%", margin: 0 }}>
+          המתכון הזה עדיין מוגדר ב-{legacyBase}. כדי לעבור למבנה החדש מלאו כמה גרם יוצא ממנו (ואפשר גם גודל מנה או כמות מנות).
+          אפשר לשמור גם בלי זה והוא יישאר כמו שהוא.
+        </p>
+      )}
 
       <div className={styles.field}>
         <label>אירוע חוץ</label>
@@ -381,9 +417,9 @@ export function RecipeEditorForm({
               <span className={styles.costBox} style={{ fontSize: 16, padding: "9px 16px" }}>
                 {formatCurrencyExact(totalCost)}
               </span>
-              {baseAmountNumber > 0 && baseUnit.trim() && (
+              {portionsEffective > 0 && (
                 <span className={styles.muted}>
-                  {formatCurrencyExact(totalCost / baseAmountNumber)} ל{baseUnit.trim()}
+                  · {formatCurrencyExact(totalCost / portionsEffective)} למנה
                 </span>
               )}
               {totalGramsNumber > 0 && (
@@ -391,9 +427,14 @@ export function RecipeEditorForm({
                   · {formatPerGram(totalCost / totalGramsNumber)} לגרם ({formatCurrencyExact((totalCost / totalGramsNumber) * 1000)} לק&quot;ג)
                 </span>
               )}
+              {!(portionsEffective > 0) && !(totalGramsNumber > 0) && initial && (
+                <span className={styles.muted}>
+                  · {formatCurrencyExact(totalCost / initial.baseAmount)} ל{initial.baseUnit}
+                </span>
+              )}
             </div>
             <p className={styles.muted} style={{ marginTop: 4 }}>
-              המחיר הוא עבור כמות הבסיס של המתכון{baseAmountNumber > 0 ? ` (${baseAmountNumber} ${baseUnit.trim()})` : ""}.
+              המחיר הוא עבור כל המתכון (כל מה שיוצא ממנו).
               {unpricedLines > 0 &&
                 ` * חסר מחיר ל-${unpricedLines === 1 ? "רכיב אחד" : `${unpricedLines} רכיבים`} — הסכום חלקי. אפשר להוסיף מחיר במסך "מרכיבים".`}
             </p>
