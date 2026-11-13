@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import type { KLEquipment, KLIngredient, KLRecipe, KLRecipeType } from "@/lib/kitchen/types";
 import { ingredientLineCost } from "@/lib/kitchen/algorithms";
 import { formatCurrencyExact } from "@/lib/pricing";
+import { SearchSelect, type SearchOption } from "./SearchSelect";
 import styles from "@/app/admin/admin.module.css";
 
 export interface RecipeOption {
@@ -48,6 +49,11 @@ interface LineCost {
   approximate: boolean;
 }
 
+/** Cost per gram needs more decimals than ordinary prices (₪0.0123 per gram is normal). */
+function formatPerGram(amount: number): string {
+  return `₪${amount.toLocaleString("he-IL", { minimumFractionDigits: 2, maximumFractionDigits: 4 })}`;
+}
+
 function newId(): string {
   return crypto.randomUUID();
 }
@@ -70,6 +76,7 @@ export function RecipeEditorForm({
   const [type, setType] = useState<KLRecipeType>(initial?.type ?? "dish");
   const [baseAmount, setBaseAmount] = useState(initial ? String(initial.baseAmount) : "");
   const [baseUnit, setBaseUnit] = useState(initial?.baseUnit ?? "");
+  const [totalGrams, setTotalGrams] = useState(initial?.totalGrams ? String(initial.totalGrams) : "");
   const [components, setComponents] = useState<ComponentRow[]>(
     (initial?.components ?? []).map((c) => ({
       kind: c.kind,
@@ -111,6 +118,35 @@ export function RecipeEditorForm({
   const totalCost = lineCosts.reduce((sum, l) => sum + (l?.cost ?? 0), 0);
   const unpricedLines = lineCosts.filter((l) => l && (l.cost === null || l.approximate)).length;
   const baseAmountNumber = Number(baseAmount);
+  const totalGramsNumber = Number(totalGrams);
+
+  // One search box for both raw ingredients and recipes: value "i:<id>" / "r:<id>".
+  const componentOptions = useMemo<SearchOption[]>(
+    () => [
+      ...ingredients.map((ing) => ({ value: `i:${ing.id}`, label: `${ing.name} (${ing.unit})`, badge: "מרכיב גלם" })),
+      ...recipeOptions
+        .filter((r) => r.id !== recipeId)
+        .map((r) => ({ value: `r:${r.id}`, label: `${r.name} (${r.baseUnit})`, badge: "מתכון" })),
+    ],
+    [ingredients, recipeOptions, recipeId]
+  );
+  const equipmentOptions = useMemo<SearchOption[]>(
+    () => equipment.map((eq) => ({ value: eq.id, label: eq.name })),
+    [equipment]
+  );
+  function componentValue(row: ComponentRow): string {
+    if (row.kind === "ingredient") return row.ingredientId ? `i:${row.ingredientId}` : "";
+    return row.componentRecipeId ? `r:${row.componentRecipeId}` : "";
+  }
+  function chooseComponent(index: number, value: string) {
+    const id = value.slice(2);
+    updateComponent(
+      index,
+      value.startsWith("i:")
+        ? { kind: "ingredient", ingredientId: id, componentRecipeId: "" }
+        : { kind: "recipe", componentRecipeId: id, ingredientId: "" }
+    );
+  }
 
   function updateComponent(index: number, patch: Partial<ComponentRow>) {
     setComponents((rows) => rows.map((r, i) => (i === index ? { ...r, ...patch } : r)));
@@ -135,17 +171,19 @@ export function RecipeEditorForm({
     if (!name.trim()) return setError("נא להזין שם");
     if (!baseUnit.trim()) return setError("נא להזין יחידת בסיס");
     if (!(Number(baseAmount) > 0)) return setError("כמות בסיס חייבת להיות גדולה מ-0");
+    if (totalGrams.trim() && !(Number(totalGrams) > 0)) return setError("כמות הגרמים חייבת להיות גדולה מ-0");
     for (const c of components) {
       if (!(Number(c.amount) > 0)) return setError("כל רכיב חייב כמות גדולה מ-0");
-      if (c.kind === "ingredient" && !c.ingredientId) return setError("נא לבחור מרכיב בכל שורה");
-      if (c.kind === "recipe" && !c.componentRecipeId) return setError("נא לבחור מתכון בכל שורה");
+      if (!c.ingredientId && !c.componentRecipeId) return setError("נא לבחור מרכיב או מתכון בכל שורה");
     }
+    if ([...prepEquip, ...eventEquip].some((e) => !e.equipId)) return setError("נא לבחור ציוד בכל שורת ציוד (או להסיר אותה)");
 
     const payload = {
       name: name.trim(),
       type,
       baseAmount: Number(baseAmount),
       baseUnit: baseUnit.trim(),
+      totalGrams: totalGrams.trim() ? Number(totalGrams) : null,
       components: components.map((c) => ({
         kind: c.kind,
         ingredientId: c.kind === "ingredient" ? c.ingredientId : null,
@@ -194,18 +232,13 @@ export function RecipeEditorForm({
       <label>{label}</label>
       {list.map((row, i) => (
         <div key={i} style={{ display: "flex", gap: 8, marginBottom: 6 }}>
-          <select
+          <SearchSelect
+            options={equipmentOptions}
             value={row.equipId}
-            onChange={(e) => updateEquipRow(list, setList, i, { equipId: e.target.value })}
-            style={{ flex: 1 }}
-          >
-            <option value="">בחר/י ציוד</option>
-            {equipment.map((eq) => (
-              <option key={eq.id} value={eq.id}>
-                {eq.name}
-              </option>
-            ))}
-          </select>
+            onChange={(v) => updateEquipRow(list, setList, i, { equipId: v })}
+            placeholder="הקלידו שם ציוד..."
+            ariaLabel="ציוד"
+          />
           <input
             type="number"
             min="1"
@@ -258,6 +291,20 @@ export function RecipeEditorForm({
       </div>
 
       <div className={styles.field}>
+        <label>סה&quot;כ גרם שיוצא מהמתכון</label>
+        <input
+          type="number"
+          step="0.001"
+          min="0"
+          value={totalGrams}
+          onChange={(e) => setTotalGrams(e.target.value)}
+          placeholder="למשל 1500"
+          style={{ width: 130 }}
+          title="כמה גרם יוצא בסך הכול מהמתכון (בכמות הבסיס). משמש לחישוב עלות לגרם"
+        />
+      </div>
+
+      <div className={styles.field}>
         <label>אירוע חוץ</label>
         <label
           title="האם הפריט הזה עצמו מופיע ברשימת הפריטים והכנות לקחת, כשהוא בתפריט של אירוע חוץ"
@@ -272,43 +319,13 @@ export function RecipeEditorForm({
         <label>רכיבים</label>
         {components.map((row, i) => (
           <div key={i} style={{ display: "flex", gap: 8, marginBottom: 6, alignItems: "center", flexWrap: "wrap" }}>
-            <select
-              value={row.kind}
-              onChange={(e) => updateComponent(i, { kind: e.target.value as "ingredient" | "recipe" })}
-              style={{ width: 110 }}
-            >
-              <option value="ingredient">מרכיב גלם</option>
-              <option value="recipe">מתכון</option>
-            </select>
-            {row.kind === "ingredient" ? (
-              <select
-                value={row.ingredientId}
-                onChange={(e) => updateComponent(i, { ingredientId: e.target.value })}
-                style={{ flex: 1 }}
-              >
-                <option value="">בחר/י מרכיב</option>
-                {ingredients.map((ing) => (
-                  <option key={ing.id} value={ing.id}>
-                    {ing.name} ({ing.unit})
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <select
-                value={row.componentRecipeId}
-                onChange={(e) => updateComponent(i, { componentRecipeId: e.target.value })}
-                style={{ flex: 1 }}
-              >
-                <option value="">בחר/י מתכון</option>
-                {recipeOptions
-                  .filter((r) => r.id !== recipeId)
-                  .map((r) => (
-                    <option key={r.id} value={r.id}>
-                      {r.name} ({r.baseUnit})
-                    </option>
-                  ))}
-              </select>
-            )}
+            <SearchSelect
+              options={componentOptions}
+              value={componentValue(row)}
+              onChange={(v) => chooseComponent(i, v)}
+              placeholder="הקלידו שם מרכיב או מתכון (למשל: שמן)..."
+              ariaLabel="מרכיב או מתכון"
+            />
             <input
               type="number"
               step="0.001"
@@ -346,24 +363,15 @@ export function RecipeEditorForm({
             </button>
           </div>
         ))}
-        <div style={{ display: "flex", gap: 8 }}>
-          <button
-            type="button"
-            className={styles.btnSecondary}
-            onClick={() => setComponents((c) => [...c, { kind: "ingredient", ingredientId: "", componentRecipeId: "", amount: "", bringOffsite: true }])}
-          >
-            + מרכיב גלם
-          </button>
-          <button
-            type="button"
-            className={styles.btnSecondary}
-            onClick={() => setComponents((c) => [...c, { kind: "recipe", ingredientId: "", componentRecipeId: "", amount: "", bringOffsite: true }])}
-          >
-            + מתכון כרכיב
-          </button>
-        </div>
+        <button
+          type="button"
+          className={styles.btnSecondary}
+          onClick={() => setComponents((c) => [...c, { kind: "ingredient", ingredientId: "", componentRecipeId: "", amount: "", bringOffsite: true }])}
+        >
+          + רכיב
+        </button>
         <p className={styles.muted} style={{ marginTop: 6 }}>
-          מרכיב חדש שלא ברשימה? הוסיפו אותו קודם במסך &quot;מרכיבים&quot;.
+          מתחילים להקליד והרשימה מציעה מרכיבי גלם ומתכונים שמכילים את המילה. מרכיב חדש שלא ברשימה? הוסיפו אותו קודם במסך &quot;מרכיבים&quot;.
         </p>
 
         {components.length > 0 && (
@@ -376,6 +384,11 @@ export function RecipeEditorForm({
               {baseAmountNumber > 0 && baseUnit.trim() && (
                 <span className={styles.muted}>
                   {formatCurrencyExact(totalCost / baseAmountNumber)} ל{baseUnit.trim()}
+                </span>
+              )}
+              {totalGramsNumber > 0 && (
+                <span className={styles.muted}>
+                  · {formatPerGram(totalCost / totalGramsNumber)} לגרם ({formatCurrencyExact((totalCost / totalGramsNumber) * 1000)} לק&quot;ג)
                 </span>
               )}
             </div>

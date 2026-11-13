@@ -17,6 +17,7 @@ export interface RecipeInput {
   type: KLRecipeType;
   baseAmount: number;
   baseUnit: string;
+  totalGrams?: number | null;
   components: RecipeComponentInput[];
   prepSteps: KLPrepStep[];
   prepEquipment: KLEquipRef[];
@@ -36,6 +37,7 @@ function validate(input: RecipeInput): string | null {
   if (!input.name.trim()) return "שם חסר";
   if (!input.baseUnit.trim()) return "יחידת בסיס חסרה";
   if (!(input.baseAmount > 0)) return "כמות בסיס חייבת להיות גדולה מ-0";
+  if (input.totalGrams != null && !(input.totalGrams > 0)) return "כמות הגרמים חייבת להיות גדולה מ-0";
   for (const c of input.components) {
     if (!(c.amount > 0)) return "כמות רכיב חייבת להיות גדולה מ-0";
     if (c.kind === "ingredient" && !c.ingredientId) return "רכיב חסר בחירת מרכיב";
@@ -86,6 +88,7 @@ export async function createRecipe(input: RecipeInput): Promise<{ id: string } |
       type: input.type,
       base_amount: input.baseAmount,
       base_unit: input.baseUnit.trim(),
+      total_grams: input.totalGrams && input.totalGrams > 0 ? input.totalGrams : null,
       prep_steps: input.prepSteps,
       prep_equipment: input.prepEquipment,
       event_equipment: input.eventEquipment,
@@ -122,6 +125,7 @@ export async function updateRecipe(recipeId: string, input: RecipeInput): Promis
       type: input.type,
       base_amount: input.baseAmount,
       base_unit: input.baseUnit.trim(),
+      total_grams: input.totalGrams && input.totalGrams > 0 ? input.totalGrams : null,
       prep_steps: input.prepSteps,
       prep_equipment: input.prepEquipment,
       event_equipment: input.eventEquipment,

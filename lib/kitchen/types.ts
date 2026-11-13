@@ -84,6 +84,8 @@ export interface KLRecipe {
   type: KLRecipeType;
   baseAmount: number;
   baseUnit: string;
+  /** Total grams the recipe yields (null = not entered). */
+  totalGrams: number | null;
   prepSteps: KLPrepStep[];
   prepEquipment: KLEquipRef[];
   eventEquipment: KLEquipRef[];

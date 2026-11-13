@@ -6,6 +6,10 @@ import { formatCurrencyExact } from "@/lib/pricing";
 import { AdminSearchGrid } from "@/components/admin/kitchen/AdminSearch";
 import styles from "../../../admin.module.css";
 
+function formatPerGram(amount: number): string {
+  return `₪${amount.toLocaleString("he-IL", { minimumFractionDigits: 2, maximumFractionDigits: 4 })}`;
+}
+
 const TYPE_LABEL = { dish: "מנה סופית", prep: "הכנה" };
 
 export default async function KitchenRecipesPage() {
@@ -49,6 +53,7 @@ export default async function KitchenRecipesPage() {
                   </p>
                   <p className={styles.muted}>
                     {formatCurrencyExact(perUnitCost)} ל{r.baseUnit}
+                    {r.totalGrams ? ` · ${formatPerGram(baseCost / r.totalGrams)} לגרם (${r.totalGrams} גרם)` : ""}
                     {missingPrices && (
                       <span style={{ color: "var(--danger)" }}> · חסר מחיר למרכיב — הסכום חלקי</span>
                     )}

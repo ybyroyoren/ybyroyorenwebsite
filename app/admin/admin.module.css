@@ -985,3 +985,70 @@
     grid-column: span 12;
   }
 }
+
+/* ---------- search-as-you-type select (recipes: components and equipment) ---------- */
+.searchSelect {
+  position: relative;
+  flex: 1;
+  min-width: 220px;
+}
+
+.searchSelect > input {
+  width: 100%;
+}
+
+.searchSelect > .searchBadge {
+  position: absolute;
+  inset-inline-end: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.searchBadge {
+  display: inline-block;
+  padding: 1px 9px;
+  border-radius: 999px;
+  background: var(--olive-mist);
+  color: var(--olive-deep);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.searchList {
+  position: absolute;
+  top: calc(100% + 4px);
+  inset-inline: 0;
+  z-index: 30;
+  max-height: 320px;
+  overflow-y: auto;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  background: var(--cream);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-shadow: 0 12px 32px rgba(23, 20, 16, 0.18);
+}
+
+.searchItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 14.5px;
+}
+
+.searchItemActive {
+  background: var(--olive-mist);
+}
+
+.searchEmpty {
+  padding: 10px 12px;
+  color: var(--ink-soft);
+  font-size: 14px;
+}

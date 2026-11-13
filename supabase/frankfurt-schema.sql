@@ -1087,3 +1087,9 @@ group by s.product_id, o.pickup_date;
 alter view product_size_stock set (security_invoker = true);
 alter view product_day_usage set (security_invoker = true);
 
+-- ===== 0024_recipe_total_grams.sql =====
+-- Total weight (in grams) a recipe yields, next to its base amount / base unit
+-- (e.g. 10 servings that come to 1500 g). Used for the cost per gram.
+alter table kl_recipes
+  add column total_grams numeric(12,3) check (total_grams is null or total_grams > 0);
+
