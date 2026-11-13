@@ -3,7 +3,8 @@ import { supabaseAdmin } from "@/lib/supabase/server";
 import { getRecipes } from "./data";
 import { wouldCreateCycle } from "./algorithms";
 import { deriveBase } from "./yield";
-import type { KLBringNote, KLEquipRef, KLPrepStep, KLRecipeType } from "./types";
+import { cleanSaleVariants } from "./saleCalc";
+import type { KLBringNote, KLEquipRef, KLPrepStep, KLRecipeType, KLSaleVariant } from "./types";
 
 export interface RecipeComponentInput {
   kind: "ingredient" | "recipe";
@@ -20,6 +21,9 @@ export interface RecipeInput {
   totalGrams?: number | null;
   /** Number of portions it yields (from the portion size, or typed directly). */
   portions?: number | null;
+  /** Sold in the shop: shows the pricing calculator. */
+  soldInStore?: boolean;
+  saleVariants?: KLSaleVariant[];
   components: RecipeComponentInput[];
   prepSteps: KLPrepStep[];
   prepEquipment: KLEquipRef[];
@@ -93,6 +97,8 @@ export async function createRecipe(input: RecipeInput): Promise<{ id: string } |
       base_amount: base.amount,
       base_unit: base.unit,
       total_grams: input.totalGrams && input.totalGrams > 0 ? input.totalGrams : null,
+      sold_in_store: input.soldInStore === true,
+      sale_variants: cleanSaleVariants(input.saleVariants),
       prep_steps: input.prepSteps,
       prep_equipment: input.prepEquipment,
       event_equipment: input.eventEquipment,
@@ -155,6 +161,8 @@ export async function updateRecipe(recipeId: string, input: RecipeInput): Promis
       base_amount: base.amount,
       base_unit: base.unit,
       total_grams: input.totalGrams && input.totalGrams > 0 ? input.totalGrams : null,
+      sold_in_store: input.soldInStore === true,
+      sale_variants: cleanSaleVariants(input.saleVariants),
       prep_steps: input.prepSteps,
       prep_equipment: input.prepEquipment,
       event_equipment: input.eventEquipment,

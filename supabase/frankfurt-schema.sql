@@ -1099,3 +1099,9 @@ alter table kl_recipes
 alter table kl_recipes
   alter column base_amount type numeric(14,6);
 
+-- ===== 0026_recipe_sale_calculator.sql =====
+-- Per-recipe "sold in the shop" pricing calculator. Kept on the recipe screen only (not read by the shop).
+-- sale_variants: [{ id, grams, extras: [{ id, name, cost }], mode, salePrice, foodCostPct }]
+alter table kl_recipes add column sold_in_store boolean not null default false;
+alter table kl_recipes add column sale_variants jsonb not null default '[]';
+

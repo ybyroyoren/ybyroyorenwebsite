@@ -110,6 +110,8 @@ export const FIELD_LABELS: Record<string, string> = {
   closed_at: "נסגר",
   daily_limit: "מקסימום ליום איסוף",
   total_grams: "גרמים בסך הכול",
+  sold_in_store: "נמכר בחנות",
+  sale_variants: "מחשבון מחיר מכירה",
   base_amount: "כמות בסיס",
   base_unit: "יחידת בסיס",
   stock_qty: "כמות במלאי",

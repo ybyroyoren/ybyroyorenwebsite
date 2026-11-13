@@ -73,7 +73,7 @@ export async function getRecipes(): Promise<KLRecipe[]> {
   const db = supabaseAdmin();
   const { data: recipeRows } = await db
     .from("kl_recipes")
-    .select("id, name, type, base_amount, base_unit, total_grams, prep_steps, prep_equipment, event_equipment, bring_items, bring_offsite")
+    .select("id, name, type, base_amount, base_unit, total_grams, sold_in_store, sale_variants, prep_steps, prep_equipment, event_equipment, bring_items, bring_offsite")
     .order("name");
   const { data: componentRows } = await db
     .from("kl_recipe_components")
@@ -102,6 +102,8 @@ export async function getRecipes(): Promise<KLRecipe[]> {
     baseAmount: row.base_amount,
     baseUnit: row.base_unit,
     totalGrams: row.total_grams === null || row.total_grams === undefined ? null : Number(row.total_grams),
+    soldInStore: row.sold_in_store ?? false,
+    saleVariants: row.sale_variants ?? [],
     prepSteps: row.prep_steps ?? [],
     prepEquipment: row.prep_equipment ?? [],
     eventEquipment: row.event_equipment ?? [],

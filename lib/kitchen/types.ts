@@ -78,6 +78,23 @@ export interface KLBringNote {
   text: string;
 }
 
+export interface KLSaleExtra {
+  id: string;
+  name: string;
+  cost: number;
+}
+
+/** One size of a recipe sold in the shop (e.g. a 100 g jar): grams, extra costs and the price / food cost. */
+export interface KLSaleVariant {
+  id: string;
+  grams: number | null;
+  extras: KLSaleExtra[];
+  /** "price": the sale price is typed and the food cost % is calculated; "foodcost": the other way round. */
+  mode: "price" | "foodcost";
+  salePrice: number | null;
+  foodCostPct: number | null;
+}
+
 export interface KLRecipe {
   id: string;
   name: string;
@@ -86,6 +103,9 @@ export interface KLRecipe {
   baseUnit: string;
   /** Total grams the recipe yields (null = not entered). */
   totalGrams: number | null;
+  /** Sold in the shop: pricing calculator is shown on the recipe screen (not used anywhere else). */
+  soldInStore: boolean;
+  saleVariants: KLSaleVariant[];
   prepSteps: KLPrepStep[];
   prepEquipment: KLEquipRef[];
   eventEquipment: KLEquipRef[];

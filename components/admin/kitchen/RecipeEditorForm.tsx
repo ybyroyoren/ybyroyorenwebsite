@@ -7,6 +7,7 @@ import { ingredientLineCost } from "@/lib/kitchen/algorithms";
 import { formatPerGram, recipeGrams, recipePortions } from "@/lib/kitchen/yield";
 import { formatCurrencyExact } from "@/lib/pricing";
 import { SearchSelect, type SearchOption } from "./SearchSelect";
+import { SaleCalculator, newVariant, type VariantRow } from "./SaleCalculator";
 import styles from "@/app/admin/admin.module.css";
 
 export interface RecipeOption {
@@ -99,6 +100,17 @@ export function RecipeEditorForm({
   );
   const [bringSelf, setBringSelf] = useState(initial?.bringOffsite ?? true);
   const [bringNotes, setBringNotes] = useState<BringNoteRow[]>(initial?.bringItems ?? []);
+  const [soldInStore, setSoldInStore] = useState(initial?.soldInStore ?? false);
+  const [variants, setVariants] = useState<VariantRow[]>(
+    (initial?.saleVariants ?? []).map((v) => ({
+      id: v.id,
+      grams: v.grams ? String(v.grams) : "",
+      extras: v.extras.map((e) => ({ id: e.id, name: e.name, cost: e.cost ? String(e.cost) : "" })),
+      mode: v.mode,
+      salePrice: v.salePrice ? String(v.salePrice) : "",
+      foodCostPct: v.foodCostPct ? String(v.foodCostPct) : "",
+    }))
+  );
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -221,6 +233,15 @@ export function RecipeEditorForm({
       eventEquipment: eventEquip.map((e) => ({ equipId: e.equipId, qty: Number(e.qty) || 1 })),
       bringItems: bringNotes.filter((n) => n.text.trim()),
       bringOffsite: bringSelf,
+      soldInStore,
+      saleVariants: variants.map((v) => ({
+        id: v.id,
+        grams: Number(v.grams) > 0 ? Number(v.grams) : null,
+        extras: v.extras.filter((e) => e.name.trim() || Number(e.cost) > 0).map((e) => ({ id: e.id, name: e.name.trim(), cost: Number(e.cost) || 0 })),
+        mode: v.mode,
+        salePrice: Number(v.salePrice) > 0 ? Number(v.salePrice) : null,
+        foodCostPct: Number(v.foodCostPct) > 0 ? Number(v.foodCostPct) : null,
+      })),
     };
 
     setSaving(true);
@@ -437,6 +458,37 @@ export function RecipeEditorForm({
               המחיר הוא עבור כל המתכון (כל מה שיוצא ממנו).
               {unpricedLines > 0 &&
                 ` * חסר מחיר ל-${unpricedLines === 1 ? "רכיב אחד" : `${unpricedLines} רכיבים`} — הסכום חלקי. אפשר להוסיף מחיר במסך "מרכיבים".`}
+            </p>
+          </div>
+        )}
+      </div>
+
+      <div className={styles.field} style={{ width: "100%" }}>
+        <label
+          style={{ display: "inline-flex", alignItems: "center", gap: 8, fontWeight: 700, fontSize: 15 }}
+          title="מסמן שהמתכון הזה הוא מוצר שנמכר בחנות ופותח מחשבון עלויות ומחיר מכירה. הנתונים נשארים במסך הזה בלבד"
+        >
+          <input
+            type="checkbox"
+            checked={soldInStore}
+            onChange={(e) => {
+              setSoldInStore(e.target.checked);
+              if (e.target.checked && variants.length === 0) setVariants([newVariant()]);
+            }}
+          />
+          מוצר שנמכר בחנות שלנו
+        </label>
+        {soldInStore && (
+          <div style={{ marginTop: 10 }}>
+            <SaleCalculator
+              variants={variants}
+              setVariants={setVariants}
+              costPerGram={totalGramsNumber > 0 ? totalCost / totalGramsNumber : null}
+              approximate={unpricedLines > 0}
+              recipeName={name}
+            />
+            <p className={styles.muted} style={{ marginTop: 6 }}>
+              החישובים האלה נשמרים במתכון בלבד ולא משפיעים על החנות, על המחירים באתר או על אירועים.
             </p>
           </div>
         )}

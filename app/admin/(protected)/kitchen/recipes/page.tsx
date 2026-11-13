@@ -41,6 +41,11 @@ export default async function KitchenRecipesPage() {
               <span className={r.type === "dish" ? styles.badgePaid : styles.badgePending}>
                 {TYPE_LABEL[r.type]}
               </span>
+              {r.soldInStore && (
+                <span className={styles.badgePaid} style={{ marginInlineStart: 6 }}>
+                  נמכר בחנות
+                </span>
+              )}
               <h2 style={{ marginTop: 10 }}>{r.name}</h2>
               <p className={styles.muted}>
                 {[grams ? `${grams} גרם` : null, portions ? `${Number(portions.toFixed(2))} מנות` : null, !grams && !portions ? `${r.baseAmount} ${r.baseUnit}` : null]
