@@ -7,6 +7,7 @@ import { issueReceipt } from "@/lib/green-invoice";
 import { sendMealRegistrationConfirmationEmail } from "@/lib/resend";
 import { notifyNewMealRegistration } from "@/lib/notifications";
 import { formatCurrency } from "@/lib/pricing";
+import { todayIsraelIso } from "@/lib/date";
 
 export const DEPOSIT_PER_SEAT = 100;
 export const MEAL_CANCEL_HOURS = 96;
@@ -37,6 +38,8 @@ async function fetchOpenMeals(): Promise<MealView[]> {
     .from("meals")
     .select("id, title, description, date, total_seats, price_per_seat, menu, seats_text_mode, seats_text_he, seats_text_en, seats_meter_mode")
     .eq("status", "open")
+    // A meal whose date has passed is no longer shown or bookable (same rule as the admin "עברה" list).
+    .gte("date", todayIsraelIso())
     .order("date", { ascending: true });
 
   if (error) throw new Error(error.message);
