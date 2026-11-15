@@ -1,12 +1,13 @@
 import { requireAdminSection } from "@/lib/admin-auth";
 import { getNotificationRecipients, getSmsRecipients, getWhatsAppRecipients } from "@/lib/notifications";
 import { missingWhatsAppConfig } from "@/lib/whatsapp";
-import { missingSmsConfig } from "@/lib/sms";
+import { getSmsConfig, missingSmsFields } from "@/lib/sms";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import {
   addNotificationRecipient,
   updateNotificationRecipient,
   deleteNotificationRecipient,
+  saveSmsSettings,
   addSmsRecipient,
   updateSmsRecipient,
   deleteSmsRecipient,
@@ -29,6 +30,8 @@ const ERRORS: Record<string, string> = {
   phone: "מספר הטלפון לא תקין. אפשר לכתוב כמו 054-1234567 או עם קידומת מדינה.",
   duplicate: "המספר הזה כבר ברשימה.",
   save: "השמירה נכשלה, אפשר לנסות שוב.",
+  smsuser: "המשתמש צריך להיות מספר הטלפון שאיתו נרשמתם ל-SMS4Free, למשל 054-1234567.",
+  smssender: "השולח צריך להיות מספר טלפון או שם באנגלית ובספרות בלבד.",
 };
 
 const TYPE_NAMES: Record<string, string> = {
@@ -47,9 +50,9 @@ const dateTime = new Intl.DateTimeFormat("he-IL", {
   minute: "2-digit",
 });
 
-export default async function AdminNotificationsPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
+export default async function AdminNotificationsPage({ searchParams }: { searchParams: Promise<{ error?: string; saved?: string }> }) {
   await requireAdminSection("notifications");
-  const { error } = await searchParams;
+  const { error, saved } = await searchParams;
   const [recipients, sms, whatsapp, { data: logRows }] = await Promise.all([
     getNotificationRecipients(),
     getSmsRecipients(),
@@ -57,7 +60,8 @@ export default async function AdminNotificationsPage({ searchParams }: { searchP
     supabaseAdmin().from("notification_log").select("id, created_at, channel, type, recipient, ok, error").order("created_at", { ascending: false }).limit(25),
   ]);
   const missing = missingWhatsAppConfig();
-  const missingSms = missingSmsConfig();
+  const smsConfig = await getSmsConfig();
+  const missingSms = missingSmsFields(smsConfig);
 
   return (
     <>
@@ -175,13 +179,52 @@ export default async function AdminNotificationsPage({ searchParams }: { searchP
       </p>
       {missingSms.length > 0 ? (
         <div className={styles.explainBox}>
-          <b>החיבור ל-SMS עוד לא הוגדר.</b> חסר ב-Vercel: {missingSms.join(", ")}. עד אז המספרים נשמרים אבל ההודעות לא יישלחו (נרשם כשל ביומן
+          <b>החיבור ל-SMS עוד לא הוגדר.</b> חסר: {missingSms.join(", ")}. מלאו אותם בטופס למטה. עד אז המספרים נשמרים אבל ההודעות לא יישלחו (נרשם כשל ביומן
           שלמטה).
         </div>
       ) : (
         <div className={styles.explainBox}>החיבור ל-SMS מוגדר. אפשר לשלוח הודעת בדיקה לכל מספר.</div>
       )}
       {error && ERRORS[error] && <p className={styles.error}>{ERRORS[error]}</p>}
+
+      {saved === "sms" && <p className={styles.success}>פרטי החיבור נשמרו. אפשר לשלוח הודעת בדיקה.</p>}
+      <div className={styles.card}>
+        <h2>פרטי חיבור ל-SMS4Free</h2>
+        <p className={styles.muted} style={{ marginBottom: 12 }}>
+          הפרטים נשמרים כאן ולא צריך לשנות כלום ב-Vercel. מפתח וסיסמה לא מוצגים אחרי השמירה. כדי להחליף, מקלידים ערך חדש. שדה ריק נשאר כמו שהיה.
+        </p>
+        <form action={saveSmsSettings} className={styles.form}>
+          <div className={styles.field}>
+            <label>מספר הטלפון שאיתו נרשמתם (משתמש)</label>
+            <input name="user" type="tel" dir="ltr" placeholder="054-1234567" defaultValue={smsConfig.values.SMS4FREE_USER} />
+          </div>
+          <div className={styles.field}>
+            <label>שולח (מספר או שם באנגלית)</label>
+            <input name="sender" dir="ltr" placeholder="לרוב אותו מספר" defaultValue={smsConfig.values.SMS4FREE_SENDER} />
+          </div>
+          <div className={styles.field}>
+            <label>
+              מפתח API{" "}
+              <span className={styles.muted}>
+                {smsConfig.values.SMS4FREE_KEY ? `· שמור (${smsConfig.values.SMS4FREE_KEY.length} תווים)` : "· לא הוגדר"}
+              </span>
+            </label>
+            <input name="key" type="password" autoComplete="off" dir="ltr" placeholder={smsConfig.values.SMS4FREE_KEY ? "••••••••" : "הדביקו את המפתח"} />
+          </div>
+          <div className={styles.field}>
+            <label>
+              סיסמה{" "}
+              <span className={styles.muted}>
+                {smsConfig.values.SMS4FREE_PASS ? `· שמורה (${smsConfig.values.SMS4FREE_PASS.length} תווים)` : "· לא הוגדרה"}
+              </span>
+            </label>
+            <input name="pass" type="password" autoComplete="off" dir="ltr" placeholder={smsConfig.values.SMS4FREE_PASS ? "••••••••" : "הסיסמה של החשבון"} />
+          </div>
+          <button type="submit" className={styles.btn}>
+            שמירה
+          </button>
+        </form>
+      </div>
 
       <div className={styles.card}>
         <h2>הוספת מספר</h2>
