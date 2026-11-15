@@ -2,6 +2,7 @@ import "server-only";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { sendEmail } from "@/lib/resend";
 import { sendWhatsAppAlert, type WhatsAppAlert } from "@/lib/whatsapp";
+import { sendSms, smsText } from "@/lib/sms";
 
 export type NotificationType = "shop_order" | "event_inquiry" | "meal_registration" | "contact_message";
 
@@ -74,25 +75,35 @@ export async function getWhatsAppRecipients(): Promise<WhatsAppRecipient[]> {
   }));
 }
 
-async function getWhatsAppPhones(type: NotificationType): Promise<string[]> {
+async function getPhones(table: "whatsapp_recipients" | "sms_recipients", type: NotificationType): Promise<string[]> {
   const { data } = await supabaseAdmin()
-    .from("whatsapp_recipients")
+    .from(table)
     .select("phone, notify_shop_order, notify_event_inquiry, notify_meal_registration, notify_contact_message");
   return (data ?? []).filter((r) => (r as unknown as Record<string, boolean>)[COLUMN[type]]).map((r) => r.phone);
 }
 
-/** Sends one WhatsApp alert and records the result (shown on the notifications admin page). Never throws. */
-export async function sendAndLogWhatsApp(type: NotificationType | "test", phone: string, alert: WhatsAppAlert): Promise<{ ok: boolean; error?: string }> {
-  let result: { ok: boolean; error?: string };
-  try {
-    result = await sendWhatsAppAlert(phone, alert);
-  } catch (e) {
-    result = { ok: false, error: e instanceof Error ? e.message : "שגיאה לא ידועה" };
-  }
-  if (!result.ok) console.error(`[whatsapp] ${type} to ${phone.slice(0, 5)}… failed:`, result.error);
+export async function getSmsRecipients(): Promise<WhatsAppRecipient[]> {
+  const { data } = await supabaseAdmin()
+    .from("sms_recipients")
+    .select("id, name, phone, notify_shop_order, notify_event_inquiry, notify_meal_registration, notify_contact_message")
+    .order("created_at", { ascending: true });
+  return (data ?? []).map((r) => ({
+    id: r.id,
+    name: r.name,
+    phone: r.phone,
+    notifyShopOrder: r.notify_shop_order,
+    notifyEventInquiry: r.notify_event_inquiry,
+    notifyMealRegistration: r.notify_meal_registration,
+    notifyContactMessage: r.notify_contact_message,
+  }));
+}
+
+/** Records the result of a send (shown on the notifications admin page). Never throws. */
+async function logSend(channel: "whatsapp" | "sms", type: string, phone: string, result: { ok: boolean; error?: string }): Promise<void> {
+  if (!result.ok) console.error(`[${channel}] ${type} to ${phone.slice(0, 5)}… failed:`, result.error);
   try {
     await supabaseAdmin().from("notification_log").insert({
-      channel: "whatsapp",
+      channel,
       type,
       recipient: phone,
       ok: result.ok,
@@ -101,16 +112,44 @@ export async function sendAndLogWhatsApp(type: NotificationType | "test", phone:
   } catch {
     // the log is a convenience; a failed insert must not affect the customer's order
   }
+}
+
+/** Sends one WhatsApp alert and records the result. Never throws. */
+export async function sendAndLogWhatsApp(type: NotificationType | "test", phone: string, alert: WhatsAppAlert): Promise<{ ok: boolean; error?: string }> {
+  let result: { ok: boolean; error?: string };
+  try {
+    result = await sendWhatsAppAlert(phone, alert);
+  } catch (e) {
+    result = { ok: false, error: e instanceof Error ? e.message : "שגיאה לא ידועה" };
+  }
+  await logSend("whatsapp", type, phone, result);
+  return result;
+}
+
+/** Sends one SMS alert and records the result. Never throws. */
+export async function sendAndLogSms(type: NotificationType | "test", phone: string, alert: WhatsAppAlert): Promise<{ ok: boolean; error?: string }> {
+  let result: { ok: boolean; error?: string };
+  try {
+    result = await sendSms(phone, smsText(alert));
+  } catch (e) {
+    result = { ok: false, error: e instanceof Error ? e.message : "שגיאה לא ידועה" };
+  }
+  await logSend("sms", type, phone, result);
   return result;
 }
 
 async function alert(type: NotificationType, subject: string, html: string, whatsapp: WhatsAppAlert): Promise<void> {
   try {
-    const [emails, phones] = await Promise.all([getRecipientEmails(type), getWhatsAppPhones(type)]);
-    // Email and WhatsApp go out in parallel, and one failing never stops the others (or the customer's order).
+    const [emails, whatsappPhones, smsPhones] = await Promise.all([
+      getRecipientEmails(type),
+      getPhones("whatsapp_recipients", type),
+      getPhones("sms_recipients", type),
+    ]);
+    // E-mail, SMS and WhatsApp go out in parallel, and one failing never stops the others (or the customer's order).
     await Promise.allSettled([
       ...emails.map((to) => sendEmail({ to, subject, html })),
-      ...phones.map((phone) => sendAndLogWhatsApp(type, phone, whatsapp)),
+      ...smsPhones.map((phone) => sendAndLogSms(type, phone, whatsapp)),
+      ...whatsappPhones.map((phone) => sendAndLogWhatsApp(type, phone, whatsapp)),
     ]);
   } catch (e) {
     console.error("[notifications] alert failed", e);

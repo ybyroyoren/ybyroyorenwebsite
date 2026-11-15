@@ -11,21 +11,13 @@ import "server-only";
 // Env (Vercel): WHATSAPP_ACCESS_TOKEN, WHATSAPP_PHONE_NUMBER_ID, and optionally WHATSAPP_TEMPLATE_NAME (default
 // "site_alert") and WHATSAPP_TEMPLATE_LANG (default "he").
 
+export { normalizePhone } from "@/lib/phone";
+
 const GRAPH_URL = "https://graph.facebook.com/v21.0";
 const TIMEOUT_MS = 6000;
 
 export function missingWhatsAppConfig(): string[] {
   return ["WHATSAPP_ACCESS_TOKEN", "WHATSAPP_PHONE_NUMBER_ID"].filter((k) => !process.env[k]);
-}
-
-/** Israeli / international phone -> digits only with country code (054-1234567 -> 972541234567), or null. */
-export function normalizePhone(input: string): string | null {
-  let digits = input.replace(/[^\d+]/g, "");
-  if (digits.startsWith("+")) digits = digits.slice(1);
-  else if (digits.startsWith("00")) digits = digits.slice(2);
-  else if (digits.startsWith("0")) digits = `972${digits.slice(1)}`;
-  digits = digits.replace(/\D/g, "");
-  return digits.length >= 10 && digits.length <= 15 ? digits : null;
 }
 
 /** Template variables can't contain line breaks, tabs or long runs of spaces, and can't be empty. */

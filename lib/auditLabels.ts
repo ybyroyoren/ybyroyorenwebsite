@@ -28,6 +28,7 @@ export const ENTITY_LABELS: Record<string, string> = {
   newsletter_subscribers: "מנוי ניוזלטר",
   notification_recipients: "נמען התראות",
   whatsapp_recipients: "נמען וואטסאפ",
+  sms_recipients: "נמען SMS",
   kl_suppliers: "ספק",
   kl_equipment: "ציוד",
   kl_guests: "סועד קבוע",

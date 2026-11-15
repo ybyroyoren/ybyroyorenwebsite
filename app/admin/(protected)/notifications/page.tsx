@@ -1,11 +1,16 @@
 import { requireAdminSection } from "@/lib/admin-auth";
-import { getNotificationRecipients, getWhatsAppRecipients } from "@/lib/notifications";
+import { getNotificationRecipients, getSmsRecipients, getWhatsAppRecipients } from "@/lib/notifications";
 import { missingWhatsAppConfig } from "@/lib/whatsapp";
+import { missingSmsConfig } from "@/lib/sms";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import {
   addNotificationRecipient,
   updateNotificationRecipient,
   deleteNotificationRecipient,
+  addSmsRecipient,
+  updateSmsRecipient,
+  deleteSmsRecipient,
+  testSmsRecipient,
   addWhatsAppRecipient,
   updateWhatsAppRecipient,
   deleteWhatsAppRecipient,
@@ -45,12 +50,14 @@ const dateTime = new Intl.DateTimeFormat("he-IL", {
 export default async function AdminNotificationsPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   await requireAdminSection("notifications");
   const { error } = await searchParams;
-  const [recipients, whatsapp, { data: logRows }] = await Promise.all([
+  const [recipients, sms, whatsapp, { data: logRows }] = await Promise.all([
     getNotificationRecipients(),
+    getSmsRecipients(),
     getWhatsAppRecipients(),
-    supabaseAdmin().from("notification_log").select("id, created_at, type, recipient, ok, error").order("created_at", { ascending: false }).limit(25),
+    supabaseAdmin().from("notification_log").select("id, created_at, channel, type, recipient, ok, error").order("created_at", { ascending: false }).limit(25),
   ]);
   const missing = missingWhatsAppConfig();
+  const missingSms = missingSmsConfig();
 
   return (
     <>
@@ -162,6 +169,111 @@ export default async function AdminNotificationsPage({ searchParams }: { searchP
         </table>
       </div>
 
+      <h2 style={{ marginTop: 36 }}>SMS</h2>
+      <p className={styles.sectionNote}>
+        אותן ארבע ההתראות מגיעות גם כהודעת SMS למספרים האלה, לפי הסימונים שנבחרו לכל מספר.
+      </p>
+      {missingSms.length > 0 ? (
+        <div className={styles.explainBox}>
+          <b>החיבור ל-SMS עוד לא הוגדר.</b> חסר ב-Vercel: {missingSms.join(", ")}. עד אז המספרים נשמרים אבל ההודעות לא יישלחו (נרשם כשל ביומן
+          שלמטה).
+        </div>
+      ) : (
+        <div className={styles.explainBox}>החיבור ל-SMS מוגדר. אפשר לשלוח הודעת בדיקה לכל מספר.</div>
+      )}
+      {error && ERRORS[error] && <p className={styles.error}>{ERRORS[error]}</p>}
+
+      <div className={styles.card}>
+        <h2>הוספת מספר</h2>
+        <form action={addSmsRecipient} className={styles.form}>
+          <div className={styles.field}>
+            <label>שם (לא חובה)</label>
+            <input name="name" placeholder="למשל: רועי" />
+          </div>
+          <div className={styles.field}>
+            <label>מספר טלפון</label>
+            <input name="phone" type="tel" required placeholder="054-1234567" dir="ltr" />
+          </div>
+          {TYPES.map((t) => (
+            <div className={styles.field} key={t.key}>
+              <label>
+                <input type="checkbox" name={t.key} defaultChecked /> {t.label}
+              </label>
+            </div>
+          ))}
+          <button type="submit" className={styles.btn}>
+            הוספה
+          </button>
+        </form>
+      </div>
+
+      <div className={styles.card}>
+        <table className={styles.table}>
+          <thead>
+            <tr>
+              <th>מספר</th>
+              {TYPES.map((t) => (
+                <th key={t.key}>{t.label}</th>
+              ))}
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {sms.map((r) => {
+              const formId = `sms-${r.id}`;
+              const flags: Record<string, boolean> = {
+                notifyShopOrder: r.notifyShopOrder,
+                notifyEventInquiry: r.notifyEventInquiry,
+                notifyMealRegistration: r.notifyMealRegistration,
+                notifyContactMessage: r.notifyContactMessage,
+              };
+              return (
+                <tr key={r.id}>
+                  <td>
+                    {r.name && <b>{r.name} · </b>}
+                    <span dir="ltr">+{r.phone}</span>
+                    <form id={formId} action={updateSmsRecipient}>
+                      <input type="hidden" name="id" value={r.id} />
+                    </form>
+                  </td>
+                  {TYPES.map((t) => (
+                    <td key={t.key} style={{ textAlign: "center" }}>
+                      <input form={formId} type="checkbox" name={t.key} defaultChecked={flags[t.key]} />
+                    </td>
+                  ))}
+                  <td>
+                    <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                      <button type="submit" form={formId} className={styles.btnSecondary}>
+                        שמירה
+                      </button>
+                      <form action={testSmsRecipient}>
+                        <input type="hidden" name="id" value={r.id} />
+                        <button type="submit" className={styles.btnSecondary}>
+                          שליחת בדיקה
+                        </button>
+                      </form>
+                      <form action={deleteSmsRecipient}>
+                        <input type="hidden" name="id" value={r.id} />
+                        <button type="submit" className={styles.btnDanger}>
+                          מחיקה
+                        </button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+            {sms.length === 0 && (
+              <tr>
+                <td colSpan={TYPES.length + 2} className={styles.muted}>
+                  אין מספרים מוגדרים עדיין.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
       <h2 style={{ marginTop: 36 }}>וואטסאפ</h2>
       <p className={styles.sectionNote}>
         אותן ארבע ההתראות מגיעות גם כהודעת וואטסאפ למספרים האלה, לפי הסימונים שנבחרו לכל מספר.
@@ -174,7 +286,7 @@ export default async function AdminNotificationsPage({ searchParams }: { searchP
       ) : (
         <div className={styles.explainBox}>החיבור לוואטסאפ מוגדר. אפשר לשלוח הודעת בדיקה לכל מספר.</div>
       )}
-      {error && ERRORS[error] && <p className={styles.error}>{ERRORS[error]}</p>}
+      
 
       <div className={styles.card}>
         <h2>הוספת מספר</h2>
@@ -268,11 +380,12 @@ export default async function AdminNotificationsPage({ searchParams }: { searchP
       </div>
 
       <div className={styles.card}>
-        <h2>יומן שליחות וואטסאפ (25 אחרונות)</h2>
+        <h2>יומן שליחות SMS ו-וואטסאפ (25 אחרונות)</h2>
         <table className={styles.table}>
           <thead>
             <tr>
               <th>מתי</th>
+              <th>ערוץ</th>
               <th>סוג</th>
               <th>מספר</th>
               <th>תוצאה</th>
@@ -282,6 +395,7 @@ export default async function AdminNotificationsPage({ searchParams }: { searchP
             {(logRows ?? []).map((row) => (
               <tr key={row.id}>
                 <td style={{ whiteSpace: "nowrap" }}>{dateTime.format(new Date(row.created_at))}</td>
+                <td>{row.channel === "sms" ? "SMS" : "וואטסאפ"}</td>
                 <td>{TYPE_NAMES[row.type] ?? row.type}</td>
                 <td dir="ltr">+{row.recipient}</td>
                 <td>{row.ok ? "נשלח" : <span style={{ color: "var(--danger)" }}>נכשל — {row.error}</span>}</td>
@@ -289,7 +403,7 @@ export default async function AdminNotificationsPage({ searchParams }: { searchP
             ))}
             {(logRows ?? []).length === 0 && (
               <tr>
-                <td colSpan={4} className={styles.muted}>
+                <td colSpan={5} className={styles.muted}>
                   עוד לא נשלחו הודעות.
                 </td>
               </tr>
@@ -297,7 +411,7 @@ export default async function AdminNotificationsPage({ searchParams }: { searchP
           </tbody>
         </table>
         <p className={styles.muted} style={{ marginTop: 8 }}>
-          &quot;נשלח&quot; אומר ש-Meta קיבלה את ההודעה. הגעה לטלפון ותבנית שלא אושרה יופיעו כאן כשל.
+          &quot;נשלח&quot; אומר שהספק (SMS4Free או Meta) קיבל את ההודעה. כשל מוצג עם הסיבה.
         </p>
       </div>
     </>
