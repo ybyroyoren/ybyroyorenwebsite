@@ -24,11 +24,13 @@ export async function sendSms(phoneDigits: string, text: string): Promise<{ ok: 
   const missing = missingSmsConfig();
   if (missing.length > 0) return { ok: false, error: `חסר חיבור ל-SMS (${missing.join(", ")})` };
 
+  // Values pasted into Vercel sometimes carry a trailing space or line break.
+  const env = (name: string) => (process.env[name] ?? "").trim();
   const body = JSON.stringify({
-    key: process.env.SMS4FREE_KEY,
-    user: process.env.SMS4FREE_USER,
-    pass: process.env.SMS4FREE_PASS,
-    sender: process.env.SMS4FREE_SENDER,
+    key: env("SMS4FREE_KEY"),
+    user: env("SMS4FREE_USER"),
+    pass: env("SMS4FREE_PASS"),
+    sender: env("SMS4FREE_SENDER"),
     recipient: toLocalIsraeli(phoneDigits),
     msg: text,
   });
