@@ -121,7 +121,7 @@ export function MealsList({ meals, locale }: { meals: MealView[]; locale: Locale
   return (
     <>
       {meals.map((m, index) => {
-        const meal = { ...m, display: seatsDisplay({ remaining: m.remainingSeats, total: m.totalSeats, taken: m.takenSeats, textMode: m.seatsTextMode, textHe: m.seatsTextHe, textEn: m.seatsTextEn, meterMode: m.seatsMeterMode }, locale) };
+        const meal = { ...m, display: seatsDisplay({ remaining: m.remainingSeats, total: m.totalSeats, taken: m.takenSeats, textMode: m.seatsTextMode, registrationClosed: m.registrationClosed, textHe: m.seatsTextHe, textEn: m.seatsTextEn, meterMode: m.seatsMeterMode }, locale) };
         const display = meal.display;
         const isFull = display.closed;
         const { day, num, month } = formatMealDateParts(meal.date, locale);
@@ -193,6 +193,7 @@ export function MealsList({ meals, locale }: { meals: MealView[]; locale: Locale
                           total: selectedMeal.totalSeats,
                           taken: selectedMeal.takenSeats,
                           textMode: selectedMeal.seatsTextMode,
+                          registrationClosed: selectedMeal.registrationClosed,
                           textHe: selectedMeal.seatsTextHe,
                           textEn: selectedMeal.seatsTextEn,
                           meterMode: selectedMeal.seatsMeterMode,

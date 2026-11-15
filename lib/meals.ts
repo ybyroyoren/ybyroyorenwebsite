@@ -24,6 +24,8 @@ export interface MealView {
   menu: MealMenuItem[];
   /** How the seats are shown to visitors (see lib/seats.ts seatsDisplay). */
   seatsTextMode: SeatsTextMode;
+  /** The owner closed registration by hand (shown as full) although seats are left. */
+  registrationClosed: boolean;
   seatsTextHe: string;
   seatsTextEn: string;
   seatsMeterMode: SeatsMeterMode;
@@ -36,7 +38,7 @@ async function fetchOpenMeals(): Promise<MealView[]> {
   const db = supabaseAdmin();
   const { data: meals, error } = await db
     .from("meals")
-    .select("id, title, description, date, total_seats, price_per_seat, menu, seats_text_mode, seats_text_he, seats_text_en, seats_meter_mode")
+    .select("id, title, description, date, total_seats, price_per_seat, menu, seats_text_mode, seats_text_he, seats_text_en, seats_meter_mode, registration_closed")
     .eq("status", "open")
     // A meal whose date has passed is no longer shown or bookable (same rule as the admin "עברה" list).
     .gte("date", todayIsraelIso())
@@ -64,6 +66,7 @@ async function fetchOpenMeals(): Promise<MealView[]> {
       pricePerSeat: m.price_per_seat,
       menu: (m.menu ?? []) as MealMenuItem[],
       seatsTextMode: m.seats_text_mode ?? "auto",
+      registrationClosed: m.registration_closed ?? false,
       seatsTextHe: m.seats_text_he ?? "",
       seatsTextEn: m.seats_text_en ?? "",
       seatsMeterMode: m.seats_meter_mode ?? "auto",
@@ -103,7 +106,7 @@ export async function createPendingRegistration(
 ): Promise<{ registrationId: string; depositTotal: number }> {
   const meal = await getMealById(params.mealId);
   if (!meal) throw new Error("הארוחה לא נמצאה");
-  if (meal.seatsTextMode === "full") throw new Error("ההרשמה לארוחה הזו סגורה");
+  if (meal.registrationClosed || meal.seatsTextMode === "full") throw new Error("ההרשמה לארוחה הזו סגורה");
 
   const seats = params.diners.length;
   if (seats < 1) throw new Error("יש לבחור לפחות סועד אחד");

@@ -74,6 +74,20 @@ export async function deleteMeal(formData: FormData): Promise<void> {
   expireMeals();
 }
 
+/** Closes (or reopens) registration for one meal by hand. A closed meal stays visible, shown as full. */
+export async function setRegistrationClosed(formData: FormData): Promise<void> {
+  const admin = await requireAdmin();
+  if (admin.role !== "owner") return;
+  const id = String(formData.get("id") ?? "");
+  if (!id) return;
+  await supabaseAdmin()
+    .from("meals")
+    .update({ registration_closed: formData.get("closed") === "true" })
+    .eq("id", id);
+  revalidatePath("/admin/meals");
+  expireMeals();
+}
+
 const TEXT_MODES = ["auto", "open", "few", "exact", "full", "custom", "hidden"];
 const METER_MODES = ["auto", "real", "hidden"];
 

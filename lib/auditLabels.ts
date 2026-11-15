@@ -130,6 +130,7 @@ export const FIELD_LABELS: Record<string, string> = {
   seats_text_he: "טקסט מותאם (עברית)",
   seats_text_en: "טקסט מותאם (אנגלית)",
   seats_meter_mode: "המד באתר",
+  registration_closed: "הרשמה סגורה ידנית",
 };
 
 export const VALUE_LABELS: Record<string, string> = {

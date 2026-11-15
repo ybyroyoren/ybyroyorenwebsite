@@ -36,6 +36,8 @@ export interface SeatsDisplayInput {
   textHe: string;
   textEn: string;
   meterMode: SeatsMeterMode;
+  /** Registration closed by hand: shown as full and can't be booked, even with seats left. */
+  registrationClosed?: boolean;
 }
 
 export interface SeatsDisplay {
@@ -57,10 +59,11 @@ export interface SeatsDisplay {
 export function seatsDisplay(m: SeatsDisplayInput, locale: Locale = "he"): SeatsDisplay {
   const t = getDict(locale).meals.seatsLabel;
   const reallyFull = m.remaining <= 0;
-  const closed = reallyFull || m.textMode === "full";
+  const manuallyClosed = m.registrationClosed === true || m.textMode === "full";
+  const closed = reallyFull || manuallyClosed;
 
   let label: string | null;
-  if (reallyFull || m.textMode === "full") label = t.full;
+  if (closed) label = t.full;
   else
     switch (m.textMode) {
       case "hidden":
@@ -86,7 +89,7 @@ export function seatsDisplay(m: SeatsDisplayInput, locale: Locale = "he"): Seats
 
   let pct: number | null;
   if (m.meterMode === "hidden") pct = null;
-  else if (reallyFull || m.textMode === "full") pct = 100;
+  else if (closed) pct = 100;
   else if (m.meterMode === "real") pct = m.total > 0 ? Math.min(100, (m.taken / m.total) * 100) : 0;
   else pct = seatsDisplayPct(m.remaining, m.total, m.taken);
 

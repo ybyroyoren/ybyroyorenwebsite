@@ -155,6 +155,8 @@ export interface Database {
           seats_text_he: string;
           seats_text_en: string;
           seats_meter_mode: SeatsMeterMode;
+          /** Registration closed by hand (shown as full) even though seats are left. */
+          registration_closed: boolean;
           created_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["meals"]["Row"]> & {

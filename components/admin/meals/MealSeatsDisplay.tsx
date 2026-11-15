@@ -13,7 +13,6 @@ const TEXT_OPTIONS: { value: SeatsTextMode; label: string; hint: string }[] = [
   { value: "exact", label: "״נשארו N מקומות״", hint: "המספר האמיתי, תמיד" },
   { value: "custom", label: "טקסט משלי", hint: "כל משפט שתרצה, למשל ״ארוחה עם שף אורח״ או ״ההרשמה נסגרת ביום ראשון״" },
   { value: "hidden", label: "בלי טקסט", hint: "מסתיר את שורת הטקסט" },
-  { value: "full", label: "סגור להרשמה (מוצג ״מלא״)", hint: "חוסם הרשמה באמת, גם אם נשארו מקומות" },
 ];
 
 const METER_OPTIONS: { value: SeatsMeterMode; label: string; hint: string }[] = [
@@ -28,6 +27,7 @@ export function MealSeatsDisplay({
   total,
   taken,
   remaining,
+  registrationClosed,
   initial,
   saveAction,
 }: {
@@ -35,6 +35,7 @@ export function MealSeatsDisplay({
   total: number;
   taken: number;
   remaining: number;
+  registrationClosed: boolean;
   initial: { textMode: SeatsTextMode; textHe: string; textEn: string; meterMode: SeatsMeterMode };
   saveAction: (fd: FormData) => Promise<void>;
 }) {
@@ -46,7 +47,7 @@ export function MealSeatsDisplay({
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
-  const preview = seatsDisplay({ remaining, total, taken, textMode, textHe, textEn, meterMode }, "he");
+  const preview = seatsDisplay({ remaining, total, taken, textMode, textHe, textEn, meterMode, registrationClosed }, "he");
   const dirty = textMode !== initial.textMode || textHe !== initial.textHe || textEn !== initial.textEn || meterMode !== initial.meterMode;
 
   async function save(e: React.FormEvent<HTMLFormElement>) {

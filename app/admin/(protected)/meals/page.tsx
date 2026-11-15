@@ -1,6 +1,6 @@
 import { requireAdminSection } from "@/lib/admin-auth";
 import { supabaseAdmin } from "@/lib/supabase/server";
-import { closeMeal, createMeal, deleteMeal, reopenMeal, updateMealDisplay } from "@/lib/actions/admin/meals";
+import { closeMeal, createMeal, deleteMeal, reopenMeal, setRegistrationClosed, updateMealDisplay } from "@/lib/actions/admin/meals";
 import {
   addDinerToRegistration,
   createManualRegistration,
@@ -39,7 +39,7 @@ export default async function AdminMealsPage({ searchParams }: { searchParams: P
   const db = supabaseAdmin();
   const { data: meals } = await db
     .from("meals")
-    .select("id, title, description, date, total_seats, price_per_seat, status, seats_text_mode, seats_text_he, seats_text_en, seats_meter_mode")
+    .select("id, title, description, date, total_seats, price_per_seat, status, seats_text_mode, seats_text_he, seats_text_en, seats_meter_mode, registration_closed")
     .order("date", { ascending: true });
 
   // The seat numbers the public page uses (see meal_availability).
@@ -158,6 +158,11 @@ export default async function AdminMealsPage({ searchParams }: { searchParams: P
                   {formatCurrency(meal.price_per_seat)} לסועד ·{" "}
                   {meal.status !== "open" ? "סגורה" : meal.date < today ? "עברה" : "פתוחה"})
                 </span>
+                {meal.registration_closed && meal.status === "open" && (
+                  <span className={styles.badgePending} style={{ marginInlineStart: 8 }}>
+                    ההרשמה סגורה (מוצגת כמלאה)
+                  </span>
+                )}
               </h2>
               {isOwner && <NewRegistrationButton mealId={meal.id} mealTitle={meal.title} createAction={createManualRegistration} />}
             </div>
@@ -168,6 +173,7 @@ export default async function AdminMealsPage({ searchParams }: { searchParams: P
                 total={meal.total_seats}
                 taken={availabilityByMeal.get(meal.id)?.taken_seats ?? 0}
                 remaining={availabilityByMeal.get(meal.id)?.remaining_seats ?? meal.total_seats}
+                registrationClosed={meal.registration_closed}
                 initial={{ textMode: meal.seats_text_mode, textHe: meal.seats_text_he, textEn: meal.seats_text_en, meterMode: meal.seats_meter_mode }}
                 saveAction={updateMealDisplay}
               />
@@ -182,6 +188,15 @@ export default async function AdminMealsPage({ searchParams }: { searchParams: P
 
             {isOwner && (
               <div style={{ display: "flex", gap: 10, marginTop: 12 }}>
+                {meal.status === "open" && (
+                  <form action={setRegistrationClosed}>
+                    <input type="hidden" name="id" value={meal.id} />
+                    <input type="hidden" name="closed" value={meal.registration_closed ? "false" : "true"} />
+                    <button type="submit" className={styles.btnSecondary} title="הארוחה נשארת באתר ומוצגת כמלאה, ואי אפשר להירשם אליה. אפשר לפתוח שוב בכל רגע">
+                      {meal.registration_closed ? "פתיחת הרשמה מחדש" : "סגירת הרשמה (הארוחה תוצג כמלאה)"}
+                    </button>
+                  </form>
+                )}
                 {meal.status === "open" ? (
                   <form action={closeMeal}>
                     <input type="hidden" name="id" value={meal.id} />
