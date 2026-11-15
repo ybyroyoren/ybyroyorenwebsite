@@ -63,12 +63,15 @@ export function Carousel({
   images,
   narrow,
   single,
+  peek,
   locale = "he",
   autoplay = true,
 }: {
   images: MediaItem[];
   narrow?: boolean;
   single?: boolean;
+  /** About two and a half slides on screen (the next one peeks in), one and a bit on phones. */
+  peek?: boolean;
   locale?: Locale;
   /** Advance on its own every few seconds (still fully manual too). */
   autoplay?: boolean;
@@ -82,7 +85,7 @@ export function Carousel({
   // clone we hop (invisibly — same pictures) to its real twin. If everything
   // already fits on screen (no more images than `edge`) there is nothing to
   // loop through and the plain scroll-and-wrap behaviour below is used.
-  const edge = single ? 1 : narrow ? 2 : 4;
+  const edge = single ? 1 : peek ? 3 : narrow ? 2 : 4;
   const n = images.length;
   const loop = n > edge;
   const slides = loop
@@ -334,7 +337,7 @@ export function Carousel({
   }
 
   return (
-    <div ref={rootRef} className={`${styles.carousel} ${single ? styles.carouselSingle : ""}`} {...handlers}>
+    <div ref={rootRef} className={`${styles.carousel} ${single ? styles.carouselSingle : ""} ${peek ? styles.carouselPeek : ""}`} {...handlers}>
       <div
         className={`${styles.track} ${single ? styles.trackSingle : ""}`}
         ref={trackRef}
@@ -347,7 +350,7 @@ export function Carousel({
         {slides.map((img, i) => (
           <div
             key={`${img.id}-${i}`}
-            className={`${styles.slide} ${single ? styles.slideSingle : narrow ? styles.slideNarrow : ""}`}
+            className={`${styles.slide} ${single ? styles.slideSingle : peek ? styles.slidePeek : narrow ? styles.slideNarrow : ""}`}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={img.url} alt="" />
@@ -375,7 +378,7 @@ export function Carousel({
           <PlayPauseIcon playing={!userPaused} />
         </button>
       )}
-      {loop && single && (
+      {loop && (single || peek) && (
         <div className={styles.dots}>
           {images.map((img, i) => (
             <button

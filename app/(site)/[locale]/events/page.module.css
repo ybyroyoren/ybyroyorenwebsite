@@ -41,9 +41,9 @@
   margin-bottom: 36px;
 }
 
-/* A single photo at a time, wide on desktop and squarer on phones. */
+/* Two and a half photos at a time on desktop (the next one peeks in), one and a bit on phones. */
 .carouselWrap {
-  --slide-aspect: 16 / 9;
+  --slide-aspect: 4 / 3;
   margin-bottom: 36px;
   border-radius: 12px;
   overflow: hidden;

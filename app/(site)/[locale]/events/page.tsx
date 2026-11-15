@@ -31,7 +31,7 @@ export default async function EventsPage({ params }: { params: Promise<{ locale:
 
         {carouselImages.length > 0 && (
           <div className={styles.carouselWrap} data-reveal="">
-            <Carousel images={carouselImages} single locale={locale} />
+            <Carousel images={carouselImages} peek locale={locale} />
           </div>
         )}
 

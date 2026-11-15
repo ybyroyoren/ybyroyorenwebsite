@@ -40,6 +40,24 @@
   border-radius: 0;
 }
 
+/* Peek variant (private events): two and a half slides at once, so the next photo shows and invites a swipe.
+   Phones show one and a bit. The doubled selector keeps it above the 860px .slide rule at the bottom. */
+.carouselPeek {
+  --peek-view: 2.5;
+  --peek-gaps: 2;
+}
+
+.slide.slidePeek {
+  flex-basis: calc((100% - var(--peek-gaps) * 12px) / var(--peek-view));
+}
+
+@media (max-width: 640px) {
+  .carouselPeek {
+    --peek-view: 1.35;
+    --peek-gaps: 1;
+  }
+}
+
 .trackSingle {
   gap: 0;
 }
