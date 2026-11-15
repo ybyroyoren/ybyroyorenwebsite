@@ -8,6 +8,7 @@ const NAV: { section: AdminSection; href: string; label: string }[] = [
   { section: "media", href: "/admin/media", label: "תמונות אתר" },
   { section: "coupons", href: "/admin/coupons", label: "קופונים" },
   { section: "orders", href: "/admin/orders", label: "הזמנות" },
+  { section: "pickup_rules", href: "/admin/pickup-rules", label: "סגירת איסוף" },
   { section: "meals", href: "/admin/meals", label: "ארוחות פתוחות" },
   { section: "events", href: "/admin/events", label: "אירועים פרטיים" },
   { section: "messages", href: "/admin/messages", label: "פניות וניוזלטר" },

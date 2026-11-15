@@ -6,7 +6,8 @@ import { computeCartTotals, formatCurrency, GREETING_CARD_FEE } from "@/lib/pric
 import { issueReceipt } from "@/lib/green-invoice";
 import { sendOrderConfirmationEmail } from "@/lib/resend";
 import { notifyNewOrder } from "@/lib/notifications";
-import { addDaysIso } from "@/lib/date";
+import { shiftIso, todayIsraelIso } from "@/lib/date";
+import { closedReason, getPickupRules } from "@/lib/pickupRules";
 import { checkAvailability, type AvailabilityLine } from "@/lib/availability";
 import { expireCatalog } from "@/lib/cache";
 
@@ -39,10 +40,14 @@ export async function createPendingOrder(params: CreateOrderParams): Promise<Cre
   }
 
   const maxLeadTime = Math.max(0, ...items.map((item) => item.leadTimeDays));
-  const earliestPickupDate = addDaysIso(maxLeadTime);
+  const earliestPickupDate = shiftIso(todayIsraelIso(), maxLeadTime);
   if (params.pickupDate < earliestPickupDate) {
     throw new Error(`בהתאם למוצרים בעגלה, האיסוף המוקדם ביותר האפשרי הוא ${earliestPickupDate}`);
   }
+
+  // Pickup closed by a shop / product rule (closed days, weekdays, date ranges).
+  const closed = closedReason(await getPickupRules(true), params.pickupDate, items.map((i) => i.productId));
+  if (closed) throw new Error(closed);
 
   // Stock and the daily limits of limited products, for the chosen pickup date.
   const lines: AvailabilityLine[] = items.map((i) => ({

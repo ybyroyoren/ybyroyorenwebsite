@@ -1,0 +1,152 @@
+.wrap {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 16px;
+  max-width: 420px;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.month {
+  font-weight: 700;
+  font-size: 17px;
+}
+
+.nav {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.nav:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.weekday {
+  text-align: center;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  padding-bottom: 4px;
+}
+
+.day {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  min-height: 42px;
+  border-radius: 10px;
+  border: 1.5px solid transparent;
+  background: transparent;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.day.ok:hover {
+  background: var(--olive-mist);
+}
+
+.day.muted {
+  color: rgba(23, 20, 16, 0.32);
+  cursor: default;
+}
+
+.day.selected,
+.day.ok.selected:hover {
+  border-color: var(--olive-deep);
+  background: var(--olive-deep);
+  color: var(--cream);
+}
+
+.day.peek {
+  border-color: var(--danger);
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: block;
+}
+
+.dotOk {
+  background: #2f8f4e;
+}
+
+.dotNo {
+  background: #c0392b;
+}
+
+.selected .dotOk {
+  background: #8fe0a8;
+}
+
+.legend {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13.5px;
+  color: var(--ink-soft);
+}
+
+.legendRow {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.legendRow .dot {
+  margin-top: 6px;
+  flex-shrink: 0;
+}
+
+.legendGray {
+  width: 7px;
+  height: 7px;
+  margin-top: 6px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(23, 20, 16, 0.3);
+}
+
+.info {
+  margin-top: 12px;
+  font-size: 14.5px;
+  color: var(--danger);
+}
+
+.picked {
+  margin-top: 12px;
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.loading {
+  padding: 30px 0;
+  text-align: center;
+  color: var(--ink-soft);
+}

@@ -56,6 +56,7 @@ export type AdminSection =
   | "media"
   | "coupons"
   | "orders"
+  | "pickup_rules"
   | "meals"
   | "events"
   | "messages"
@@ -70,6 +71,7 @@ export const SECTION_ROLES: Record<AdminSection, AdminRole[]> = {
   media: ["owner"],
   coupons: ["owner"],
   orders: ["owner", "kitchen"],
+  pickup_rules: ["owner"],
   meals: ["owner", "kitchen", "sales"],
   events: ["owner", "sales"],
   messages: ["owner"],

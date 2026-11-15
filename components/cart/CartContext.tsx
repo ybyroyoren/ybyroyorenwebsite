@@ -4,7 +4,7 @@ import { track } from "@/lib/analytics/client";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { CartItemView } from "@/lib/cart";
 import { computeCartTotals, GREETING_CARD_FEE } from "@/lib/pricing";
-import { addDaysIso } from "@/lib/date";
+import { shiftIso, todayIsraelIso } from "@/lib/date";
 
 export const GREETING_CARD_MAX_LENGTH = 200;
 
@@ -67,7 +67,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     [subtotal, discountPct, extraFee]
   );
   const maxLeadTime = items.reduce((max, item) => Math.max(max, item.leadTimeDays), 0);
-  const minPickupDate = useMemo(() => addDaysIso(maxLeadTime), [maxLeadTime]);
+  const minPickupDate = useMemo(() => shiftIso(todayIsraelIso(), maxLeadTime), [maxLeadTime]);
 
   useEffect(() => {
     let cancelled = false;

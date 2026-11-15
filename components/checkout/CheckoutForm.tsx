@@ -1,9 +1,10 @@
 "use client";
 
 import { track } from "@/lib/analytics/client";
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useState } from "react";
 import { submitCheckout, type CheckoutState } from "@/lib/actions/checkout";
 import { useCart } from "@/components/cart/CartContext";
+import { PickupCalendar } from "@/components/checkout/PickupCalendar";
 import { getDict, type Locale } from "@/lib/dictionary";
 import styles from "@/app/(site)/[locale]/checkout/page.module.css";
 
@@ -15,28 +16,10 @@ export function CheckoutForm({ locale }: { locale: Locale }) {
   const hasLeadTime = cart.items.some((item) => item.leadTimeDays > 0);
   const f = getDict(locale).checkout.form;
 
-  // Is every product in the cart still available on the chosen pickup date (stock, daily limits)?
-  const [pickupDate, setPickupDate] = useState(cart.minPickupDate);
-  const [availability, setAvailability] = useState<{ problems: string[]; alternatives: string[] }>({ problems: [], alternatives: [] });
+  // The pickup calendar only lets the customer choose a day on which pickup is open and everything in the cart is in stock.
+  const [pickupDate, setPickupDate] = useState("");
   const cartKey = cart.items.map((i) => `${i.productSizeId}:${i.qty}`).join(",");
-  useEffect(() => {
-    if (!pickupDate || cart.items.length === 0) return;
-    let cancelled = false;
-    const timer = setTimeout(() => {
-      fetch(`/api/cart/availability?date=${encodeURIComponent(pickupDate)}`)
-        .then((r) => (r.ok ? r.json() : null))
-        .then((data) => {
-          if (!cancelled && data) setAvailability({ problems: data.problems ?? [], alternatives: data.alternatives ?? [] });
-        })
-        .catch(() => {});
-    }, 250);
-    return () => {
-      cancelled = true;
-      clearTimeout(timer);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pickupDate, cartKey]);
-  const blocked = availability.problems.length > 0;
+  const blocked = !pickupDate;
 
   return (
     <form className={styles.form} action={action} onSubmit={() => track("checkout_submit")}>
@@ -65,34 +48,10 @@ export function CheckoutForm({ locale }: { locale: Locale }) {
       </div>
 
       <div className={styles.field}>
-        <label htmlFor="pickupDate">{f.pickupDateLabel}</label>
-        <input
-          id="pickupDate"
-          name="pickupDate"
-          type="date"
-          min={cart.minPickupDate}
-          value={pickupDate}
-          onChange={(e) => setPickupDate(e.target.value)}
-          required
-        />
-        {blocked && (
-          <div className={styles.error} role="alert">
-            {availability.problems.map((p) => (
-              <p key={p}>{p}</p>
-            ))}
-            {availability.alternatives.length > 0 && (
-              <p>
-                {locale === "en" ? "Dates that work: " : "תאריכים פנויים: "}
-                {availability.alternatives.map((d) => (
-                  <button key={d} type="button" className={styles.altDate} onClick={() => setPickupDate(d)}>
-                    {d.split("-").reverse().join(".")}
-                  </button>
-                ))}
-              </p>
-            )}
-          </div>
-        )}
-        {hasLeadTime && <p className={styles.fieldNote}>{f.leadTimeNote(cart.minPickupDate)}</p>}
+        <label>{f.pickupDateLabel}</label>
+        <input type="hidden" name="pickupDate" value={pickupDate} />
+        <PickupCalendar locale={locale} value={pickupDate} onChange={setPickupDate} cartKey={cartKey} />
+        {hasLeadTime && <p className={styles.fieldNote}>{f.leadTimeNote(cart.minPickupDate.split("-").reverse().join("."))}</p>}
       </div>
 
       <div className={styles.field}>

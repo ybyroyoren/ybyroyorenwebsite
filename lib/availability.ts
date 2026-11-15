@@ -87,6 +87,18 @@ export async function checkAvailability(lines: AvailabilityLine[], pickupDate: s
   return [...stockProblems(lines, data, ownOrderIncluded), ...dailyProblems(lines, pickupDate, data, ownOrderIncluded)];
 }
 
+/** Stock / daily-limit problems for every date from `fromDate` to `toDate` (one entry per date, empty = fine). */
+export async function availabilityCalendar(lines: AvailabilityLine[], fromDate: string, toDate: string): Promise<Map<string, string[]>> {
+  const out = new Map<string, string[]>();
+  if (lines.length === 0) return out;
+  const data = await load(lines, fromDate, toDate);
+  const stock = stockProblems(lines, data, false);
+  for (let date = fromDate; date <= toDate; date = shiftIso(date, 1)) {
+    out.set(date, [...stock, ...dailyProblems(lines, date, data, false)]);
+  }
+  return out;
+}
+
 /** The next dates (from `fromDate`) on which the whole cart fits within every daily limit. */
 export async function nextAvailableDates(lines: AvailabilityLine[], fromDate: string, count = 3, horizonDays = 45): Promise<string[]> {
   if (lines.length === 0) return [];
