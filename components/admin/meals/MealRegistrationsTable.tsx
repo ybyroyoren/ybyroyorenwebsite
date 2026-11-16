@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Modal } from "@/components/admin/Modal";
+import { DEPOSIT_PER_SEAT, paymentBreakdown } from "@/lib/mealPayments";
 import styles from "@/app/admin/admin.module.css";
 
 export interface DinerData {
@@ -36,6 +37,12 @@ export interface RegistrationData {
   /** Coupon used on the deposit (code) and the amount it took off. */
   couponCode: string | null;
   depositDiscount: number;
+  /** Discount off the balance paid at the table. */
+  balanceDiscount: number;
+  /** Paid so far toward the deposit. */
+  paidAmount: number;
+  /** The meal's price per diner (for what is left to pay). */
+  pricePerSeat: number;
   diners: DinerData[];
 }
 
@@ -52,7 +59,7 @@ export interface MealRegistrationActions {
   addDinerToRegistration: (fd: FormData) => Promise<void>;
   updateDiner: (fd: FormData) => Promise<void>;
   deleteDiner: (fd: FormData) => Promise<void>;
-  toggleDinerPaid: (fd: FormData) => Promise<void>;
+  updateRegistrationPayment: (fd: FormData) => Promise<void>;
   moveDinerToMeal: (fd: FormData) => Promise<void>;
 }
 
@@ -80,8 +87,13 @@ function RegistrationExtras({ reg, colSpan }: { reg: RegistrationData; colSpan: 
   }
   if (reg.extraNotes) parts.push({ label: "הערה מהלקוח", value: reg.extraNotes });
   if (reg.seatingNote) parts.push({ label: "רוצים לשבת ליד", value: reg.seatingNote });
-  if (reg.couponCode || reg.depositDiscount > 0) {
-    parts.push({ label: "קופון", value: `${reg.couponCode ?? "—"} (הנחה על המקדמה ₪${reg.depositDiscount.toLocaleString("he-IL")})` });
+  if (reg.couponCode || reg.depositDiscount > 0 || reg.balanceDiscount > 0) {
+    const shekels = (n: number) => `₪${n.toLocaleString("he-IL")}`;
+    const took = [
+      reg.depositDiscount > 0 ? `${shekels(reg.depositDiscount)} מהמקדמה` : null,
+      reg.balanceDiscount > 0 ? `${shekels(reg.balanceDiscount)} מהיתרה` : null,
+    ].filter(Boolean);
+    parts.push({ label: reg.couponCode ? `קופון ${reg.couponCode}` : "הנחה", value: took.join(" + ") });
   }
   if (reg.consentedAt) {
     parts.push({ label: "אישרו אזהרת אלרגנים ומדיניות ביטול", value: consentFormat.format(new Date(reg.consentedAt)) });
@@ -101,13 +113,31 @@ function RegistrationExtras({ reg, colSpan }: { reg: RegistrationData; colSpan: 
   );
 }
 
-/** What to show next to a booking: its real payment state (the diners\' paid boxes), not only the stored status. */
-function groupStatus(reg: RegistrationData): string {
-  if (reg.status === "cancelled") return "בוטל";
-  const paid = reg.diners.filter((d) => d.paid).length;
-  if (reg.diners.length > 0 && paid === reg.diners.length) return reg.fromWeb ? "שולם דרך האתר" : "שולם";
-  if (paid === 0) return reg.fromWeb ? "ממתין לתשלום" : "טרם שולם";
-  return `שולם חלקית (${paid}/${reg.diners.length})`;
+const shekels = (n: number) => `₪${n.toLocaleString("he-IL")}`;
+
+/** How much is paid, still due as deposit, and left for the day of the meal (a number, 0 or more). */
+function PaymentLine({ reg }: { reg: RegistrationData }) {
+  if (reg.status === "cancelled") return <span className={styles.badgePending}>בוטל</span>;
+  const p = paymentBreakdown({
+    seats: reg.diners.length,
+    pricePerSeat: reg.pricePerSeat,
+    paidAmount: reg.paidAmount,
+    depositDiscount: reg.depositDiscount,
+    balanceDiscount: reg.balanceDiscount,
+  });
+  return (
+    <span className={styles.paymentLine}>
+      <span>
+        שולם: <b>{shekels(p.paid)}</b>
+      </span>
+      <span>
+        נותר למקדמה: <b style={p.remainingDeposit > 0 ? { color: "var(--danger)" } : undefined}>{shekels(p.remainingDeposit)}</b>
+      </span>
+      <span>
+        נותר ביום האירוע: <b>{shekels(p.remainingAtEvent)}</b>
+      </span>
+    </span>
+  );
 }
 
 /** Phone and e-mail, or a plain note when a booking entered by hand has neither. */
@@ -131,7 +161,6 @@ export function MealRegistrationsTable({
     <table className={styles.table}>
       <thead>
         <tr>
-          <th>שולם</th>
           <th>סועד</th>
           <th>הגבלות / הערות</th>
           {isOwner && <th></th>}
@@ -140,7 +169,7 @@ export function MealRegistrationsTable({
       <tbody>
         {registrations.length === 0 && (
           <tr>
-            <td colSpan={4} className={styles.muted}>
+            <td colSpan={3} className={styles.muted}>
               אין הרשמות עדיין.
             </td>
           </tr>
@@ -163,16 +192,16 @@ function ReadOnlyGroup({ reg }: { reg: RegistrationData }) {
       <tr className={styles.groupHeaderRow}>
         <td colSpan={3}>
           <span className={styles.groupContact}>
-            {reg.customerName} <span>· {contactLine(reg)} · {groupStatus(reg)}</span>
+            {reg.customerName} <span>· {contactLine(reg)}</span>
           </span>
+          <div style={{ marginTop: 4 }}>
+            <PaymentLine reg={reg} />
+          </div>
         </td>
       </tr>
       <RegistrationExtras reg={reg} colSpan={3} />
       {reg.diners.map((d) => (
         <tr key={d.id}>
-          <td>
-            <span className={d.paid ? styles.badgePaid : styles.badgePending}>{d.paid ? "שולם" : "לא שולם"}</span>
-          </td>
           <td>{dinerTitle(d)}</td>
           <td>
             {d.restrictions.length > 0 ? d.restrictions.join(", ") : "—"}
@@ -197,6 +226,7 @@ function RegistrationGroup({
   const router = useRouter();
   const [editingContact, setEditingContact] = useState(false);
   const [addingDiner, setAddingDiner] = useState(false);
+  const [editingPayment, setEditingPayment] = useState(false);
 
   async function handleMoveGroup(targetMealId: string) {
     if (!targetMealId) return;
@@ -221,6 +251,13 @@ function RegistrationGroup({
     router.refresh();
   }
 
+  async function handlePaymentSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    await actions.updateRegistrationPayment(new FormData(e.currentTarget));
+    setEditingPayment(false);
+    router.refresh();
+  }
+
   async function handleAddDinerSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     await actions.addDinerToRegistration(new FormData(e.currentTarget));
@@ -231,17 +268,20 @@ function RegistrationGroup({
   return (
     <>
       <tr className={styles.groupHeaderRow}>
-        <td colSpan={4}>
+        <td colSpan={3}>
           <div className={styles.groupHeaderBar}>
             <span className={styles.groupContact}>
-              {reg.customerName}{" "}
-              <span>
-                · {contactLine(reg)} · {groupStatus(reg)}
-              </span>
+              {reg.customerName} <span>· {contactLine(reg)}</span>
+              <div style={{ marginTop: 4 }}>
+                <PaymentLine reg={reg} />
+              </div>
             </span>
             <div className={styles.groupActions}>
               <button type="button" className={styles.btnSecondary} onClick={() => setEditingContact(true)}>
                 עריכת פרטי קשר
+              </button>
+              <button type="button" className={styles.btnSecondary} onClick={() => setEditingPayment(true)}>
+                עדכון תשלום
               </button>
               <button type="button" className={styles.btnSecondary} onClick={() => setAddingDiner(true)}>
                 + הוספת סועד
@@ -273,10 +313,14 @@ function RegistrationGroup({
         </td>
       </tr>
 
-      <RegistrationExtras reg={reg} colSpan={4} />
+      <RegistrationExtras reg={reg} colSpan={3} />
       {reg.diners.map((d) => (
         <DinerRow key={d.id} diner={d} registrationId={reg.id} otherMeals={otherMeals} actions={actions} />
       ))}
+
+      {editingPayment && (
+        <PaymentModal reg={reg} onClose={() => setEditingPayment(false)} onSubmit={handlePaymentSubmit} />
+      )}
 
       {editingContact && (
         <Modal title={`עריכת פרטי קשר — ${reg.customerName}`} onClose={() => setEditingContact(false)}>
@@ -349,6 +393,64 @@ function RegistrationGroup({
   );
 }
 
+/** Edit what was paid and the discounts of one booking; shows right away what is left to pay. */
+function PaymentModal({
+  reg,
+  onClose,
+  onSubmit,
+}: {
+  reg: RegistrationData;
+  onClose: () => void;
+  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+}) {
+  const [paid, setPaid] = useState(String(reg.paidAmount));
+  const [depositDiscount, setDepositDiscount] = useState(String(reg.depositDiscount));
+  const [balanceDiscount, setBalanceDiscount] = useState(String(reg.balanceDiscount));
+  const num = (v: string) => (Number.isFinite(Number(v)) && Number(v) > 0 ? Number(v) : 0);
+  const p = paymentBreakdown({
+    seats: reg.diners.length,
+    pricePerSeat: reg.pricePerSeat,
+    paidAmount: num(paid),
+    depositDiscount: num(depositDiscount),
+    balanceDiscount: num(balanceDiscount),
+  });
+  return (
+    <Modal title={`תשלום — ${reg.customerName}`} onClose={onClose}>
+      <form onSubmit={onSubmit} className={styles.form}>
+        <input type="hidden" name="id" value={reg.id} />
+        <p className={styles.muted} style={{ width: "100%", margin: 0 }}>
+          {reg.diners.length} סועדים · מחיר ארוחה {shekels(p.mealTotal)} · מקדמה {shekels(DEPOSIT_PER_SEAT)} לסועד
+        </p>
+        <div className={styles.field}>
+          <label>שולם עד כה (₪)</label>
+          <div style={{ display: "flex", gap: 8 }}>
+            <input name="paidAmount" type="number" min="0" step="0.01" value={paid} onChange={(e) => setPaid(e.target.value)} style={{ width: 120 }} />
+            <button type="button" className={styles.btnSecondary} onClick={() => setPaid(String(p.depositDue))}>
+              המקדמה שולמה במלואה
+            </button>
+          </div>
+        </div>
+        <div className={styles.field}>
+          <label>הנחה על המקדמה (₪)</label>
+          <input name="depositDiscount" type="number" min="0" step="0.01" value={depositDiscount} onChange={(e) => setDepositDiscount(e.target.value)} style={{ width: 120 }} />
+        </div>
+        <div className={styles.field}>
+          <label>הנחה על היתרה, מעבר למקדמה (₪)</label>
+          <input name="balanceDiscount" type="number" min="0" step="0.01" value={balanceDiscount} onChange={(e) => setBalanceDiscount(e.target.value)} style={{ width: 120 }} />
+        </div>
+        <div className={styles.explainBox} style={{ width: "100%" }}>
+          מקדמה לתשלום: <b>{shekels(p.depositDue)}</b> · שולם: <b>{shekels(p.paid)}</b>
+          <br />
+          נותר למקדמה: <b>{shekels(p.remainingDeposit)}</b> · נותר ביום האירוע: <b>{shekels(p.remainingAtEvent)}</b>
+        </div>
+        <button type="submit" className={styles.btn}>
+          שמירה
+        </button>
+      </form>
+    </Modal>
+  );
+}
+
 function DinerRow({
   diner,
   registrationId,
@@ -362,14 +464,6 @@ function DinerRow({
 }) {
   const router = useRouter();
   const [editing, setEditing] = useState(false);
-
-  async function handleTogglePaid() {
-    const fd = new FormData();
-    fd.set("id", diner.id);
-    fd.set("current", String(diner.paid));
-    await actions.toggleDinerPaid(fd);
-    router.refresh();
-  }
 
   async function handleMove(targetMealId: string) {
     if (!targetMealId) return;
@@ -398,14 +492,6 @@ function DinerRow({
   return (
     <>
       <tr>
-        <td>
-          <label style={{ display: "inline-flex", alignItems: "center", gap: 6, cursor: "pointer" }}>
-            <input type="checkbox" checked={diner.paid} onChange={handleTogglePaid} />
-            <span className={diner.paid ? styles.badgePaid : styles.badgePending}>
-              {diner.paid ? "שולם" : "לא שולם"}
-            </span>
-          </label>
-        </td>
         <td>{dinerTitle(diner)}</td>
         <td>
           {diner.restrictions.length > 0 ? diner.restrictions.join(", ") : "—"}
@@ -475,11 +561,6 @@ function DinerRow({
             <div className={styles.field} style={{ width: "100%" }}>
               <label>אוהב/ת לאכול</label>
               <input name="favorites" type="text" defaultValue={diner.favorites} />
-            </div>
-            <div className={styles.field}>
-              <label>
-                <input type="checkbox" name="paid" defaultChecked={diner.paid} /> המקדמה שולמה
-              </label>
             </div>
             <button type="submit" className={styles.btn}>
               שמירה

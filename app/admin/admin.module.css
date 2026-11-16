@@ -1052,3 +1052,11 @@
   color: var(--ink-soft);
   font-size: 14px;
 }
+
+/* Open-meal bookings: paid / still due as deposit / left for the day of the meal, on one line. */
+.paymentLine {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+  font-size: 14px;
+}

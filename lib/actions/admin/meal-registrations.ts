@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/admin-auth";
 import { expireMeals } from "@/lib/cache";
 import { supabaseAdmin } from "@/lib/supabase/server";
-import { DEPOSIT_PER_SEAT } from "@/lib/meals";
+import { DEPOSIT_PER_SEAT } from "@/lib/mealPayments";
 
 type Db = ReturnType<typeof supabaseAdmin>;
 
@@ -67,7 +67,8 @@ export async function createManualRegistration(formData: FormData): Promise<void
       customer_email: customerEmail,
       customer_phone: customerPhone,
       seats_count: 1,
-      deposit_total: paid ? DEPOSIT_PER_SEAT : 0,
+      deposit_total: DEPOSIT_PER_SEAT,
+      paid_amount: paid ? DEPOSIT_PER_SEAT : 0,
       status: paid ? "paid" : "pending",
       source: "admin",
     })
@@ -152,6 +153,10 @@ export async function addDinerToRegistration(formData: FormData): Promise<void> 
     notes,
     deposit_paid: paid,
   });
+  if (paid) {
+    const { data: current } = await db.from("meal_registrations").select("paid_amount").eq("id", registrationId).maybeSingle();
+    await db.from("meal_registrations").update({ paid_amount: Number(current?.paid_amount ?? 0) + DEPOSIT_PER_SEAT }).eq("id", registrationId);
+  }
 
   // Once the owner adds someone by hand, the registration keeps its seats.
   await db.from("meal_registrations").update({ source: "admin" }).eq("id", registrationId);
@@ -173,7 +178,6 @@ export async function updateDiner(formData: FormData): Promise<void> {
       ...dinerDetails(formData),
       dietary_restrictions: parseRestrictions(formData.get("restrictions")),
       notes: String(formData.get("notes") ?? "").trim(),
-      deposit_paid: formData.get("paid") === "on",
     })
     .eq("id", id);
 
@@ -202,15 +206,44 @@ export async function deleteDiner(formData: FormData): Promise<void> {
   expireMeals();
 }
 
-export async function toggleDinerPaid(formData: FormData): Promise<void> {
+/**
+ * Sets what was paid and the two discounts of a booking. The deposit due follows the discount; once the deposit is
+ * covered the booking counts as paid (and its diners as paid), which is what the public seat count relies on.
+ */
+export async function updateRegistrationPayment(formData: FormData): Promise<void> {
   const admin = await requireAdmin();
   if (admin.role !== "owner") return;
   const db = supabaseAdmin();
   const id = String(formData.get("id") ?? "");
-  const current = formData.get("current") === "true";
   if (!id) return;
 
-  await db.from("meal_diners").update({ deposit_paid: !current }).eq("id", id);
+  const amount = (name: string) => {
+    const n = Number(formData.get(name) ?? 0);
+    return Number.isFinite(n) && n > 0 ? Math.min(Math.round(n * 100) / 100, 100000) : 0;
+  };
+  const paid = amount("paidAmount");
+  const depositDiscount = amount("depositDiscount");
+  const balanceDiscount = amount("balanceDiscount");
+
+  const { data: diners } = await db.from("meal_diners").select("id").eq("registration_id", id);
+  const seats = diners?.length ?? 0;
+  const depositDue = Math.max(0, Math.round((DEPOSIT_PER_SEAT * seats - depositDiscount) * 100) / 100);
+  const covered = seats > 0 && paid >= depositDue;
+
+  const { data: current } = await db.from("meal_registrations").select("status").eq("id", id).maybeSingle();
+  await db
+    .from("meal_registrations")
+    .update({
+      paid_amount: paid,
+      deposit_discount: depositDiscount,
+      balance_discount: balanceDiscount,
+      deposit_total: depositDue,
+      // A cancelled booking stays cancelled; otherwise it is paid once the deposit is covered.
+      status: current?.status === "cancelled" ? "cancelled" : covered ? "paid" : "pending",
+    })
+    .eq("id", id);
+  await db.from("meal_diners").update({ deposit_paid: covered }).eq("registration_id", id);
+
   revalidatePath("/admin/meals");
   expireMeals();
 }
@@ -226,7 +259,7 @@ export async function moveDinerToMeal(formData: FormData): Promise<void> {
 
   const { data: diner } = await db
     .from("meal_diners")
-    .select("id, registration_id, deposit_paid, meal_registrations(customer_name, customer_email, customer_phone)")
+    .select("id, registration_id, deposit_paid, meal_registrations(customer_name, customer_email, customer_phone, paid_amount)")
     .eq("id", dinerId)
     .maybeSingle();
   if (!diner) return;
@@ -236,7 +269,10 @@ export async function moveDinerToMeal(formData: FormData): Promise<void> {
     customer_name: string;
     customer_email: string;
     customer_phone: string;
+    paid_amount: number;
   };
+  // A diner whose deposit was paid takes that deposit along; the old booking gives up the same amount.
+  const takenPaid = diner.deposit_paid ? DEPOSIT_PER_SEAT : 0;
 
   const { data: newRegistration, error } = await db
     .from("meal_registrations")
@@ -246,14 +282,19 @@ export async function moveDinerToMeal(formData: FormData): Promise<void> {
       customer_email: oldReg.customer_email,
       customer_phone: oldReg.customer_phone,
       seats_count: 1,
-      deposit_total: diner.deposit_paid ? DEPOSIT_PER_SEAT : 0,
-      status: diner.deposit_paid ? "paid" : "pending",
+      deposit_total: DEPOSIT_PER_SEAT,
+      paid_amount: takenPaid,
+      status: takenPaid > 0 ? "paid" : "pending",
+      source: "admin",
     })
     .select("id")
     .single();
   if (error || !newRegistration) return;
 
   await db.from("meal_diners").update({ registration_id: newRegistration.id }).eq("id", dinerId);
+  if (takenPaid > 0) {
+    await db.from("meal_registrations").update({ paid_amount: Math.max(0, Number(oldReg.paid_amount ?? 0) - takenPaid) }).eq("id", oldRegistrationId);
+  }
 
   const { data: remaining } = await db.from("meal_diners").select("id").eq("registration_id", oldRegistrationId);
   if (!remaining || remaining.length === 0) {

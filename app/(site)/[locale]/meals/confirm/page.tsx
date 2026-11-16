@@ -34,7 +34,7 @@ export default async function MealConfirmPage({
     | "closed"
     | "expired"
     | null;
-  const balance = reg.pricePerSeat * reg.seatsCount - reg.fullDeposit;
+  const balance = Math.max(0, reg.pricePerSeat * reg.seatsCount - reg.fullDeposit - reg.balanceDiscount);
 
   return (
     <div className={styles.wrap}>
@@ -51,10 +51,18 @@ export default async function MealConfirmPage({
           <span>{t.deposit}</span>
           <span>{formatCurrency(reg.fullDeposit)}</span>
         </div>
-        <div className={styles.row}>
-          <span>{t.discount(reg.couponCode)}</span>
-          <span>-{formatCurrency(reg.discount)}</span>
-        </div>
+        {reg.discount > 0 && (
+          <div className={styles.row}>
+            <span>{t.discount(reg.couponCode)}</span>
+            <span>-{formatCurrency(reg.discount)}</span>
+          </div>
+        )}
+        {reg.balanceDiscount > 0 && (
+          <div className={styles.row}>
+            <span>{t.balanceDiscount(reg.couponCode)}</span>
+            <span>-{formatCurrency(reg.balanceDiscount)}</span>
+          </div>
+        )}
         <div className={`${styles.row} ${styles.grand}`}>
           <span>{t.toPay}</span>
           <span>{t.free}</span>

@@ -1,7 +1,8 @@
 import "server-only";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { getCart, type CartItemView } from "@/lib/cart";
-import { validateCoupon } from "@/lib/coupons";
+import { couponValueOf, validateCoupon } from "@/lib/coupons";
+import { pctForCart } from "@/lib/couponMath";
 import { computeCartTotals, formatCurrency, GREETING_CARD_FEE, VAT_RATE } from "@/lib/pricing";
 import { issueReceipt } from "@/lib/green-invoice";
 import { sendOrderConfirmationEmail } from "@/lib/resend";
@@ -69,7 +70,7 @@ export async function createPendingOrder(params: CreateOrderParams): Promise<Cre
     const coupon = await validateCoupon(params.couponCode);
     if (coupon.valid) {
       couponId = coupon.couponId;
-      discountPct = coupon.discountPct ?? 0;
+      discountPct = pctForCart(subtotal, couponValueOf(coupon));
     }
   }
 

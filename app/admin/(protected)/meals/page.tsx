@@ -8,7 +8,7 @@ import {
   deleteRegistration,
   moveDinerToMeal,
   moveRegistrationToMeal,
-  toggleDinerPaid,
+  updateRegistrationPayment,
   updateDiner,
   updateRegistrationContact,
 } from "@/lib/actions/admin/meal-registrations";
@@ -28,7 +28,7 @@ const REGISTRATION_ACTIONS = {
   addDinerToRegistration,
   updateDiner,
   deleteDiner,
-  toggleDinerPaid,
+  updateRegistrationPayment,
   moveDinerToMeal,
 };
 
@@ -50,10 +50,11 @@ export default async function AdminMealsPage({ searchParams }: { searchParams: P
   const { data: registrations } = await db
     .from("meal_registrations")
     .select(
-      "id, meal_id, customer_name, customer_email, customer_phone, status, source, occasions, occasion_other, extra_notes, seating_note, consented_at, deposit_discount, coupons(code), meal_diners(id, full_name, age, gender, dietary_restrictions, notes, favorite_foods, deposit_paid)"
+      "id, meal_id, customer_name, customer_email, customer_phone, status, source, occasions, occasion_other, extra_notes, seating_note, consented_at, deposit_discount, balance_discount, paid_amount, coupons(code), meal_diners(id, full_name, age, gender, dietary_restrictions, notes, favorite_foods, deposit_paid)"
     )
     .order("created_at", { ascending: false });
 
+  const priceByMeal = new Map((meals ?? []).map((m) => [m.id as string, Number(m.price_per_seat)]));
   const regsByMealId = new Map<string, RegistrationData[]>();
   for (const r of registrations ?? []) {
     const list = regsByMealId.get(r.meal_id) ?? [];
@@ -72,6 +73,9 @@ export default async function AdminMealsPage({ searchParams }: { searchParams: P
       consentedAt: r.consented_at ?? null,
       couponCode: (r.coupons as unknown as { code: string } | null)?.code ?? null,
       depositDiscount: Number(r.deposit_discount ?? 0),
+      balanceDiscount: Number(r.balance_discount ?? 0),
+      paidAmount: Number(r.paid_amount ?? 0),
+      pricePerSeat: priceByMeal.get(r.meal_id) ?? 0,
       diners: r.meal_diners.map((d) => ({
         id: d.id,
         fullName: d.full_name,
@@ -183,7 +187,19 @@ export default async function AdminMealsPage({ searchParams }: { searchParams: P
 
             {(() => {
               const summary = restrictionSummary(regs);
-              return summary ? <p style={{ marginTop: 8, fontWeight: 600 }}>{summary}</p> : null;
+              if (!summary) return null;
+              // "5× ללא הגבלות": each count sits on the right of what it counts (read right to left).
+              return (
+                <p dir="rtl" style={{ marginTop: 8, fontWeight: 600, textAlign: "right" }}>
+                  הגבלות תזונה ({summary.total} סועדים):{" "}
+                  {summary.groups.map((g, i) => (
+                    <span key={g.label}>
+                      {i > 0 && " · "}
+                      <bdi dir="ltr">{g.count}×</bdi> <bdi dir="rtl">{g.label}</bdi>
+                    </span>
+                  ))}
+                </p>
+              );
             })()}
 
             {isOwner && (

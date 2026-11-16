@@ -185,6 +185,10 @@ export interface Database {
           /** Coupon used on the deposit, and how much it took off (deposit_total is what was actually charged). */
           coupon_id: string | null;
           deposit_discount: number;
+          /** Discount off the balance beyond the deposit (paid at the table). */
+          balance_discount: number;
+          /** How much has been paid so far toward the deposit (web payments, or entered by hand). */
+          paid_amount: number;
           /** When the visitor confirmed the allergy warning and cancellation policy (web bookings). */
           consented_at: string | null;
           status: RegistrationStatus;

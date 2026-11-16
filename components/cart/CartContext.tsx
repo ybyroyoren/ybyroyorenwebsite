@@ -5,6 +5,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import type { CartItemView } from "@/lib/cart";
 import { computeCartTotals, GREETING_CARD_FEE, VAT_RATE } from "@/lib/pricing";
 import { shiftIso, todayIsraelIso } from "@/lib/date";
+import { pctForCart, type CouponValue } from "@/lib/couponMath";
 
 export const GREETING_CARD_MAX_LENGTH = 200;
 
@@ -57,7 +58,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [minOrder, setMinOrder] = useState(0);
-  const [discountPct, setDiscountPct] = useState(0);
+  // The applied coupon (a percentage or a fixed amount); the effective percentage follows the cart as it changes.
+  const [couponValue, setCouponValue] = useState<CouponValue | null>(null);
   const [couponCode, setCouponCode] = useState("");
   const [couponMessage, setCouponMessage] = useState("");
   const [couponStatus, setCouponStatus] = useState<"idle" | "success" | "error">("idle");
@@ -67,6 +69,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const count = items.reduce((sum, item) => sum + item.qty, 0);
   const subtotal = items.reduce((sum, item) => sum + item.priceBeforeVat * item.qty, 0);
   const extraFee = greetingCardEnabled ? GREETING_CARD_FEE : 0;
+  const discountPct = couponValue ? pctForCart(subtotal, couponValue) : 0;
   const totals = useMemo(
     () => computeCartTotals(subtotal, discountPct, extraFee),
     [subtotal, discountPct, extraFee]
@@ -153,7 +156,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const applyCoupon = useCallback(async (code: string) => {
     if (!code.trim()) {
-      setDiscountPct(0);
+      setCouponValue(null);
       setCouponMessage("");
       setCouponStatus("idle");
       return;
@@ -166,11 +169,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     const data = await res.json();
     track("coupon_apply", { valid: Boolean(data.valid) });
     if (data.valid) {
-      setDiscountPct(data.discountPct);
+      setCouponValue({ kind: data.kind === "amount" ? "amount" : "percent", pct: data.discountPct ?? 0, amount: data.discountAmount ?? 0 });
       setCouponCode(code.trim().toUpperCase());
       setCouponStatus("success");
     } else {
-      setDiscountPct(0);
+      setCouponValue(null);
       setCouponCode("");
       setCouponStatus("error");
     }

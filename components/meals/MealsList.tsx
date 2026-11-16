@@ -5,6 +5,7 @@ import { useState } from "react";
 import type { MealView } from "@/lib/meals";
 import { GENDERS, NO_RESTRICTIONS, OCCASIONS, OTHER_OCCASION, OTHER_RESTRICTION, RESTRICTIONS, label, type Gender } from "@/lib/mealForm";
 import { seatsDisplay } from "@/lib/seats";
+import { discountOf, type CouponValue } from "@/lib/couponMath";
 import { formatCurrency } from "@/lib/pricing";
 import { formatMealDateParts, formatMealDateFull } from "@/lib/date";
 import { getDict, type Locale } from "@/lib/dictionary";
@@ -39,7 +40,7 @@ export function MealsList({ meals, locale }: { meals: MealView[]; locale: Locale
   const [seatingNote, setSeatingNote] = useState("");
   const [consent, setConsent] = useState(false);
   const [couponInput, setCouponInput] = useState("");
-  const [coupon, setCoupon] = useState<{ code: string; pct: number } | null>(null);
+  const [coupon, setCoupon] = useState<{ code: string; value: CouponValue; target: "deposit" | "balance" } | null>(null);
   const [couponMessage, setCouponMessage] = useState<{ text: string; ok: boolean } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -100,7 +101,11 @@ export function MealsList({ meals, locale }: { meals: MealView[]; locale: Locale
       });
       const data = await res.json();
       if (data.valid) {
-        setCoupon({ code: code.toUpperCase(), pct: data.discountPct });
+        setCoupon({
+          code: code.toUpperCase(),
+          value: { kind: data.kind === "amount" ? "amount" : "percent", pct: data.discountPct ?? 0, amount: data.discountAmount ?? 0 },
+          target: data.mealTarget === "balance" ? "balance" : "deposit",
+        });
         setCouponMessage({ text: data.message, ok: true });
       } else {
         setCoupon(null);
@@ -201,10 +206,13 @@ export function MealsList({ meals, locale }: { meals: MealView[]; locale: Locale
 
   const mealTotal = selectedMeal ? selectedMeal.pricePerSeat * seatsCount : 0;
   const fullDeposit = DEPOSIT_PER_SEAT * seatsCount;
-  const couponDiscount = coupon ? Math.round(fullDeposit * coupon.pct * 100) / 100 : 0;
+  // What is left beyond the deposit, paid at the table (a coupon can take from this part instead of the deposit).
+  const balancePart = selectedMeal ? Math.max(0, (selectedMeal.pricePerSeat - DEPOSIT_PER_SEAT) * seatsCount) : 0;
+  const couponDiscount = coupon && coupon.target === "deposit" ? discountOf(fullDeposit, coupon.value) : 0;
+  const balanceDiscount = coupon && coupon.target === "balance" ? discountOf(balancePart, coupon.value) : 0;
   const depositTotal = Math.max(0, fullDeposit - couponDiscount);
-  // The coupon is a real discount: what is left to pay at the table does not grow when the deposit shrinks.
-  const balance = mealTotal - fullDeposit;
+  // The coupon is a real discount: the rest to pay at the table is the meal minus the full deposit and any balance discount.
+  const balance = Math.max(0, mealTotal - fullDeposit - balanceDiscount);
 
   return (
     <>
@@ -474,6 +482,12 @@ export function MealsList({ meals, locale }: { meals: MealView[]; locale: Locale
                 <div className={styles.totalsRow}>
                   <span>{d.couponDiscount}</span>
                   <span>-{formatCurrency(couponDiscount)}</span>
+                </div>
+              )}
+              {balanceDiscount > 0 && (
+                <div className={styles.totalsRow}>
+                  <span>{d.couponBalanceDiscount}</span>
+                  <span>-{formatCurrency(balanceDiscount)}</span>
                 </div>
               )}
               <div className={`${styles.totalsRow} ${styles.grand}`}>

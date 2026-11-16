@@ -6,7 +6,12 @@ export type CouponScope = "shop" | "meals";
 export interface CouponValidationResult {
   valid: boolean;
   couponId?: string;
+  /** What the coupon takes off: a percentage (0-1) or a fixed amount in shekels. */
+  kind?: "percent" | "amount";
   discountPct?: number;
+  discountAmount?: number;
+  /** For open meals: whether it comes off the deposit or off the balance paid at the table. */
+  mealTarget?: "deposit" | "balance";
   message: string;
 }
 
@@ -17,7 +22,7 @@ export async function validateCoupon(code: string, scope: CouponScope = "shop"):
   const db = supabaseAdmin();
   const { data } = await db
     .from("coupons")
-    .select("id, discount_pct, active, usage_limit_type, usage_limit_count, times_used, applies_to")
+    .select("id, kind, discount_pct, discount_amount, meal_target, active, usage_limit_type, usage_limit_count, times_used, applies_to")
     .eq("code", trimmed)
     .maybeSingle();
 
@@ -39,15 +44,24 @@ export async function validateCoupon(code: string, scope: CouponScope = "shop"):
     return { valid: false, message: "קוד הקופון מוצה" };
   }
 
+  const kind = data.kind === "amount" ? "amount" : "percent";
+  const what = kind === "amount" ? `₪${Number(data.discount_amount).toLocaleString("he-IL")}` : `${(Number(data.discount_pct) * 100).toFixed(0)}%`;
+  const where =
+    scope === "meals" ? (data.meal_target === "balance" ? " על יתרת התשלום (מעבר למקדמה)" : " על המקדמה") : "";
   return {
     valid: true,
     couponId: data.id,
-    discountPct: data.discount_pct,
-    message:
-      scope === "meals"
-        ? `קוד "${trimmed}" הופעל — ${(data.discount_pct * 100).toFixed(0)}% הנחה על המקדמה`
-        : `קוד "${trimmed}" הופעל — ${(data.discount_pct * 100).toFixed(0)}% הנחה`,
+    kind,
+    discountPct: Number(data.discount_pct ?? 0),
+    discountAmount: Number(data.discount_amount ?? 0),
+    mealTarget: data.meal_target === "balance" ? "balance" : "deposit",
+    message: `קוד "${trimmed}" הופעל — ${what} הנחה${where}`,
   };
+}
+
+/** The coupon as plain numbers for the arithmetic helpers. */
+export function couponValueOf(result: CouponValidationResult): { kind: "percent" | "amount"; pct: number; amount: number } {
+  return { kind: result.kind ?? "percent", pct: result.discountPct ?? 0, amount: result.discountAmount ?? 0 };
 }
 
 /** Counts one use of a coupon (called when the order / registration is paid). */

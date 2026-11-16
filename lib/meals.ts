@@ -6,12 +6,14 @@ import type { MealMenuItem, SeatsMeterMode, SeatsTextMode } from "@/lib/supabase
 import { issueReceipt } from "@/lib/green-invoice";
 import { sendMealRegistrationConfirmationEmail } from "@/lib/resend";
 import { notifyNewMealRegistration } from "@/lib/notifications";
-import { recordCouponUse, validateCoupon } from "@/lib/coupons";
+import { couponValueOf, recordCouponUse, validateCoupon } from "@/lib/coupons";
+import { discountOf } from "@/lib/couponMath";
 import { formatCurrency } from "@/lib/pricing";
 import { todayIsraelIso } from "@/lib/date";
 import { GENDERS, NO_RESTRICTIONS, OCCASIONS, OTHER_RESTRICTION, RESTRICTIONS, hebrewLabels, type Gender } from "@/lib/mealForm";
 
-export const DEPOSIT_PER_SEAT = 100;
+import { DEPOSIT_PER_SEAT } from "@/lib/mealPayments";
+export { DEPOSIT_PER_SEAT };
 export const MEAL_CANCEL_HOURS = 96;
 
 export interface MealView {
@@ -143,7 +145,7 @@ export interface CreateRegistrationParams {
 
 export async function createPendingRegistration(
   params: CreateRegistrationParams
-): Promise<{ registrationId: string; depositTotal: number; discount: number }> {
+): Promise<{ registrationId: string; depositTotal: number; discount: number; balanceDiscount: number }> {
   const meal = await getMealById(params.mealId);
   if (!meal) throw new Error("הארוחה לא נמצאה");
   if (meal.registrationClosed || meal.seatsTextMode === "full") throw new Error("ההרשמה לארוחה הזו סגורה");
@@ -155,17 +157,23 @@ export async function createPendingRegistration(
   if (problem) throw new Error(problem);
   if (params.extras?.consent !== true) throw new Error("נא לאשר שקראתם את אזהרת האלרגנים ואת מדיניות הביטול");
 
-  // A coupon takes a percentage off the deposit (checked again here: the page's check is only for display).
+  // A coupon (a percentage or a fixed amount) comes off the deposit, or off the balance beyond the deposit (paid at the
+  // table). It is checked again here: the page's check is only a preview.
   const fullDeposit = DEPOSIT_PER_SEAT * seats;
+  const balancePart = Math.max(0, (meal.pricePerSeat - DEPOSIT_PER_SEAT) * seats);
   let couponId: string | null = null;
-  let discount = 0;
+  let depositDiscount = 0;
+  let balanceDiscount = 0;
   if (params.couponCode?.trim()) {
     const coupon = await validateCoupon(params.couponCode, "meals");
     if (!coupon.valid) throw new Error(coupon.message || "קוד קופון לא תקין");
     couponId = coupon.couponId ?? null;
-    discount = Math.round(fullDeposit * (coupon.discountPct ?? 0) * 100) / 100;
+    if (coupon.mealTarget === "balance") balanceDiscount = discountOf(balancePart, couponValueOf(coupon));
+    else depositDiscount = discountOf(fullDeposit, couponValueOf(coupon));
   }
-  const depositTotal = Math.max(0, Math.round((fullDeposit - discount) * 100) / 100);
+  const discount = depositDiscount;
+  const depositTotal = Math.max(0, Math.round((fullDeposit - depositDiscount) * 100) / 100);
+
   const db = supabaseAdmin();
 
   const { data: registration, error } = await db
@@ -178,7 +186,8 @@ export async function createPendingRegistration(
       seats_count: seats,
       deposit_total: depositTotal,
       coupon_id: couponId,
-      deposit_discount: discount,
+      deposit_discount: depositDiscount,
+      balance_discount: balanceDiscount,
       occasions: hebrewLabels(OCCASIONS, params.extras?.occasions ?? []),
       occasion_other: (params.extras?.occasionOther ?? "").trim().slice(0, 200),
       extra_notes: (params.extras?.extraNotes ?? "").trim().slice(0, 1000),
@@ -205,7 +214,7 @@ export async function createPendingRegistration(
   const { error: dinersError } = await db.from("meal_diners").insert(dinerRows);
   if (dinersError) throw new Error(dinersError.message);
 
-  return { registrationId: registration.id, depositTotal, discount };
+  return { registrationId: registration.id, depositTotal, discount, balanceDiscount };
 }
 
 export interface RegistrationSummary {
@@ -275,7 +284,7 @@ export async function finalizeMealRegistration(
 
   const total = meal.price_per_seat * registration.seats_count;
   // What is left to pay at the table: the meal minus the full deposit (the coupon's discount is a real discount).
-  const balance = total - (registration.deposit_total + registration.deposit_discount);
+  const balance = Math.max(0, total - (registration.deposit_total + registration.deposit_discount) - registration.balance_discount);
 
   let receiptDocId: string | null = null;
   // A registration whose deposit was fully covered by a coupon has nothing to receipt.
@@ -301,7 +310,7 @@ export async function finalizeMealRegistration(
 
   await db
     .from("meal_registrations")
-    .update({ status: "paid", grow_payment_id: growPaymentId, receipt_doc_id: receiptDocId })
+    .update({ status: "paid", grow_payment_id: growPaymentId, receipt_doc_id: receiptDocId, paid_amount: registration.deposit_total })
     .eq("id", registrationId);
 
   await db.from("meal_diners").update({ deposit_paid: true }).eq("registration_id", registrationId);
@@ -343,6 +352,8 @@ export interface FreeRegistrationView {
   seatsCount: number;
   fullDeposit: number;
   discount: number;
+  /** Discount off the balance paid at the table (a coupon on the balance, not the deposit). */
+  balanceDiscount: number;
   couponCode: string | null;
   mealTitle: string;
   mealDate: string;
@@ -358,7 +369,7 @@ export async function getFreeRegistrationToConfirm(id: string): Promise<FreeRegi
   const db = supabaseAdmin();
   const { data } = await db
     .from("meal_registrations")
-    .select("id, meal_id, status, seats_count, deposit_total, deposit_discount, created_at, coupons(code), meals(title, date, price_per_seat)")
+    .select("id, meal_id, status, seats_count, deposit_total, deposit_discount, balance_discount, created_at, coupons(code), meals(title, date, price_per_seat)")
     .eq("id", id)
     .maybeSingle();
   if (!data) return null;
@@ -370,6 +381,7 @@ export async function getFreeRegistrationToConfirm(id: string): Promise<FreeRegi
     seatsCount: data.seats_count,
     fullDeposit: Number(data.deposit_total) + Number(data.deposit_discount),
     discount: Number(data.deposit_discount),
+    balanceDiscount: Number(data.balance_discount),
     couponCode: (data.coupons as unknown as { code: string } | null)?.code ?? null,
     mealTitle: meal.title,
     mealDate: meal.date,
