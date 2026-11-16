@@ -207,24 +207,10 @@ export async function deleteDiner(formData: FormData): Promise<void> {
 }
 
 /**
- * Sets what was paid and the two discounts of a booking. The deposit due follows the discount; once the deposit is
- * covered the booking counts as paid (and its diners as paid), which is what the public seat count relies on.
+ * Saves what was paid and the two discounts of a booking. The deposit due follows the deposit discount; once the deposit
+ * is covered the booking counts as paid (and its diners as paid), which is what the public seat count relies on.
  */
-export async function updateRegistrationPayment(formData: FormData): Promise<void> {
-  const admin = await requireAdmin();
-  if (admin.role !== "owner") return;
-  const db = supabaseAdmin();
-  const id = String(formData.get("id") ?? "");
-  if (!id) return;
-
-  const amount = (name: string) => {
-    const n = Number(formData.get(name) ?? 0);
-    return Number.isFinite(n) && n > 0 ? Math.min(Math.round(n * 100) / 100, 100000) : 0;
-  };
-  const paid = amount("paidAmount");
-  const depositDiscount = amount("depositDiscount");
-  const balanceDiscount = amount("balanceDiscount");
-
+async function savePayment(db: Db, id: string, paid: number, depositDiscount: number, balanceDiscount: number): Promise<void> {
   const { data: diners } = await db.from("meal_diners").select("id").eq("registration_id", id);
   const seats = diners?.length ?? 0;
   const depositDue = Math.max(0, Math.round((DEPOSIT_PER_SEAT * seats - depositDiscount) * 100) / 100);
@@ -243,9 +229,87 @@ export async function updateRegistrationPayment(formData: FormData): Promise<voi
     })
     .eq("id", id);
   await db.from("meal_diners").update({ deposit_paid: covered }).eq("registration_id", id);
+}
 
+function refreshPayments() {
   revalidatePath("/admin/meals");
+  revalidatePath("/admin/open-payments");
   expireMeals();
+}
+
+const money = (value: FormDataEntryValue | null) => {
+  const n = Number(value ?? 0);
+  return Number.isFinite(n) && n > 0 ? Math.min(Math.round(n * 100) / 100, 100000) : 0;
+};
+
+/** Sets what was paid and the two discounts of a booking (the payment editor). */
+export async function updateRegistrationPayment(formData: FormData): Promise<void> {
+  const admin = await requireAdmin();
+  if (admin.role !== "owner") return;
+  const id = String(formData.get("id") ?? "");
+  if (!id) return;
+  await savePayment(supabaseAdmin(), id, money(formData.get("paidAmount")), money(formData.get("depositDiscount")), money(formData.get("balanceDiscount")));
+  refreshPayments();
+}
+
+/** A payment received: adds `amount` to what the booking has paid so far. */
+export async function addRegistrationPayment(formData: FormData): Promise<void> {
+  const admin = await requireAdmin();
+  if (admin.role !== "owner") return;
+  const db = supabaseAdmin();
+  const id = String(formData.get("id") ?? "");
+  const amount = money(formData.get("amount"));
+  if (!id || amount <= 0) return;
+  const { data: reg } = await db.from("meal_registrations").select("paid_amount, deposit_discount, balance_discount").eq("id", id).maybeSingle();
+  if (!reg) return;
+  await savePayment(db, id, Math.round((Number(reg.paid_amount) + amount) * 100) / 100, Number(reg.deposit_discount), Number(reg.balance_discount));
+  refreshPayments();
+}
+
+/** The customer paid everything: the amount paid becomes the whole meal (after discounts). */
+export async function markRegistrationPaidInFull(formData: FormData): Promise<void> {
+  const admin = await requireAdmin();
+  if (admin.role !== "owner") return;
+  const db = supabaseAdmin();
+  const id = String(formData.get("id") ?? "");
+  if (!id) return;
+  const { data: reg } = await db
+    .from("meal_registrations")
+    .select("paid_amount, deposit_discount, balance_discount, meals(price_per_seat)")
+    .eq("id", id)
+    .maybeSingle();
+  if (!reg) return;
+  const { data: diners } = await db.from("meal_diners").select("id").eq("registration_id", id);
+  const price = Number((reg.meals as unknown as { price_per_seat: number } | null)?.price_per_seat ?? 0);
+  const netTotal = Math.max(0, price * (diners?.length ?? 0) - Number(reg.deposit_discount) - Number(reg.balance_discount));
+  await savePayment(db, id, Math.max(Number(reg.paid_amount), Math.round(netTotal * 100) / 100), Number(reg.deposit_discount), Number(reg.balance_discount));
+  refreshPayments();
+}
+
+/**
+ * Marks every registered booking of one meal (cancelled ones and unpaid website bookings excluded) as paid in full.
+ * For a meal that already took place, when the day-of-meal balance was paid at the table and never recorded.
+ */
+export async function markMealPaidInFull(formData: FormData): Promise<void> {
+  const admin = await requireAdmin();
+  if (admin.role !== "owner") return;
+  const db = supabaseAdmin();
+  const mealId = String(formData.get("mealId") ?? "");
+  if (!mealId) return;
+
+  const { data: meal } = await db.from("meals").select("price_per_seat").eq("id", mealId).maybeSingle();
+  if (!meal) return;
+  const { data: regs } = await db
+    .from("meal_registrations")
+    .select("id, status, source, paid_amount, deposit_discount, balance_discount, meal_diners(id)")
+    .eq("meal_id", mealId);
+  for (const reg of regs ?? []) {
+    if (reg.status === "cancelled" || (reg.status === "pending" && reg.source !== "admin")) continue;
+    const seats = (reg.meal_diners as unknown as { id: string }[]).length;
+    const netTotal = Math.max(0, Number(meal.price_per_seat) * seats - Number(reg.deposit_discount) - Number(reg.balance_discount));
+    await savePayment(db, reg.id, Math.max(Number(reg.paid_amount), Math.round(netTotal * 100) / 100), Number(reg.deposit_discount), Number(reg.balance_discount));
+  }
+  refreshPayments();
 }
 
 export async function moveDinerToMeal(formData: FormData): Promise<void> {

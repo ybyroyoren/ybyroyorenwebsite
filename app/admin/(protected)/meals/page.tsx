@@ -9,6 +9,8 @@ import {
   moveDinerToMeal,
   moveRegistrationToMeal,
   updateRegistrationPayment,
+  addRegistrationPayment,
+  markRegistrationPaidInFull,
   updateDiner,
   updateRegistrationContact,
 } from "@/lib/actions/admin/meal-registrations";
@@ -29,6 +31,8 @@ const REGISTRATION_ACTIONS = {
   updateDiner,
   deleteDiner,
   updateRegistrationPayment,
+  addRegistrationPayment,
+  markRegistrationPaidInFull,
   moveDinerToMeal,
 };
 
@@ -188,14 +192,14 @@ export default async function AdminMealsPage({ searchParams }: { searchParams: P
             {(() => {
               const summary = restrictionSummary(regs);
               if (!summary) return null;
-              // "5× ללא הגבלות": each count sits on the right of what it counts (read right to left).
+              // "×5 ללא הגבלות": each count sits on the right of what it counts (read right to left).
               return (
                 <p dir="rtl" style={{ marginTop: 8, fontWeight: 600, textAlign: "right" }}>
                   הגבלות תזונה ({summary.total} סועדים):{" "}
                   {summary.groups.map((g, i) => (
                     <span key={g.label}>
                       {i > 0 && " · "}
-                      <bdi dir="ltr">{g.count}×</bdi> <bdi dir="rtl">{g.label}</bdi>
+                      <bdi dir="ltr">×{g.count}</bdi> <bdi dir="rtl">{g.label}</bdi>
                     </span>
                   ))}
                 </p>

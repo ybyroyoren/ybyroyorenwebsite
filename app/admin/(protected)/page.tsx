@@ -9,6 +9,7 @@ const SECTION_PATH: Record<string, string> = {
   orders: "/admin/orders",
   pickup_rules: "/admin/pickup-rules",
   meals: "/admin/meals",
+  open_payments: "/admin/open-payments",
   events: "/admin/events",
   messages: "/admin/messages",
   kitchen_ledger: "/admin/kitchen",

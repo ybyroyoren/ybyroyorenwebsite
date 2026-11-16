@@ -60,6 +60,8 @@ export interface MealRegistrationActions {
   updateDiner: (fd: FormData) => Promise<void>;
   deleteDiner: (fd: FormData) => Promise<void>;
   updateRegistrationPayment: (fd: FormData) => Promise<void>;
+  addRegistrationPayment: (fd: FormData) => Promise<void>;
+  markRegistrationPaidInFull: (fd: FormData) => Promise<void>;
   moveDinerToMeal: (fd: FormData) => Promise<void>;
 }
 
@@ -136,8 +138,23 @@ function PaymentLine({ reg }: { reg: RegistrationData }) {
       <span>
         נותר ביום האירוע: <b>{shekels(p.remainingAtEvent)}</b>
       </span>
+      <span>
+        סה&quot;כ נותר לתשלום: <b style={p.remainingTotal > 0 ? { color: "var(--danger)" } : { color: "var(--olive-deep)" }}>{shekels(p.remainingTotal)}</b>
+      </span>
     </span>
   );
+}
+
+/** What is still to be paid for this booking (deposit and day-of-meal together). */
+function paymentLeft(reg: RegistrationData): number {
+  if (reg.status === "cancelled") return 0;
+  return paymentBreakdown({
+    seats: reg.diners.length,
+    pricePerSeat: reg.pricePerSeat,
+    paidAmount: reg.paidAmount,
+    depositDiscount: reg.depositDiscount,
+    balanceDiscount: reg.balanceDiscount,
+  }).remainingTotal;
 }
 
 /** Phone and e-mail, or a plain note when a booking entered by hand has neither. */
@@ -251,6 +268,13 @@ function RegistrationGroup({
     router.refresh();
   }
 
+  async function handlePaidInFull() {
+    const fd = new FormData();
+    fd.set("id", reg.id);
+    await actions.markRegistrationPaidInFull(fd);
+    router.refresh();
+  }
+
   async function handlePaymentSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     await actions.updateRegistrationPayment(new FormData(e.currentTarget));
@@ -283,6 +307,11 @@ function RegistrationGroup({
               <button type="button" className={styles.btnSecondary} onClick={() => setEditingPayment(true)}>
                 עדכון תשלום
               </button>
+              {paymentLeft(reg) > 0 && (
+                <button type="button" className={styles.btnSecondary} onClick={handlePaidInFull} title="הלקוח שילם את כל מה שנותר">
+                  שולם הכל
+                </button>
+              )}
               <button type="button" className={styles.btnSecondary} onClick={() => setAddingDiner(true)}>
                 + הוספת סועד
               </button>
@@ -428,6 +457,9 @@ function PaymentModal({
             <button type="button" className={styles.btnSecondary} onClick={() => setPaid(String(p.depositDue))}>
               המקדמה שולמה במלואה
             </button>
+            <button type="button" className={styles.btnSecondary} onClick={() => setPaid(String(Math.max(p.netTotal, p.paid)))}>
+              שולם הכל
+            </button>
           </div>
         </div>
         <div className={styles.field}>
@@ -441,7 +473,7 @@ function PaymentModal({
         <div className={styles.explainBox} style={{ width: "100%" }}>
           מקדמה לתשלום: <b>{shekels(p.depositDue)}</b> · שולם: <b>{shekels(p.paid)}</b>
           <br />
-          נותר למקדמה: <b>{shekels(p.remainingDeposit)}</b> · נותר ביום האירוע: <b>{shekels(p.remainingAtEvent)}</b>
+          נותר למקדמה: <b>{shekels(p.remainingDeposit)}</b> · נותר ביום האירוע: <b>{shekels(p.remainingAtEvent)}</b> · סה&quot;כ נותר: <b>{shekels(p.remainingTotal)}</b>
         </div>
         <button type="submit" className={styles.btn}>
           שמירה

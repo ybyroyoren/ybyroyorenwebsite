@@ -22,6 +22,8 @@ export interface PaymentBreakdown {
   paid: number;
   remainingDeposit: number;
   remainingAtEvent: number;
+  /** Everything still to pay: what is left of the deposit plus what is left for the day of the meal. */
+  remainingTotal: number;
 }
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
@@ -41,5 +43,6 @@ export function paymentBreakdown(i: PaymentInput): PaymentBreakdown {
     paid: round2(i.paidAmount),
     remainingDeposit: round2(remainingDeposit),
     remainingAtEvent: round2(remainingAtEvent),
+    remainingTotal: round2(remainingTotal),
   };
 }
