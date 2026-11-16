@@ -78,5 +78,6 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  // Static files (the self-hosted fonts) skip the locale rewrite, which would turn /fonts/x into /he/fonts/x (404).
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|fonts/).*)"],
 };

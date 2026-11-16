@@ -1,20 +1,6 @@
 import type { Metadata } from "next";
-import { Frank_Ruhl_Libre, Assistant } from "next/font/google";
+import "./fonts.css";
 import "./globals.css";
-
-const frankRuhlLibre = Frank_Ruhl_Libre({
-  variable: "--font-serif",
-  subsets: ["latin", "hebrew"],
-  weight: ["700", "900"], // only the Y logo mark still uses the serif face
-  display: "swap",
-});
-
-const assistant = Assistant({
-  variable: "--font-sans",
-  subsets: ["latin", "hebrew"],
-  weight: ["300", "400", "500", "600", "700"],
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: {
@@ -32,8 +18,11 @@ export default function RootLayout({
   return (
     // suppressHydrationWarning: the inline script below adds a class to <html>
     // before React hydrates.
-    <html lang="he" dir="rtl" data-scroll-behavior="smooth" className={`${frankRuhlLibre.variable} ${assistant.variable}`} suppressHydrationWarning>
+    <html lang="he" dir="rtl" data-scroll-behavior="smooth" suppressHydrationWarning>
       <head>
+        {/* The fonts the first paint needs (Hebrew and Latin of the body font), fetched early. */}
+        <link rel="preload" href="/fonts/assistant-hebrew.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
+        <link rel="preload" href="/fonts/assistant-latin.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
         {/* [data-reveal] content is only hidden once JS is known to run; if
             RevealObserver hasn't signalled within 4s, show everything. */}
         <script
