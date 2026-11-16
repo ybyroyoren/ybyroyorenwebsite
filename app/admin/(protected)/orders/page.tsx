@@ -33,7 +33,7 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
   const { data: orders } = await db
     .from("orders")
     .select(
-      "id, customer_name, customer_email, customer_phone, pickup_date, total, status, payment_method, fulfillment_status, created_at, greeting_card_message, order_items(product_name, size_label, unit_price, qty)"
+      "id, customer_name, customer_email, customer_phone, pickup_date, total, status, payment_method, fulfillment_status, created_at, notes, greeting_card_message, order_items(product_name, size_label, unit_price, qty)"
     )
     .order("created_at", { ascending: false });
 
@@ -100,6 +100,11 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
                       {item.size_label ? ` — ${item.size_label}` : ""} × {item.qty}
                     </div>
                   ))}
+                  {o.notes?.trim() && (
+                    <div style={{ marginTop: 4, whiteSpace: "pre-line", fontWeight: 600 }}>
+                      📝 הערת לקוח: {o.notes}
+                    </div>
+                  )}
                   {o.greeting_card_message && (
                     <div className={styles.muted} style={{ marginTop: 4 }}>
                       🎁 כרטיס ברכה: &quot;{o.greeting_card_message}&quot;

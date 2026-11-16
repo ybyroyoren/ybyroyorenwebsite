@@ -138,6 +138,10 @@ export async function sendAndLogSms(type: NotificationType | "test", phone: stri
   return result;
 }
 
+function escapeHtml(v: string): string {
+  return v.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
 async function alert(type: NotificationType, subject: string, html: string, whatsapp: WhatsAppAlert): Promise<void> {
   try {
     const [emails, whatsappPhones, smsPhones] = await Promise.all([
@@ -164,7 +168,9 @@ export async function notifyNewOrder(params: {
   pickupDate: string;
   totalFormatted: string;
   items: { name: string; qty: number }[];
+  notes?: string | null;
 }): Promise<void> {
+  const note = params.notes?.trim() || "";
   await alert(
     "shop_order",
     `הזמנה חדשה מהחנות — ${params.customerName}`,
@@ -177,12 +183,42 @@ export async function notifyNewOrder(params: {
         <p><b>מוצרים:</b></p>
         <ul>${params.items.map((i) => `<li>${i.name} × ${i.qty}</li>`).join("")}</ul>
         <p><b>סה&quot;כ שולם:</b> ${params.totalFormatted}</p>
+        ${note ? `<p style="white-space: pre-line;"><b>הערת הלקוח:</b> ${escapeHtml(note)}</p>` : ""}
       </div>
     `,
     {
       kind: "הזמנה חדשה בחנות",
       customer: `${params.customerName} · ${params.customerPhone}`,
-      details: `${params.items.map((i) => `${i.name} × ${i.qty}`).join(", ")} · סה״כ ${params.totalFormatted} · איסוף ${params.pickupDate}`,
+      details: `${params.items.map((i) => `${i.name} × ${i.qty}`).join(", ")} · סה״כ ${params.totalFormatted} · איסוף ${params.pickupDate}${note ? ` · הערה: ${note}` : ""}`,
+    }
+  );
+}
+
+/** The tax document could not be issued/e-mailed — the owner must handle it by hand. */
+export async function notifyReceiptFailed(params: {
+  orderId: string;
+  customerName: string;
+  customerEmail: string;
+  totalFormatted: string;
+  reason: string;
+}): Promise<void> {
+  await alert(
+    "shop_order",
+    `שגיאה בהנפקת חשבונית — ${params.customerName}`,
+    `
+      <div dir="rtl" style="font-family: sans-serif;">
+        <h2>החשבונית לא הונפקה אוטומטית</h2>
+        <p>ההזמנה שולמה, אך חשבונית המס/קבלה לא נוצרה ולא נשלחה ללקוח. יש להפיק אותה ידנית.</p>
+        <p><b>לקוח:</b> ${escapeHtml(params.customerName)} · ${escapeHtml(params.customerEmail)}</p>
+        <p><b>מספר הזמנה:</b> ${params.orderId}</p>
+        <p><b>סכום:</b> ${params.totalFormatted}</p>
+        <p><b>סיבה:</b> ${escapeHtml(params.reason)}</p>
+      </div>
+    `,
+    {
+      kind: "חשבונית לא הונפקה",
+      customer: `${params.customerName} · ${params.customerEmail}`,
+      details: `הזמנה ${params.orderId.slice(0, 8)} · ${params.totalFormatted} · יש להפיק חשבונית ידנית`,
     }
   );
 }

@@ -6,7 +6,7 @@ import { pctForCart } from "@/lib/couponMath";
 import { computeCartTotals, formatCurrency, GREETING_CARD_FEE, VAT_RATE } from "@/lib/pricing";
 import { issueReceipt } from "@/lib/green-invoice";
 import { sendOrderConfirmationEmail } from "@/lib/resend";
-import { notifyNewOrder } from "@/lib/notifications";
+import { notifyNewOrder, notifyReceiptFailed } from "@/lib/notifications";
 import { shiftIso, todayIsraelIso } from "@/lib/date";
 import { closedReason, getPickupRules } from "@/lib/pickupRules";
 import { fetchMinOrderFresh } from "@/lib/siteSettings";
@@ -206,6 +206,13 @@ export async function finalizeOrder(orderId: string, growPaymentId: string): Pro
     receiptDocId = receipt.documentId;
   } catch (err) {
     console.error(`[green-invoice] Failed to issue receipt for order ${orderId}:`, err);
+    await notifyReceiptFailed({
+      orderId: order.id,
+      customerName: order.customer_name,
+      customerEmail: order.customer_email,
+      totalFormatted: formatCurrency(order.total),
+      reason: err instanceof Error ? err.message.slice(0, 300) : "שגיאה לא ידועה",
+    });
   }
 
   await db
@@ -247,6 +254,7 @@ export async function finalizeOrder(orderId: string, growPaymentId: string): Pro
       name: i.size_label ? `${i.product_name} — ${i.size_label}` : i.product_name,
       qty: i.qty,
     })),
+    notes: order.notes,
   });
 
   return {
