@@ -38,7 +38,7 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
         <div className={styles.eyebrow} data-reveal="">
           {t.teamEyebrow}
         </div>
-        <h2 data-reveal="">{t.teamHeading}</h2>
+        <h2 className="displayHeading" data-reveal="">{t.teamHeading}</h2>
         <div className={styles.teamGrid}>
           {team.map((member) => {
             const name = (locale === "en" && member.nameEn) || member.name;
