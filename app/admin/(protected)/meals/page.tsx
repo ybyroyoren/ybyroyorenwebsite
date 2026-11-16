@@ -78,7 +78,7 @@ export default async function AdminMealsPage({ searchParams }: { searchParams: P
   const { data: registrations } = await db
     .from("meal_registrations")
     .select(
-      "id, meal_id, customer_name, customer_email, customer_phone, status, occasions, occasion_other, extra_notes, seating_note, consented_at, meal_diners(id, full_name, age, gender, dietary_restrictions, notes, favorite_foods, deposit_paid)"
+      "id, meal_id, customer_name, customer_email, customer_phone, status, occasions, occasion_other, extra_notes, seating_note, consented_at, deposit_discount, coupons(code), meal_diners(id, full_name, age, gender, dietary_restrictions, notes, favorite_foods, deposit_paid)"
     )
     .order("created_at", { ascending: false });
 
@@ -96,6 +96,8 @@ export default async function AdminMealsPage({ searchParams }: { searchParams: P
       extraNotes: r.extra_notes ?? "",
       seatingNote: r.seating_note ?? "",
       consentedAt: r.consented_at ?? null,
+      couponCode: (r.coupons as unknown as { code: string } | null)?.code ?? null,
+      depositDiscount: Number(r.deposit_discount ?? 0),
       diners: r.meal_diners.map((d) => ({
         id: d.id,
         fullName: d.full_name,

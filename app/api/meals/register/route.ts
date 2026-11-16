@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
-import { createPendingRegistration, type DinerInput, type RegistrationExtras } from "@/lib/meals";
+import { createPendingRegistration, finalizeMealRegistration, type DinerInput, type RegistrationExtras } from "@/lib/meals";
+import { revalidatePath, revalidateTag } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache";
 import { createPaymentRequest } from "@/lib/grow";
 import { localePath } from "@/lib/i18n";
 
@@ -10,6 +12,7 @@ interface RegisterBody {
   customerPhone: string;
   diners: DinerInput[];
   extras?: RegistrationExtras;
+  couponCode?: string;
   locale?: string;
 }
 
@@ -37,6 +40,7 @@ export async function POST(request: Request) {
       customerPhone: body.customerPhone,
       diners: body.diners,
       extras: body.extras,
+      couponCode: body.couponCode,
     });
     registrationId = result.registrationId;
     depositTotal = result.depositTotal;
@@ -49,6 +53,15 @@ export async function POST(request: Request) {
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
   const locale = body.locale === "en" ? "en" : "he";
+
+  // A coupon that covers the whole deposit: nothing to pay, so the registration is confirmed right away.
+  if (depositTotal <= 0) {
+    await finalizeMealRegistration(registrationId, null);
+    revalidateTag(CACHE_TAGS.meals, "max");
+    revalidatePath("/meals");
+    revalidatePath("/en/meals");
+    return NextResponse.json({ paymentUrl: `${siteUrl}${localePath(locale, "/meals/success")}?registrationId=${registrationId}` });
+  }
   const payment = await createPaymentRequest({
     items: [{ name: `מקדמה — ${body.diners.length} סועדים`, price: depositTotal, quantity: 1 }],
     description: `מקדמה לארוחה פתוחה — ${registrationId}`,

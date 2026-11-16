@@ -182,6 +182,9 @@ export interface Database {
           extra_notes: string;
           /** Who (if anyone) the group wants to sit next to. */
           seating_note: string;
+          /** Coupon used on the deposit, and how much it took off (deposit_total is what was actually charged). */
+          coupon_id: string | null;
+          deposit_discount: number;
           /** When the visitor confirmed the allergy warning and cancellation policy (web bookings). */
           consented_at: string | null;
           status: RegistrationStatus;

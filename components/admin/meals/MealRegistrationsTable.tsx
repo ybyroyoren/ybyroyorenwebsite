@@ -29,6 +29,9 @@ export interface RegistrationData {
   seatingNote: string;
   /** When the visitor confirmed the allergy warning and cancellation policy (online bookings). */
   consentedAt: string | null;
+  /** Coupon used on the deposit (code) and the amount it took off. */
+  couponCode: string | null;
+  depositDiscount: number;
   diners: DinerData[];
 }
 
@@ -73,6 +76,9 @@ function RegistrationExtras({ reg, colSpan }: { reg: RegistrationData; colSpan: 
   }
   if (reg.extraNotes) parts.push({ label: "הערה מהלקוח", value: reg.extraNotes });
   if (reg.seatingNote) parts.push({ label: "רוצים לשבת ליד", value: reg.seatingNote });
+  if (reg.couponCode || reg.depositDiscount > 0) {
+    parts.push({ label: "קופון", value: `${reg.couponCode ?? "—"} (הנחה על המקדמה ₪${reg.depositDiscount.toLocaleString("he-IL")})` });
+  }
   if (reg.consentedAt) {
     parts.push({ label: "אישרו אזהרת אלרגנים ומדיניות ביטול", value: consentFormat.format(new Date(reg.consentedAt)) });
   }

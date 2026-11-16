@@ -499,3 +499,46 @@
   line-height: 1.5;
   color: var(--ink-soft);
 }
+
+.couponRow {
+  display: flex;
+  gap: 8px;
+  margin: 14px 0 6px;
+}
+
+.couponRow input {
+  flex: 1;
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: var(--cream);
+  font-family: inherit;
+  font-size: 15px;
+  color: var(--ink);
+  text-transform: uppercase;
+}
+
+.couponRow button {
+  padding: 10px 18px;
+  border-radius: 6px;
+  border: 1px solid var(--olive-deep);
+  background: transparent;
+  color: var(--olive-deep);
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.couponRow button:hover {
+  background: var(--olive-deep);
+  color: var(--cream);
+}
+
+.couponMsg {
+  margin: 0 0 8px;
+  font-size: 14px;
+}
+
+.couponOk {
+  color: var(--olive-deep);
+}

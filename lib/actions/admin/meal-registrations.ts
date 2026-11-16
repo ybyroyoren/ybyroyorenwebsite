@@ -34,9 +34,12 @@ function dinerDetails(formData: FormData) {
 async function syncRegistrationSeats(db: Db, registrationId: string): Promise<void> {
   const { data: diners } = await db.from("meal_diners").select("id").eq("registration_id", registrationId);
   const count = diners?.length ?? 0;
+  // A coupon's discount stays a fixed amount off the deposit when seats are added or removed by hand.
+  const { data: registration } = await db.from("meal_registrations").select("deposit_discount").eq("id", registrationId).maybeSingle();
+  const discount = Number(registration?.deposit_discount ?? 0);
   await db
     .from("meal_registrations")
-    .update({ seats_count: count, deposit_total: DEPOSIT_PER_SEAT * count })
+    .update({ seats_count: count, deposit_total: Math.max(0, DEPOSIT_PER_SEAT * count - discount) })
     .eq("id", registrationId);
 }
 

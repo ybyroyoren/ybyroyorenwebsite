@@ -6,6 +6,7 @@ import type { MealMenuItem, SeatsMeterMode, SeatsTextMode } from "@/lib/supabase
 import { issueReceipt } from "@/lib/green-invoice";
 import { sendMealRegistrationConfirmationEmail } from "@/lib/resend";
 import { notifyNewMealRegistration } from "@/lib/notifications";
+import { recordCouponUse, validateCoupon } from "@/lib/coupons";
 import { formatCurrency } from "@/lib/pricing";
 import { todayIsraelIso } from "@/lib/date";
 import { GENDERS, NO_RESTRICTIONS, OCCASIONS, OTHER_RESTRICTION, RESTRICTIONS, hebrewLabels, type Gender } from "@/lib/mealForm";
@@ -136,11 +137,13 @@ export interface CreateRegistrationParams {
   customerPhone: string;
   diners: DinerInput[];
   extras?: RegistrationExtras;
+  /** Optional coupon code for the deposit. */
+  couponCode?: string;
 }
 
 export async function createPendingRegistration(
   params: CreateRegistrationParams
-): Promise<{ registrationId: string; depositTotal: number }> {
+): Promise<{ registrationId: string; depositTotal: number; discount: number }> {
   const meal = await getMealById(params.mealId);
   if (!meal) throw new Error("הארוחה לא נמצאה");
   if (meal.registrationClosed || meal.seatsTextMode === "full") throw new Error("ההרשמה לארוחה הזו סגורה");
@@ -152,7 +155,17 @@ export async function createPendingRegistration(
   if (problem) throw new Error(problem);
   if (params.extras?.consent !== true) throw new Error("נא לאשר שקראתם את אזהרת האלרגנים ואת מדיניות הביטול");
 
-  const depositTotal = DEPOSIT_PER_SEAT * seats;
+  // A coupon takes a percentage off the deposit (checked again here: the page's check is only for display).
+  const fullDeposit = DEPOSIT_PER_SEAT * seats;
+  let couponId: string | null = null;
+  let discount = 0;
+  if (params.couponCode?.trim()) {
+    const coupon = await validateCoupon(params.couponCode, "meals");
+    if (!coupon.valid) throw new Error(coupon.message || "קוד קופון לא תקין");
+    couponId = coupon.couponId ?? null;
+    discount = Math.round(fullDeposit * (coupon.discountPct ?? 0) * 100) / 100;
+  }
+  const depositTotal = Math.max(0, Math.round((fullDeposit - discount) * 100) / 100);
   const db = supabaseAdmin();
 
   const { data: registration, error } = await db
@@ -164,6 +177,8 @@ export async function createPendingRegistration(
       customer_phone: params.customerPhone,
       seats_count: seats,
       deposit_total: depositTotal,
+      coupon_id: couponId,
+      deposit_discount: discount,
       occasions: hebrewLabels(OCCASIONS, params.extras?.occasions ?? []),
       occasion_other: (params.extras?.occasionOther ?? "").trim().slice(0, 200),
       extra_notes: (params.extras?.extraNotes ?? "").trim().slice(0, 1000),
@@ -190,7 +205,7 @@ export async function createPendingRegistration(
   const { error: dinersError } = await db.from("meal_diners").insert(dinerRows);
   if (dinersError) throw new Error(dinersError.message);
 
-  return { registrationId: registration.id, depositTotal };
+  return { registrationId: registration.id, depositTotal, discount };
 }
 
 export interface RegistrationSummary {
@@ -232,7 +247,7 @@ export async function getRegistrationById(id: string): Promise<RegistrationSumma
  */
 export async function finalizeMealRegistration(
   registrationId: string,
-  growPaymentId: string
+  growPaymentId: string | null
 ): Promise<RegistrationSummary> {
   const db = supabaseAdmin();
 
@@ -259,25 +274,29 @@ export async function finalizeMealRegistration(
   }
 
   const total = meal.price_per_seat * registration.seats_count;
-  const balance = total - registration.deposit_total;
+  // What is left to pay at the table: the meal minus the full deposit (the coupon's discount is a real discount).
+  const balance = total - (registration.deposit_total + registration.deposit_discount);
 
   let receiptDocId: string | null = null;
-  try {
-    const receipt = await issueReceipt({
-      customerName: registration.customer_name,
-      customerEmail: registration.customer_email,
-      items: [
-        {
-          description: `מקדמה — ${meal.title} (${registration.seats_count} סועדים)`,
-          quantity: 1,
-          unitPrice: registration.deposit_total,
-        },
-      ],
-      total: registration.deposit_total,
-    });
-    receiptDocId = receipt.documentId;
-  } catch (err) {
-    console.error(`[green-invoice] Failed to issue receipt for registration ${registrationId}:`, err);
+  // A registration whose deposit was fully covered by a coupon has nothing to receipt.
+  if (registration.deposit_total > 0) {
+    try {
+      const receipt = await issueReceipt({
+        customerName: registration.customer_name,
+        customerEmail: registration.customer_email,
+        items: [
+          {
+            description: `מקדמה — ${meal.title} (${registration.seats_count} סועדים)`,
+            quantity: 1,
+            unitPrice: registration.deposit_total,
+          },
+        ],
+        total: registration.deposit_total,
+      });
+      receiptDocId = receipt.documentId;
+    } catch (err) {
+      console.error(`[green-invoice] Failed to issue receipt for registration ${registrationId}:`, err);
+    }
   }
 
   await db
@@ -286,6 +305,7 @@ export async function finalizeMealRegistration(
     .eq("id", registrationId);
 
   await db.from("meal_diners").update({ deposit_paid: true }).eq("registration_id", registrationId);
+  if (registration.coupon_id) await recordCouponUse(registration.coupon_id);
 
   await sendMealRegistrationConfirmationEmail({
     to: registration.customer_email,
