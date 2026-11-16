@@ -264,6 +264,8 @@ const dictionary = {
       heading: ["רוי אורן,", "שף פרטי"],
       body: "עזבתי קריירת הייטק כדי ללמוד בישול ואפייה מקצועיים בבתי הספר של אלן דוקאס בפריז ובאיסאנז'ו שבצרפת, ולעבור סטאז' תחת השף Massimo Bottura ב-Osteria Francescana באיטליה. אני מאמין שדיוק הטעם קודם לכול. מנות דגל שמתפתחות ומשתפרות עם הזמן, לצד המצאות חדשות שפיתחתי וניסיתי במטבח שלי. למה אנחנו נקראים Y? תגיעו לאחד האירועים שלנו ותשמעו את הסיפור ממני.",
       photoAlt: "רוי אורן",
+      teamEyebrow: "הצוות",
+      teamHeading: "האנשים שמאחורי Y",
     },
     contact: {
       eyebrow: "יצירת קשר",
@@ -604,6 +606,8 @@ const dictionary = {
       heading: ["Roy Oren,", "Private Chef"],
       body: "I left a career in tech to study professional cooking and baking at Alain Ducasse's schools in Paris and Yssingeaux, France, and to stage under chef Massimo Bottura at Osteria Francescana in Italy. I believe precision of flavor comes first. Signature dishes that evolve and improve over time, alongside new creations I develop and test in my own kitchen. Why are we called Y? Come to one of our events and hear the story from me.",
       photoAlt: "Roy Oren",
+      teamEyebrow: "The team",
+      teamHeading: "The people behind Y",
     },
     contact: {
       eyebrow: "Contact",

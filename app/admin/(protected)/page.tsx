@@ -4,6 +4,7 @@ import { accessibleSections, requireAdmin } from "@/lib/admin-auth";
 const SECTION_PATH: Record<string, string> = {
   products: "/admin/products",
   media: "/admin/media",
+  about_team: "/admin/about-team",
   coupons: "/admin/coupons",
   orders: "/admin/orders",
   pickup_rules: "/admin/pickup-rules",

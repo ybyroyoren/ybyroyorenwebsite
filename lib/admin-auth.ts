@@ -54,6 +54,7 @@ export async function requireAdmin(): Promise<AdminUser> {
 export type AdminSection =
   | "products"
   | "media"
+  | "about_team"
   | "coupons"
   | "orders"
   | "pickup_rules"
@@ -69,6 +70,7 @@ export type AdminSection =
 export const SECTION_ROLES: Record<AdminSection, AdminRole[]> = {
   products: ["owner", "kitchen"],
   media: ["owner"],
+  about_team: ["owner"],
   coupons: ["owner"],
   orders: ["owner", "kitchen"],
   pickup_rules: ["owner"],

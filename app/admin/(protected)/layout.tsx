@@ -6,6 +6,7 @@ import styles from "../admin.module.css";
 const NAV: { section: AdminSection; href: string; label: string }[] = [
   { section: "products", href: "/admin/products", label: "מוצרים" },
   { section: "media", href: "/admin/media", label: "תמונות אתר" },
+  { section: "about_team", href: "/admin/about-team", label: "צוות באודות" },
   { section: "coupons", href: "/admin/coupons", label: "קופונים" },
   { section: "orders", href: "/admin/orders", label: "הזמנות" },
   { section: "pickup_rules", href: "/admin/pickup-rules", label: "סגירת איסוף" },
