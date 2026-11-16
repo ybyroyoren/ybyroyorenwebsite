@@ -116,7 +116,7 @@ const dictionary = {
       total: "סה\"כ לתשלום",
       checkoutBtn: "המשך לתשלום",
       note: "קבלה תישלח אוטומטית למייל לאחר התשלום",
-      minOrderMissing: (min: string, missing: string) => `מינימום הזמנה: ${min} (כולל מע"מ). חסרים עוד ${missing} כדי להמשיך לתשלום.`,
+      minOrderMissing: (min: string, missing: string) => `מינימום הזמנה בחנות הוא ${min} (כולל מע"מ). חסרים עוד ${missing}.`,
       keepShopping: "להמשך קניות",
     },
     meals: {
@@ -462,7 +462,7 @@ const dictionary = {
       total: "Total to pay",
       checkoutBtn: "Continue to payment",
       note: "A receipt will be emailed to you automatically after payment",
-      minOrderMissing: (min: string, missing: string) => `Minimum order: ${min} (incl. VAT). ${missing} more to continue to payment.`,
+      minOrderMissing: (min: string, missing: string) => `The minimum order in the shop is ${min} (incl. VAT). ${missing} more to go.`,
       keepShopping: "Keep shopping",
     },
     meals: {

@@ -19,8 +19,8 @@ export async function POST(request: Request) {
 
   try {
     const cartId = await addCartItem(sessionId, productSizeId, qty);
-    const items = await getCart(sessionId, cartId);
-    return NextResponse.json({ items });
+    const [items, minOrder] = await Promise.all([getCart(sessionId, cartId), getMinOrder()]);
+    return NextResponse.json({ items, minOrder });
   } catch (err) {
     if (err instanceof SoldOutError) return NextResponse.json({ error: err.message, soldOut: true }, { status: 409 });
     throw err;
@@ -36,8 +36,8 @@ export async function PATCH(request: Request) {
   }
 
   const cartId = await updateCartItemQty(sessionId, cartItemId, qty);
-  const items = await getCart(sessionId, cartId);
-  return NextResponse.json({ items });
+  const [items, minOrder] = await Promise.all([getCart(sessionId, cartId), getMinOrder()]);
+  return NextResponse.json({ items, minOrder });
 }
 
 export async function DELETE(request: Request) {
@@ -49,6 +49,6 @@ export async function DELETE(request: Request) {
   }
 
   const cartId = await removeCartItem(sessionId, cartItemId);
-  const items = await getCart(sessionId, cartId);
-  return NextResponse.json({ items });
+  const [items, minOrder] = await Promise.all([getCart(sessionId, cartId), getMinOrder()]);
+  return NextResponse.json({ items, minOrder });
 }

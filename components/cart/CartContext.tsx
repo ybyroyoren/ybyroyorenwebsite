@@ -95,6 +95,25 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
+  /** Re-reads the cart and the minimum order (they may have changed since this page loaded). */
+  const refresh = useCallback(() => {
+    cartRequest("GET")
+      .then((fetched) => {
+        setItems(fetched.items);
+        if (typeof fetched.minOrder === "number") setMinOrder(fetched.minOrder);
+      })
+      .catch(() => {});
+  }, []);
+
+  // A tab left open while the owner changed the minimum: pick it up again when the visitor comes back to it.
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState === "visible") refresh();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
+  }, [refresh]);
+
   const addItem = useCallback(async (productSizeId: string, qty = 1) => {
     setIsLoading(true);
     // Open right away: the server round trip takes a moment, and a click
@@ -103,6 +122,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     try {
       const updated = await cartRequest("POST", { productSizeId, qty });
       setItems(updated.items);
+      if (typeof updated.minOrder === "number") setMinOrder(updated.minOrder);
     } finally {
       setIsLoading(false);
     }
@@ -113,6 +133,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     try {
       const updated = await cartRequest("PATCH", { cartItemId, qty });
       setItems(updated.items);
+      if (typeof updated.minOrder === "number") setMinOrder(updated.minOrder);
     } finally {
       setIsLoading(false);
     }
@@ -124,6 +145,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     try {
       const updated = await cartRequest("DELETE", { cartItemId });
       setItems(updated.items);
+      if (typeof updated.minOrder === "number") setMinOrder(updated.minOrder);
     } finally {
       setIsLoading(false);
     }
@@ -177,6 +199,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     open: () => {
       track("cart_open");
       setIsOpen(true);
+      refresh();
     },
     close: () => setIsOpen(false),
     addItem,
