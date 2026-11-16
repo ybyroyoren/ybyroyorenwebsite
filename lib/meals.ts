@@ -336,3 +336,57 @@ export async function finalizeMealRegistration(
     mealDate: meal.date,
   };
 }
+
+export interface FreeRegistrationView {
+  id: string;
+  status: "pending" | "paid" | "cancelled";
+  seatsCount: number;
+  fullDeposit: number;
+  discount: number;
+  couponCode: string | null;
+  mealTitle: string;
+  mealDate: string;
+  pricePerSeat: number;
+  /** Why it can't be confirmed right now, if so: "full" (seats gone), "closed" (registration closed), "expired". */
+  problem: "full" | "closed" | "expired" | "not-free" | null;
+}
+
+const HOLD_MINUTES = 30; // how long a not-yet-paid booking holds its seats (see the meal_availability view)
+
+/** A zero-deposit registration waiting for the visitor's confirmation, with a check that it can still be confirmed. */
+export async function getFreeRegistrationToConfirm(id: string): Promise<FreeRegistrationView | null> {
+  const db = supabaseAdmin();
+  const { data } = await db
+    .from("meal_registrations")
+    .select("id, meal_id, status, seats_count, deposit_total, deposit_discount, created_at, coupons(code), meals(title, date, price_per_seat)")
+    .eq("id", id)
+    .maybeSingle();
+  if (!data) return null;
+
+  const meal = data.meals as unknown as { title: string; date: string; price_per_seat: number };
+  const view: FreeRegistrationView = {
+    id: data.id,
+    status: data.status,
+    seatsCount: data.seats_count,
+    fullDeposit: Number(data.deposit_total) + Number(data.deposit_discount),
+    discount: Number(data.deposit_discount),
+    couponCode: (data.coupons as unknown as { code: string } | null)?.code ?? null,
+    mealTitle: meal.title,
+    mealDate: meal.date,
+    pricePerSeat: Number(meal.price_per_seat),
+    problem: null,
+  };
+  if (data.status !== "pending" || Number(data.deposit_total) > 0) {
+    view.problem = "not-free";
+    return view;
+  }
+
+  // The seats were held for HOLD_MINUTES from the start. After that they may have been taken, so check again.
+  const open = await getMealById(data.meal_id);
+  if (!open) view.problem = "expired";
+  else if (open.registrationClosed || open.seatsTextMode === "full") view.problem = "closed";
+  else if (Date.now() - new Date(data.created_at).getTime() > HOLD_MINUTES * 60_000 && data.seats_count > open.remainingSeats) {
+    view.problem = "full";
+  }
+  return view;
+}
