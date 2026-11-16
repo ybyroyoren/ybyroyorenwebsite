@@ -6,6 +6,8 @@ import { resolveLocale } from "@/lib/i18n";
 import { getDict } from "@/lib/dictionary";
 import { ShopCatalog } from "@/components/shop/ShopCatalog";
 import { stagger } from "@/lib/motion";
+import { getMinOrder } from "@/lib/siteSettings";
+import { formatCurrency } from "@/lib/pricing";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = { title: "חנות" };
@@ -16,7 +18,7 @@ export const metadata: Metadata = { title: "חנות" };
 export default async function ShopPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale: rawLocale } = await params;
   const locale = resolveLocale(rawLocale);
-  const [products, categories, allAllergens] = await Promise.all([getActiveProducts(), getCategories(), getAllergens()]);
+  const [products, categories, allAllergens, minOrder] = await Promise.all([getActiveProducts(), getCategories(), getAllergens(), getMinOrder()]);
   // Only offer the tags some product actually carries.
   const usedAllergenIds = new Set(products.flatMap((p) => p.allergens.map((a) => a.id)));
   const allergens = allAllergens.filter((a) => usedAllergenIds.has(a.id));
@@ -31,6 +33,7 @@ export default async function ShopPage({ params }: { params: Promise<{ locale: s
         <div className={styles.pickupNote}>
           <span>{t.pickupNote}</span>
           <span>{t.prepNote}</span>
+          {minOrder > 0 && <span>{t.minOrderNote(formatCurrency(minOrder))}</span>}
         </div>
       </div>
 

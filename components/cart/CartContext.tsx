@@ -3,7 +3,7 @@
 import { track } from "@/lib/analytics/client";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { CartItemView } from "@/lib/cart";
-import { computeCartTotals, GREETING_CARD_FEE } from "@/lib/pricing";
+import { computeCartTotals, GREETING_CARD_FEE, VAT_RATE } from "@/lib/pricing";
 import { shiftIso, todayIsraelIso } from "@/lib/date";
 
 export const GREETING_CARD_MAX_LENGTH = 200;
@@ -13,6 +13,11 @@ interface CartContextValue {
   count: number;
   totals: ReturnType<typeof computeCartTotals>;
   minPickupDate: string;
+  /** Minimum order in shekels incl. VAT (0 = none), the amount counted toward it, and whether the cart is still short. */
+  minOrder: number;
+  amountTowardMinOrder: number;
+  belowMinOrder: boolean;
+  missingForMinOrder: number;
   discountPct: number;
   couponCode: string;
   couponMessage: string;
@@ -33,15 +38,14 @@ interface CartContextValue {
 
 const CartContext = createContext<CartContextValue | null>(null);
 
-async function cartRequest(method: string, body?: unknown): Promise<CartItemView[]> {
+async function cartRequest(method: string, body?: unknown): Promise<{ items: CartItemView[]; minOrder?: number }> {
   const res = await fetch("/api/cart", {
     method,
     headers: body ? { "Content-Type": "application/json" } : undefined,
     body: body ? JSON.stringify(body) : undefined,
   });
   if (!res.ok) throw new Error("Cart request failed");
-  const data = await res.json();
-  return data.items as CartItemView[];
+  return (await res.json()) as { items: CartItemView[]; minOrder?: number };
 }
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
@@ -52,6 +56,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItemView[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [minOrder, setMinOrder] = useState(0);
   const [discountPct, setDiscountPct] = useState(0);
   const [couponCode, setCouponCode] = useState("");
   const [couponMessage, setCouponMessage] = useState("");
@@ -66,6 +71,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     () => computeCartTotals(subtotal, discountPct, extraFee),
     [subtotal, discountPct, extraFee]
   );
+  // Minimum order: the products before any coupon, VAT included (the greeting card extra doesn't count).
+  const amountTowardMinOrder = totals.subtotal * (1 + VAT_RATE);
+  const belowMinOrder = minOrder > 0 && items.length > 0 && amountTowardMinOrder < minOrder - 0.005;
+  const missingForMinOrder = belowMinOrder ? Math.ceil(minOrder - amountTowardMinOrder) : 0;
   const maxLeadTime = items.reduce((max, item) => Math.max(max, item.leadTimeDays), 0);
   const minPickupDate = useMemo(() => shiftIso(todayIsraelIso(), maxLeadTime), [maxLeadTime]);
 
@@ -73,7 +82,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     let cancelled = false;
     cartRequest("GET")
       .then((fetched) => {
-        if (!cancelled) setItems(fetched);
+        if (cancelled) return;
+        setItems(fetched.items);
+        setMinOrder(fetched.minOrder ?? 0);
       })
       .catch(() => {
         // Cart stays empty client-side; the drawer will pick up the real
@@ -91,7 +102,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setIsOpen(true);
     try {
       const updated = await cartRequest("POST", { productSizeId, qty });
-      setItems(updated);
+      setItems(updated.items);
     } finally {
       setIsLoading(false);
     }
@@ -101,7 +112,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(true);
     try {
       const updated = await cartRequest("PATCH", { cartItemId, qty });
-      setItems(updated);
+      setItems(updated.items);
     } finally {
       setIsLoading(false);
     }
@@ -112,7 +123,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(true);
     try {
       const updated = await cartRequest("DELETE", { cartItemId });
-      setItems(updated);
+      setItems(updated.items);
     } finally {
       setIsLoading(false);
     }
@@ -149,6 +160,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     count,
     totals,
     minPickupDate,
+    minOrder,
+    amountTowardMinOrder,
+    belowMinOrder,
+    missingForMinOrder,
     discountPct,
     couponCode,
     couponMessage,

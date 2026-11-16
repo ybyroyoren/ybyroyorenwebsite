@@ -3,6 +3,8 @@ import { supabaseAdmin } from "@/lib/supabase/server";
 import { getCategories } from "@/lib/categories";
 import { getAllergens } from "@/lib/allergens";
 import { todayIsraelIso } from "@/lib/date";
+import { fetchMinOrderFresh } from "@/lib/siteSettings";
+import { setMinOrder } from "@/lib/actions/admin/shop-settings";
 import { tagTextColor } from "@/lib/allergenTags";
 import {
   addProductSize,
@@ -31,9 +33,11 @@ import { ConfirmButton } from "@/components/admin/ConfirmButton";
 import { ImageUploadButton } from "@/components/admin/ImageUploadButton";
 import styles from "../../admin.module.css";
 
-export default async function AdminProductsPage() {
+export default async function AdminProductsPage({ searchParams }: { searchParams: Promise<{ error?: string; saved?: string }> }) {
   const admin = await requireAdminSection("products");
+  const { error: pageError, saved } = await searchParams;
   const isOwner = admin.role === "owner";
+  const minOrder = await fetchMinOrderFresh();
 
   // Includes inactive products too (unlike the public getActiveProducts()).
   const db = supabaseAdmin();
@@ -71,6 +75,27 @@ export default async function AdminProductsPage() {
     <>
       <h1>מוצרים</h1>
       {!isOwner && <p className={styles.muted}>גישת מטבח: עדכון מלאי בלבד.</p>}
+
+      {saved === "minorder" && <p className={styles.success}>מינימום ההזמנה נשמר.</p>}
+      {pageError === "minorder" && <p className={styles.error}>הסכום לא תקין. אפשר להקליד מספר בשקלים, או 0 כדי לבטל את המינימום.</p>}
+      {isOwner && (
+        <div className={styles.card}>
+          <h2>מינימום הזמנה בחנות</h2>
+          <p className={styles.muted} style={{ marginBottom: 12 }}>
+            סכום מינימלי להזמנה בשקלים, כולל מע&quot;מ. סופרים את המוצרים לפני הנחת קופון, בלי כרטיס הברכה. 0 או ריק = בלי מינימום. הלקוחות
+            רואים את המינימום בעמוד החנות, ובעגלה עם כמה חסר להם. כפתור התשלום נעול עד שמגיעים אליו, וההזמנות הידניות שלכם לא מושפעות.
+          </p>
+          <form action={setMinOrder} className={styles.form}>
+            <div className={styles.field}>
+              <label>מינימום הזמנה (₪, כולל מע&quot;מ)</label>
+              <input name="minOrder" type="number" min="0" step="1" defaultValue={minOrder || ""} placeholder="למשל 120" style={{ width: 160 }} />
+            </div>
+            <button type="submit" className={styles.btn}>
+              שמירה
+            </button>
+          </form>
+        </div>
+      )}
 
       {isOwner && (
         <div className={styles.card}>

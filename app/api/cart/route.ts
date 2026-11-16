@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
 import { getCartSessionId } from "@/lib/session";
+import { getMinOrder } from "@/lib/siteSettings";
 import { addCartItem, getCart, removeCartItem, SoldOutError, updateCartItemQty } from "@/lib/cart";
 
 export async function GET() {
   const sessionId = await getCartSessionId();
-  const items = await getCart(sessionId);
-  return NextResponse.json({ items });
+  const [items, minOrder] = await Promise.all([getCart(sessionId), getMinOrder()]);
+  return NextResponse.json({ items, minOrder });
 }
 
 export async function POST(request: Request) {

@@ -2,12 +2,13 @@ import "server-only";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { getCart, type CartItemView } from "@/lib/cart";
 import { validateCoupon } from "@/lib/coupons";
-import { computeCartTotals, formatCurrency, GREETING_CARD_FEE } from "@/lib/pricing";
+import { computeCartTotals, formatCurrency, GREETING_CARD_FEE, VAT_RATE } from "@/lib/pricing";
 import { issueReceipt } from "@/lib/green-invoice";
 import { sendOrderConfirmationEmail } from "@/lib/resend";
 import { notifyNewOrder } from "@/lib/notifications";
 import { shiftIso, todayIsraelIso } from "@/lib/date";
 import { closedReason, getPickupRules } from "@/lib/pickupRules";
+import { fetchMinOrderFresh } from "@/lib/siteSettings";
 import { checkAvailability, type AvailabilityLine } from "@/lib/availability";
 import { expireCatalog } from "@/lib/cache";
 
@@ -76,6 +77,13 @@ export async function createPendingOrder(params: CreateOrderParams): Promise<Cre
   const greetingCardFee = greetingCardMessage ? GREETING_CARD_FEE : 0;
 
   const totals = computeCartTotals(subtotal, discountPct, greetingCardFee);
+
+  // Minimum order: the products before any coupon, VAT included (the greeting-card extra does not count toward it).
+  const minOrder = await fetchMinOrderFresh();
+  const productsInclVat = totals.subtotal * (1 + VAT_RATE);
+  if (minOrder > 0 && productsInclVat < minOrder - 0.005) {
+    throw new Error(`מינימום הזמנה בחנות הוא ${formatCurrency(minOrder)} (כולל מע"מ). חסרים עוד ${formatCurrency(Math.ceil(minOrder - productsInclVat))}.`);
+  }
   const db = supabaseAdmin();
 
   const { data: cartRow } = await db

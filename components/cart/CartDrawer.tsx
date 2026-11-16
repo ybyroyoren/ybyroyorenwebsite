@@ -157,9 +157,27 @@ export function CartDrawer({ locale }: { locale: Locale }) {
               <span>{formatCurrency(cart.totals.total)}</span>
             </div>
 
-            <Link href={localePath(locale, "/checkout")} className={`ybtn ${styles.checkoutBtn}`} onClick={cart.close}>
-              {t.checkoutBtn}
-            </Link>
+            {cart.belowMinOrder && (
+              <div className={styles.minOrder} role="status">
+                <div className={styles.minOrderBar}>
+                  <div
+                    className={styles.minOrderFill}
+                    style={{ width: `${Math.min(100, (cart.amountTowardMinOrder / cart.minOrder) * 100)}%` }}
+                  />
+                </div>
+                <p>{t.minOrderMissing(formatCurrency(cart.minOrder), formatCurrency(cart.missingForMinOrder))}</p>
+              </div>
+            )}
+
+            {cart.belowMinOrder ? (
+              <button type="button" className={`ybtn ${styles.checkoutBtn} ${styles.checkoutDisabled}`} onClick={cart.close}>
+                {t.keepShopping}
+              </button>
+            ) : (
+              <Link href={localePath(locale, "/checkout")} className={`ybtn ${styles.checkoutBtn}`} onClick={cart.close}>
+                {t.checkoutBtn}
+              </Link>
+            )}
             <p className={styles.note}>{t.note}</p>
           </div>
         )}

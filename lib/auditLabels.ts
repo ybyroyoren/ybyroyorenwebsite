@@ -32,6 +32,7 @@ export const ENTITY_LABELS: Record<string, string> = {
   sms_settings: "הגדרות SMS",
   pickup_rules: "חוק סגירת איסוף",
   team_members: "איש צוות (אודות)",
+  shop_settings: "הגדרות חנות",
   kl_suppliers: "ספק",
   kl_equipment: "ציוד",
   kl_guests: "סועד קבוע",

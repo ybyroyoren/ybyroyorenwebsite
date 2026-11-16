@@ -14,6 +14,7 @@ export const CACHE_TAGS = {
   media: "media",
   meals: "meals",
   team: "team",
+  settings: "settings",
 } as const;
 
 // Call these from Server Actions (updateTag only works there) right after a
@@ -33,6 +34,12 @@ export function expireMeals() {
 
 export function expireMedia() {
   updateTag(CACHE_TAGS.media);
+}
+
+export function expireSettings() {
+  updateTag(CACHE_TAGS.settings);
+  revalidatePath("/shop");
+  revalidatePath("/en/shop");
 }
 
 export function expireTeam() {

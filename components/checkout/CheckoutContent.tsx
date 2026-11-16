@@ -5,6 +5,7 @@ import { useCart } from "@/components/cart/CartContext";
 import { TrackEvent } from "@/components/site/TrackEvent";
 import { CheckoutSummary } from "./CheckoutSummary";
 import { CheckoutForm } from "./CheckoutForm";
+import { formatCurrency } from "@/lib/pricing";
 import { getDict, type Locale } from "@/lib/dictionary";
 import { localePath } from "@/lib/i18n";
 import styles from "@/app/(site)/[locale]/checkout/page.module.css";
@@ -17,6 +18,15 @@ export function CheckoutContent({ locale }: { locale: Locale }) {
     return (
       <div className={styles.empty}>
         <p>{t.emptyCart}</p>
+        <Link href={localePath(locale, "/shop")}>{t.backToShop}</Link>
+      </div>
+    );
+  }
+
+  if (cart.belowMinOrder) {
+    return (
+      <div className={styles.empty}>
+        <p>{t.belowMin(formatCurrency(cart.minOrder), formatCurrency(cart.missingForMinOrder))}</p>
         <Link href={localePath(locale, "/shop")}>{t.backToShop}</Link>
       </div>
     );

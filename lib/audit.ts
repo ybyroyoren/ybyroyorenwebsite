@@ -35,6 +35,7 @@ const SKIP_TABLES = new Set([
   "product_allergens",
   "notification_log", // send results written by the site itself
   "integration_settings", // holds secrets (API keys, passwords): never copied into the log
+  "site_settings", // logged explicitly (with a readable label) by the action that edits it
 ]);
 
 // Join / child tables that are rewritten wholesale (delete everything, insert again) on every

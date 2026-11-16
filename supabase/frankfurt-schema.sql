@@ -1226,3 +1226,12 @@ create table team_members (
 );
 alter table team_members enable row level security;
 
+-- ===== 0036_site_settings.sql =====
+-- Small shop settings edited by the owner (e.g. the minimum order amount). Not for secrets (see integration_settings).
+create table site_settings (
+  name text primary key,
+  value text not null,
+  updated_at timestamptz not null default now()
+);
+alter table site_settings enable row level security;
+

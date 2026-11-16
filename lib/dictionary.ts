@@ -68,6 +68,7 @@ const dictionary = {
       sub: "כל המוצרים מיוצרים אצלנו לפי הזמנה. בחרו, הוסיפו לעגלה ובחרו תאריך איסוף בסוף התהליך.",
       pickupNote: "כרגע, ניתן להזמין רק באיסוף עצמי מרחוב השוק 34 בתל אביב. משלוחים עד הבית, בקרוב.",
       prepNote: "שימו לב, יש מוצרים שזמן ההכנה שלהם הוא מספר ימים ולכן תאריך האיסוף ייקבע על פיהם.",
+      minOrderNote: (amount: string) => `מינימום הזמנה בחנות: ${amount} (כולל מע"מ).`,
       allergenFilter: "ללא אלרגנים:",
       allergenFilterClear: "נקה",
       pauseRotation: "השהיית מעבר התמונות",
@@ -115,6 +116,8 @@ const dictionary = {
       total: "סה\"כ לתשלום",
       checkoutBtn: "המשך לתשלום",
       note: "קבלה תישלח אוטומטית למייל לאחר התשלום",
+      minOrderMissing: (min: string, missing: string) => `מינימום הזמנה: ${min} (כולל מע"מ). חסרים עוד ${missing} כדי להמשיך לתשלום.`,
+      keepShopping: "להמשך קניות",
     },
     meals: {
       eyebrow: "ארוחות פתוחות",
@@ -294,6 +297,7 @@ const dictionary = {
     checkout: {
       emptyCart: "העגלה שלך ריקה.",
       backToShop: "לחזרה לחנות",
+      belowMin: (min: string, missing: string) => `ההזמנה נמוכה ממינימום ההזמנה בחנות (${min} כולל מע"מ). חסרים עוד ${missing}.`,
       summaryHeading: "סיכום הזמנה",
       giftCardLine: (msg: string) => `כרטיס ברכה: "${msg}"`,
       subtotal: "סכום ביניים",
@@ -410,6 +414,7 @@ const dictionary = {
       sub: "All products are made to order, here at our kitchen. Choose, add to cart, and pick a pickup date at checkout.",
       pickupNote: "For now, orders are available for self pickup only, from 34 HaShuk St, Tel Aviv. Home delivery is coming soon.",
       prepNote: "Please note: some products take several days to prepare, so your pickup date will be set accordingly.",
+      minOrderNote: (amount: string) => `Minimum order in the shop: ${amount} (incl. VAT).`,
       allergenFilter: "Free of:",
       allergenFilterClear: "Clear",
       pauseRotation: "Pause photo slideshow",
@@ -457,6 +462,8 @@ const dictionary = {
       total: "Total to pay",
       checkoutBtn: "Continue to payment",
       note: "A receipt will be emailed to you automatically after payment",
+      minOrderMissing: (min: string, missing: string) => `Minimum order: ${min} (incl. VAT). ${missing} more to continue to payment.`,
+      keepShopping: "Keep shopping",
     },
     meals: {
       eyebrow: "Open Meals",
@@ -636,6 +643,7 @@ const dictionary = {
     checkout: {
       emptyCart: "Your cart is empty.",
       backToShop: "Back to shop",
+      belowMin: (min: string, missing: string) => `Your order is below the shop minimum (${min} incl. VAT). ${missing} more to go.`,
       summaryHeading: "Order summary",
       giftCardLine: (msg: string) => `Greeting card: "${msg}"`,
       subtotal: "Subtotal",
