@@ -134,7 +134,7 @@ const dictionary = {
         remaining: (n: number) => `נשארו ${n} מקומות`,
       },
       drawer: {
-        summary: "ארוחת שף שבה המנות מצולחות ומוגשות אישית. אנחנו יודעים לתת מענה לכל הגבלת תזונה באופן אישי שלא משפיע על שאר הסועדים - פשוט ציינו אותה למטה.",
+        summary: "ארוחת שף של מנות מוקפדות, שמוגשות אישית לכל סועד. כל הגבלת תזונה מקבלת מענה אישי, בלי להשפיע על שאר השולחן. רק ציינו אותה למטה.",
         seatsPickerLabel: "מספר סועדים",
         namePlaceholder: "שם מלא (איש/אשת קשר)",
         emailPlaceholder: "אימייל",
@@ -474,7 +474,7 @@ const dictionary = {
         remaining: (n: number) => `${n} seats left`,
       },
       drawer: {
-        summary: "A chef's meal where the dishes are plated and served individually. We can accommodate any dietary restriction personally, without affecting the other diners — just note it below.",
+        summary: "A chef's meal of carefully crafted dishes, served individually to each diner. Every dietary restriction gets a personal solution, without affecting the rest of the table. Just note it below.",
         seatsPickerLabel: "Number of diners",
         namePlaceholder: "Full name (contact person)",
         emailPlaceholder: "Email",
