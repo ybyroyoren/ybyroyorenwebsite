@@ -50,7 +50,7 @@ export default async function AdminMealsPage({ searchParams }: { searchParams: P
   const { data: registrations } = await db
     .from("meal_registrations")
     .select(
-      "id, meal_id, customer_name, customer_email, customer_phone, status, occasions, occasion_other, extra_notes, seating_note, consented_at, deposit_discount, coupons(code), meal_diners(id, full_name, age, gender, dietary_restrictions, notes, favorite_foods, deposit_paid)"
+      "id, meal_id, customer_name, customer_email, customer_phone, status, source, occasions, occasion_other, extra_notes, seating_note, consented_at, deposit_discount, coupons(code), meal_diners(id, full_name, age, gender, dietary_restrictions, notes, favorite_foods, deposit_paid)"
     )
     .order("created_at", { ascending: false });
 
@@ -63,6 +63,7 @@ export default async function AdminMealsPage({ searchParams }: { searchParams: P
       customerEmail: r.customer_email,
       customerPhone: r.customer_phone,
       status: r.status,
+      unpaidWebBooking: r.status === "pending" && r.source !== "admin",
       occasions: r.occasions ?? [],
       occasionOther: r.occasion_other ?? "",
       extraNotes: r.extra_notes ?? "",
@@ -151,10 +152,11 @@ export default async function AdminMealsPage({ searchParams }: { searchParams: P
       )}
 
       {shownMeals.map((meal) => {
-        const regs = regsByMealId.get(meal.id) ?? [];
-        // Counts everyone registered (including deposit still pending) —
-        // the public meal_availability view only counts paid diners, which
-        // undercounts for planning purposes here.
+        const allRegs = regsByMealId.get(meal.id) ?? [];
+        // A booking from the website that was never paid (the visitor left the payment page) is not a registration yet:
+        // it is listed apart, below. Bookings you entered by hand count even before the deposit arrives.
+        const regs = allRegs.filter((r) => !r.unpaidWebBooking);
+        const unpaidWeb = allRegs.filter((r) => r.unpaidWebBooking);
         const registeredCount = regs
           .filter((r) => r.status !== "cancelled")
           .reduce((sum, r) => sum + r.diners.length, 0);
@@ -201,6 +203,24 @@ export default async function AdminMealsPage({ searchParams }: { searchParams: P
               isOwner={isOwner}
               actions={isOwner ? REGISTRATION_ACTIONS : undefined}
             />
+
+            {unpaidWeb.length > 0 && (
+              <details style={{ marginTop: 16 }}>
+                <summary style={{ cursor: "pointer", fontWeight: 600 }}>
+                  התחילו הרשמה באתר ולא שילמו ({unpaidWeb.reduce((sum, r) => sum + r.diners.length, 0)} סועדים, {unpaidWeb.length} הזמנות)
+                </summary>
+                <p className={styles.muted} style={{ margin: "8px 0" }}>
+                  אלה לא רשומים לארוחה ולא נספרים למעלה. המקומות שלהם נשמרים באתר 30 דקות מרגע ההתחלה, ואם התשלום לא הושלם הם משתחררים. אם התשלום נעשה
+                  בכל זאת, ההרשמה עוברת לרשימה הראשית מעצמה. אפשר ליצור איתם קשר, או למחוק את הניסיון.
+                </p>
+                <MealRegistrationsTable
+                  registrations={unpaidWeb}
+                  otherMeals={otherMeals}
+                  isOwner={isOwner}
+                  actions={isOwner ? REGISTRATION_ACTIONS : undefined}
+                />
+              </details>
+            )}
 
             {isOwner && (
               <div style={{ display: "flex", gap: 10, marginTop: 12 }}>

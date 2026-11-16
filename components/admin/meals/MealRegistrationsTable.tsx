@@ -22,6 +22,8 @@ export interface RegistrationData {
   customerEmail: string;
   customerPhone: string;
   status: "pending" | "paid" | "cancelled";
+  /** Started on the website but the deposit was never paid (not a registration yet). */
+  unpaidWebBooking: boolean;
   /** What the group is celebrating and anything else they wrote when booking online. */
   occasions: string[];
   occasionOther: string;
