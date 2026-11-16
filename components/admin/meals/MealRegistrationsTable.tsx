@@ -8,6 +8,8 @@ import styles from "@/app/admin/admin.module.css";
 export interface DinerData {
   id: string;
   fullName: string;
+  age: number | null;
+  gender: "male" | "female" | "other" | null;
   restrictions: string[];
   notes: string;
   paid: boolean;
@@ -19,6 +21,11 @@ export interface RegistrationData {
   customerEmail: string;
   customerPhone: string;
   status: "pending" | "paid" | "cancelled";
+  /** What the group is celebrating and anything else they wrote when booking online. */
+  occasions: string[];
+  occasionOther: string;
+  extraNotes: string;
+  seatingNote: string;
   diners: DinerData[];
 }
 
@@ -37,6 +44,30 @@ export interface MealRegistrationActions {
   deleteDiner: (fd: FormData) => Promise<void>;
   toggleDinerPaid: (fd: FormData) => Promise<void>;
   moveDinerToMeal: (fd: FormData) => Promise<void>;
+}
+
+const GENDER_LABEL = { male: "זכר", female: "נקבה", other: "אחר" } as const;
+
+/** "דנה כהן · 34 · נקבה" for diners who booked online; older / manual diners just have the name. */
+function dinerTitle(d: DinerData): string {
+  const extra = [d.age ? `גיל ${d.age}` : null, d.gender ? GENDER_LABEL[d.gender] : null].filter(Boolean).join(" · ");
+  return extra ? `${d.fullName} (${extra})` : d.fullName;
+}
+
+function RegistrationExtras({ reg, colSpan }: { reg: RegistrationData; colSpan: number }) {
+  const parts = [
+    reg.occasions.length > 0 || reg.occasionOther ? `חוגגים: ${[...reg.occasions, reg.occasionOther].filter(Boolean).join(", ")}` : null,
+    reg.extraNotes ? `הערה מהלקוח: ${reg.extraNotes}` : null,
+    reg.seatingNote ? `רוצים לשבת ליד: ${reg.seatingNote}` : null,
+  ].filter(Boolean);
+  if (parts.length === 0) return null;
+  return (
+    <tr>
+      <td colSpan={colSpan} className={styles.muted}>
+        {parts.join(" · ")}
+      </td>
+    </tr>
+  );
 }
 
 const STATUS_LABEL: Record<RegistrationData["status"], string> = {
@@ -96,12 +127,13 @@ function ReadOnlyGroup({ reg }: { reg: RegistrationData }) {
           </span>
         </td>
       </tr>
+      <RegistrationExtras reg={reg} colSpan={3} />
       {reg.diners.map((d) => (
         <tr key={d.id}>
           <td>
             <span className={d.paid ? styles.badgePaid : styles.badgePending}>{d.paid ? "שולם" : "לא שולם"}</span>
           </td>
-          <td>{d.fullName}</td>
+          <td>{dinerTitle(d)}</td>
           <td>
             {d.restrictions.length > 0 ? d.restrictions.join(", ") : "—"}
             {d.notes && ` (${d.notes})`}
@@ -200,6 +232,7 @@ function RegistrationGroup({
         </td>
       </tr>
 
+      <RegistrationExtras reg={reg} colSpan={4} />
       {reg.diners.map((d) => (
         <DinerRow key={d.id} diner={d} registrationId={reg.id} otherMeals={otherMeals} actions={actions} />
       ))}
@@ -315,7 +348,7 @@ function DinerRow({
             </span>
           </label>
         </td>
-        <td>{diner.fullName}</td>
+        <td>{dinerTitle(diner)}</td>
         <td>
           {diner.restrictions.length > 0 ? diner.restrictions.join(", ") : "—"}
           {diner.notes && ` (${diner.notes})`}

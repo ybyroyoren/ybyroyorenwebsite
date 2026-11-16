@@ -8,6 +8,7 @@ import { sendMealRegistrationConfirmationEmail } from "@/lib/resend";
 import { notifyNewMealRegistration } from "@/lib/notifications";
 import { formatCurrency } from "@/lib/pricing";
 import { todayIsraelIso } from "@/lib/date";
+import { GENDERS, NO_RESTRICTIONS, OCCASIONS, OTHER_RESTRICTION, RESTRICTIONS, hebrewLabels, type Gender } from "@/lib/mealForm";
 
 export const DEPOSIT_PER_SEAT = 100;
 export const MEAL_CANCEL_HOURS = 96;
@@ -88,9 +89,42 @@ export async function getMealById(mealId: string): Promise<MealView | null> {
 }
 
 export interface DinerInput {
-  fullName: string;
-  dietaryRestrictions: string[];
+  firstName: string;
+  lastName: string;
+  age: number | null;
+  gender: Gender | "";
+  /** Keys from RESTRICTIONS (lib/mealForm.ts). */
+  restrictions: string[];
+  /** Free text; required when the restriction "other" is chosen. */
   notes: string;
+}
+
+export interface RegistrationExtras {
+  /** Keys from OCCASIONS. */
+  occasions: string[];
+  occasionOther: string;
+  extraNotes: string;
+  /** Who they would like to sit next to (one line for the whole booking). */
+  seatingNote: string;
+  /** The visitor ticked the allergy-warning / cancellation-policy confirmation. */
+  consent: boolean;
+}
+
+/** The first problem with the diners' details (Hebrew message), or null when they are complete. */
+export function dinerProblem(diners: DinerInput[]): string | null {
+  for (let i = 0; i < diners.length; i++) {
+    const d = diners[i];
+    const who = `סועד/ת ${i + 1}: `;
+    if (!d.firstName?.trim()) return `${who}נא למלא שם פרטי`;
+    if (!d.lastName?.trim()) return `${who}נא למלא שם משפחה`;
+    if (!Number.isInteger(d.age) || (d.age as number) < 1 || (d.age as number) > 120) return `${who}נא למלא גיל תקין`;
+    if (!GENDERS.some((g) => g.key === d.gender)) return `${who}נא לבחור מין`;
+    const known = Array.isArray(d.restrictions) ? d.restrictions.filter((k) => RESTRICTIONS.some((r) => r.key === k)) : [];
+    if (known.length === 0) return `${who}נא לסמן הגבלה אחת לפחות, או ״ללא הגבלות״`;
+    if (known.includes(NO_RESTRICTIONS) && known.length > 1) return `${who}״ללא הגבלות״ אי אפשר לשלב עם הגבלה אחרת`;
+    if (known.includes(OTHER_RESTRICTION) && !d.notes?.trim()) return `${who}נא לפרט את ההגבלה האחרת בשורת הטקסט`;
+  }
+  return null;
 }
 
 export interface CreateRegistrationParams {
@@ -99,6 +133,7 @@ export interface CreateRegistrationParams {
   customerEmail: string;
   customerPhone: string;
   diners: DinerInput[];
+  extras?: RegistrationExtras;
 }
 
 export async function createPendingRegistration(
@@ -111,9 +146,9 @@ export async function createPendingRegistration(
   const seats = params.diners.length;
   if (seats < 1) throw new Error("יש לבחור לפחות סועד אחד");
   if (seats > meal.remainingSeats) throw new Error("אין מספיק מקומות פנויים");
-  if (params.diners.some((d) => !d.fullName.trim())) {
-    throw new Error("שם מלא נדרש לכל סועד");
-  }
+  const problem = dinerProblem(params.diners);
+  if (problem) throw new Error(problem);
+  if (params.extras?.consent !== true) throw new Error("נא לאשר שקראתם את אזהרת האלרגנים ואת מדיניות הביטול");
 
   const depositTotal = DEPOSIT_PER_SEAT * seats;
   const db = supabaseAdmin();
@@ -127,6 +162,11 @@ export async function createPendingRegistration(
       customer_phone: params.customerPhone,
       seats_count: seats,
       deposit_total: depositTotal,
+      occasions: hebrewLabels(OCCASIONS, params.extras?.occasions ?? []),
+      occasion_other: (params.extras?.occasionOther ?? "").trim().slice(0, 200),
+      extra_notes: (params.extras?.extraNotes ?? "").trim().slice(0, 1000),
+      seating_note: (params.extras?.seatingNote ?? "").trim().slice(0, 300),
+      consented_at: new Date().toISOString(),
       status: "pending",
     })
     .select("id")
@@ -136,9 +176,13 @@ export async function createPendingRegistration(
 
   const dinerRows = params.diners.map((d) => ({
     registration_id: registration.id,
-    full_name: d.fullName,
-    dietary_restrictions: d.dietaryRestrictions,
-    notes: d.notes,
+    full_name: `${d.firstName.trim()} ${d.lastName.trim()}`.slice(0, 120),
+    first_name: d.firstName.trim().slice(0, 60),
+    last_name: d.lastName.trim().slice(0, 60),
+    age: d.age,
+    gender: d.gender as Gender,
+    dietary_restrictions: hebrewLabels(RESTRICTIONS, d.restrictions),
+    notes: (d.notes ?? "").trim().slice(0, 300),
   }));
   const { error: dinersError } = await db.from("meal_diners").insert(dinerRows);
   if (dinersError) throw new Error(dinersError.message);

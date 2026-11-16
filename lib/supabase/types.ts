@@ -176,6 +176,14 @@ export interface Database {
           customer_phone: string;
           seats_count: number;
           deposit_total: number;
+          /** What the group is celebrating (Hebrew labels), a free-text detail, and anything else they wrote. */
+          occasions: string[];
+          occasion_other: string;
+          extra_notes: string;
+          /** Who (if anyone) the group wants to sit next to. */
+          seating_note: string;
+          /** When the visitor confirmed the allergy warning and cancellation policy (web bookings). */
+          consented_at: string | null;
           status: RegistrationStatus;
           grow_payment_id: string | null;
           receipt_doc_id: string | null;
@@ -198,6 +206,10 @@ export interface Database {
           id: string;
           registration_id: string;
           full_name: string;
+          first_name: string | null;
+          last_name: string | null;
+          age: number | null;
+          gender: "male" | "female" | "other" | null;
           dietary_restrictions: string[];
           notes: string;
         };

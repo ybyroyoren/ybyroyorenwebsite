@@ -251,7 +251,8 @@
 }
 
 .allergyWarning {
-  font-size: 14.5px;
+  font-size: 17px;
+  font-weight: 700;
   color: var(--danger);
   line-height: 1.6;
   margin-bottom: 16px;
@@ -285,7 +286,8 @@
   color: var(--danger);
 }
 
-.dinerRow input[type="text"] {
+.dinerRow input[type="text"],
+.dinerRow input[type="number"] {
   width: 100%;
   padding: 10px 12px;
   border-radius: 6px;
@@ -318,6 +320,65 @@
 
 .restrictionChip input {
   accent-color: var(--olive-deep);
+}
+
+.chipDisabled {
+  opacity: 0.42;
+  cursor: default;
+}
+
+.dinerGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.dinerGridAge {
+  grid-template-columns: 92px 1fr;
+  align-items: center;
+}
+
+.dinerGrid input {
+  margin-bottom: 0 !important;
+}
+
+.genderChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.fieldLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  margin-bottom: 8px;
+}
+
+.optional {
+  font-weight: 400;
+  color: var(--ink-soft);
+}
+
+.extras {
+  margin-top: 22px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.extrasInput {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: var(--cream);
+  font-family: inherit;
+  font-size: 16px;
+  color: var(--ink);
+  resize: vertical;
 }
 
 .drawerFooter {
@@ -391,4 +452,38 @@
   color: var(--danger);
   font-size: 15px;
   margin-bottom: 12px;
+}
+
+.selfBtn {
+  margin-inline-start: 10px;
+  padding: 2px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--olive-deep);
+  background: transparent;
+  color: var(--olive-deep);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.selfBtn:hover {
+  background: var(--olive-deep);
+  color: var(--cream);
+}
+
+.consent {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin: 14px 0 6px;
+  font-size: 14.5px;
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+.consent input {
+  margin-top: 4px;
+  accent-color: var(--olive-deep);
+  flex-shrink: 0;
 }

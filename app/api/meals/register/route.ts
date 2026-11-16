@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createPendingRegistration, type DinerInput } from "@/lib/meals";
+import { createPendingRegistration, type DinerInput, type RegistrationExtras } from "@/lib/meals";
 import { createPaymentRequest } from "@/lib/grow";
 import { localePath } from "@/lib/i18n";
 
@@ -9,6 +9,7 @@ interface RegisterBody {
   customerEmail: string;
   customerPhone: string;
   diners: DinerInput[];
+  extras?: RegistrationExtras;
   locale?: string;
 }
 
@@ -35,6 +36,7 @@ export async function POST(request: Request) {
       customerEmail: body.customerEmail,
       customerPhone: body.customerPhone,
       diners: body.diners,
+      extras: body.extras,
     });
     registrationId = result.registrationId;
     depositTotal = result.depositTotal;

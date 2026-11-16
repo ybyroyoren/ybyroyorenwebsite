@@ -1183,3 +1183,24 @@ alter table meals add column registration_closed boolean not null default false;
 -- Meals that were closed through the old "full" text option move to the new switch.
 update meals set registration_closed = true, seats_text_mode = 'auto' where seats_text_mode = 'full';
 
+-- ===== 0032_meal_diner_details.sql =====
+-- More details per open-meal diner (first / last name, age, gender) and per registration (what they are celebrating,
+-- anything else). full_name stays (first + last name) so older rows and the admin screens keep working.
+alter table meal_diners
+  add column first_name text,
+  add column last_name text,
+  add column age smallint check (age is null or (age >= 0 and age <= 120)),
+  add column gender text check (gender is null or gender in ('male', 'female', 'other'));
+
+alter table meal_registrations
+  add column occasions text[] not null default '{}',
+  add column occasion_other text not null default '',
+  add column extra_notes text not null default '';
+
+-- ===== 0033_meal_registration_consent_seating.sql =====
+-- Open-meal registrations: when the visitor confirmed the allergy warning and cancellation policy, and an optional
+-- seating wish (e.g. "next to friends who booked separately").
+alter table meal_registrations
+  add column consented_at timestamptz,
+  add column seating_note text not null default '';
+

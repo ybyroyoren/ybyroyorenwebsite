@@ -2,7 +2,8 @@
 
 import { track } from "@/lib/analytics/client";
 import { useState } from "react";
-import type { MealView, DinerInput } from "@/lib/meals";
+import type { MealView } from "@/lib/meals";
+import { GENDERS, NO_RESTRICTIONS, OCCASIONS, OTHER_OCCASION, OTHER_RESTRICTION, RESTRICTIONS, label, type Gender } from "@/lib/mealForm";
 import { seatsDisplay } from "@/lib/seats";
 import { formatCurrency } from "@/lib/pricing";
 import { formatMealDateParts, formatMealDateFull } from "@/lib/date";
@@ -11,22 +12,35 @@ import styles from "./MealsList.module.css";
 
 const DEPOSIT_PER_SEAT = 100;
 
-function emptyDiner(): DinerInput {
-  return { fullName: "", dietaryRestrictions: [], notes: "" };
+interface DinerForm {
+  firstName: string;
+  lastName: string;
+  age: string;
+  gender: Gender | "";
+  restrictions: string[];
+  notes: string;
+}
+
+function emptyDiner(): DinerForm {
+  return { firstName: "", lastName: "", age: "", gender: "", restrictions: [], notes: "" };
 }
 
 export function MealsList({ meals, locale }: { meals: MealView[]; locale: Locale }) {
   const [selectedMeal, setSelectedMeal] = useState<MealView | null>(null);
   const [seatsCount, setSeatsCount] = useState(1);
-  const [diners, setDiners] = useState<DinerInput[]>([emptyDiner()]);
+  const [diners, setDiners] = useState<DinerForm[]>([emptyDiner()]);
   const [customerName, setCustomerName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
+  const [occasions, setOccasions] = useState<string[]>([]);
+  const [occasionOther, setOccasionOther] = useState("");
+  const [extraNotes, setExtraNotes] = useState("");
+  const [seatingNote, setSeatingNote] = useState("");
+  const [consent, setConsent] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const t = getDict(locale).meals;
   const d = t.drawer;
-  const RESTRICTION_OPTIONS = d.restrictions;
 
   function openMeal(meal: MealView) {
     track("meal_register_open", { meal_date: meal.date, remaining: meal.remainingSeats });
@@ -36,6 +50,11 @@ export function MealsList({ meals, locale }: { meals: MealView[]; locale: Locale
     setCustomerName("");
     setCustomerEmail("");
     setCustomerPhone("");
+    setOccasions([]);
+    setOccasionOther("");
+    setExtraNotes("");
+    setSeatingNote("");
+    setConsent(false);
     setError(null);
   }
 
@@ -55,23 +74,49 @@ export function MealsList({ meals, locale }: { meals: MealView[]; locale: Locale
     });
   }
 
-  function updateDiner(index: number, patch: Partial<DinerInput>) {
+  function updateDiner(index: number, patch: Partial<DinerForm>) {
     setDiners((prev) => prev.map((d, i) => (i === index ? { ...d, ...patch } : d)));
   }
 
-  function toggleRestriction(index: number, restriction: string) {
+  /** Fills a diner's name from the contact person's name (first word = first name, the rest = last name). */
+  function fillFromContact(index: number) {
+    const parts = customerName.trim().split(/\s+/).filter(Boolean);
+    if (parts.length === 0) return;
+    updateDiner(index, { firstName: parts[0], lastName: parts.slice(1).join(" ") });
+  }
+
+  /** "No restrictions" excludes every other choice; any other choice clears it. The rest combine freely. */
+  function toggleRestriction(index: number, key: string) {
     setDiners((prev) =>
-      prev.map((d, i) => {
-        if (i !== index) return d;
-        const has = d.dietaryRestrictions.includes(restriction);
-        return {
-          ...d,
-          dietaryRestrictions: has
-            ? d.dietaryRestrictions.filter((r) => r !== restriction)
-            : [...d.dietaryRestrictions, restriction],
-        };
+      prev.map((diner, i) => {
+        if (i !== index) return diner;
+        if (key === NO_RESTRICTIONS) {
+          return { ...diner, restrictions: diner.restrictions.includes(NO_RESTRICTIONS) ? [] : [NO_RESTRICTIONS] };
+        }
+        const rest = diner.restrictions.filter((k) => k !== NO_RESTRICTIONS);
+        return { ...diner, restrictions: rest.includes(key) ? rest.filter((k) => k !== key) : [...rest, key] };
       })
     );
+  }
+
+  function toggleOccasion(key: string) {
+    setOccasions((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]));
+  }
+
+  /** The first missing detail, worded for the visitor, or null when everything required is filled in. */
+  function dinerError(): string | null {
+    for (let i = 0; i < diners.length; i++) {
+      const diner = diners[i];
+      const prefix = d.dinerErrorPrefix(i + 1);
+      const age = Number(diner.age);
+      if (!diner.firstName.trim()) return prefix + d.dinerErrors.firstName;
+      if (!diner.lastName.trim()) return prefix + d.dinerErrors.lastName;
+      if (!Number.isInteger(age) || age < 1 || age > 120) return prefix + d.dinerErrors.age;
+      if (!diner.gender) return prefix + d.dinerErrors.gender;
+      if (diner.restrictions.length === 0) return prefix + d.dinerErrors.restrictions;
+      if (diner.restrictions.includes(OTHER_RESTRICTION) && !diner.notes.trim()) return prefix + d.dinerErrors.other;
+    }
+    return null;
   }
 
   async function submit() {
@@ -80,8 +125,13 @@ export function MealsList({ meals, locale }: { meals: MealView[]; locale: Locale
       setError(d.errorMissingContact);
       return;
     }
-    if (diners.some((diner) => !diner.fullName.trim())) {
-      setError(d.errorMissingDinerName);
+    const problem = dinerError();
+    if (problem) {
+      setError(problem);
+      return;
+    }
+    if (!consent) {
+      setError(d.errorConsent);
       return;
     }
 
@@ -97,7 +147,8 @@ export function MealsList({ meals, locale }: { meals: MealView[]; locale: Locale
           customerName,
           customerEmail,
           customerPhone,
-          diners,
+          diners: diners.map((diner) => ({ ...diner, age: Number(diner.age) })),
+          extras: { occasions, occasionOther: occasions.includes(OTHER_OCCASION) ? occasionOther : "", extraNotes, seatingNote, consent },
           locale,
         }),
       });
@@ -106,7 +157,7 @@ export function MealsList({ meals, locale }: { meals: MealView[]; locale: Locale
         setError(data.error ?? d.errorGeneric);
         return;
       }
-      window.location.href = data.paymentUrl;
+      window.location.assign(data.paymentUrl);
     } catch {
       setError(d.errorGeneric);
     } finally {
@@ -238,37 +289,128 @@ export function MealsList({ meals, locale }: { meals: MealView[]; locale: Locale
               <p className={styles.allergyWarning}>{d.allergyWarning}</p>
 
               <div className={styles.dinersList}>
-                {diners.map((diner, i) => (
-                  <div key={i} className={styles.dinerRow}>
-                    <div className={styles.dinerRowLabel}>
-                      {d.dinerLabel(i + 1)} <span className={styles.dinerRowRequired}>{d.dinerRequired}</span>
+                {diners.map((diner, i) => {
+                  const noneChosen = diner.restrictions.includes(NO_RESTRICTIONS);
+                  const otherChosen = diner.restrictions.includes(OTHER_RESTRICTION);
+                  return (
+                    <div key={i} className={styles.dinerRow}>
+                      <div className={styles.dinerRowLabel}>
+                        {d.dinerLabel(i + 1)} <span className={styles.dinerRowRequired}>{d.dinerRequired}</span>
+                        {i === 0 && customerName.trim() && (
+                          <button type="button" className={styles.selfBtn} title={d.selfHint} onClick={() => fillFromContact(0)}>
+                            {d.selfButton}
+                          </button>
+                        )}
+                      </div>
+                      <div className={styles.dinerGrid}>
+                        <input
+                          type="text"
+                          autoComplete="off"
+                          placeholder={d.firstNamePlaceholder}
+                          value={diner.firstName}
+                          onChange={(e) => updateDiner(i, { firstName: e.target.value })}
+                        />
+                        <input
+                          type="text"
+                          autoComplete="off"
+                          placeholder={d.lastNamePlaceholder}
+                          value={diner.lastName}
+                          onChange={(e) => updateDiner(i, { lastName: e.target.value })}
+                        />
+                      </div>
+                      <div className={`${styles.dinerGrid} ${styles.dinerGridAge}`}>
+                        <input
+                          type="number"
+                          inputMode="numeric"
+                          min={1}
+                          max={120}
+                          placeholder={d.agePlaceholder}
+                          value={diner.age}
+                          onChange={(e) => updateDiner(i, { age: e.target.value })}
+                        />
+                        <div className={styles.genderChips} role="radiogroup" aria-label={d.genderLabel}>
+                          {GENDERS.map((g) => (
+                            <label key={g.key} className={styles.restrictionChip}>
+                              <input
+                                type="radio"
+                                name={`gender-${i}`}
+                                checked={diner.gender === g.key}
+                                onChange={() => updateDiner(i, { gender: g.key })}
+                              />
+                              {label(g, locale)}
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                      <div className={styles.fieldLabel}>{d.restrictionsLabel}</div>
+                      <div className={styles.restrictionChecks}>
+                        {RESTRICTIONS.map((option) => {
+                          const disabled = noneChosen && option.key !== NO_RESTRICTIONS;
+                          return (
+                            <label key={option.key} className={`${styles.restrictionChip} ${disabled ? styles.chipDisabled : ""}`}>
+                              <input
+                                type="checkbox"
+                                checked={diner.restrictions.includes(option.key)}
+                                disabled={disabled}
+                                onChange={() => toggleRestriction(i, option.key)}
+                              />
+                              {label(option, locale)}
+                            </label>
+                          );
+                        })}
+                      </div>
+                      <input
+                        type="text"
+                        placeholder={otherChosen ? d.otherNotesPlaceholder : d.dinerNotesPlaceholder}
+                        value={diner.notes}
+                        onChange={(e) => updateDiner(i, { notes: e.target.value })}
+                      />
                     </div>
-                    <input
-                      type="text"
-                      placeholder={d.dinerNamePlaceholder}
-                      value={diner.fullName}
-                      onChange={(e) => updateDiner(i, { fullName: e.target.value })}
-                    />
-                    <div className={styles.restrictionChecks}>
-                      {RESTRICTION_OPTIONS.map((option) => (
-                        <label key={option} className={styles.restrictionChip}>
-                          <input
-                            type="checkbox"
-                            checked={diner.dietaryRestrictions.includes(option)}
-                            onChange={() => toggleRestriction(i, option)}
-                          />
-                          {option}
-                        </label>
-                      ))}
-                    </div>
-                    <input
-                      type="text"
-                      placeholder={d.dinerNotesPlaceholder}
-                      value={diner.notes}
-                      onChange={(e) => updateDiner(i, { notes: e.target.value })}
-                    />
-                  </div>
-                ))}
+                  );
+                })}
+              </div>
+
+              <div className={styles.extras}>
+                <div className={styles.fieldLabel}>
+                  {d.occasionsHeading} <span className={styles.optional}>{d.optional}</span>
+                </div>
+                <div className={styles.restrictionChecks}>
+                  {OCCASIONS.map((option) => (
+                    <label key={option.key} className={styles.restrictionChip}>
+                      <input type="checkbox" checked={occasions.includes(option.key)} onChange={() => toggleOccasion(option.key)} />
+                      {label(option, locale)}
+                    </label>
+                  ))}
+                </div>
+                {occasions.includes(OTHER_OCCASION) && (
+                  <input
+                    type="text"
+                    className={styles.extrasInput}
+                    placeholder={d.occasionOtherPlaceholder}
+                    value={occasionOther}
+                    onChange={(e) => setOccasionOther(e.target.value)}
+                  />
+                )}
+                <div className={styles.fieldLabel} style={{ marginTop: 14 }}>
+                  {d.extraHeading} <span className={styles.optional}>{d.optional}</span>
+                </div>
+                <textarea
+                  className={styles.extrasInput}
+                  rows={3}
+                  placeholder={d.extraPlaceholder}
+                  value={extraNotes}
+                  onChange={(e) => setExtraNotes(e.target.value)}
+                />
+                <div className={styles.fieldLabel} style={{ marginTop: 14 }}>
+                  {d.seatingHeading} <span className={styles.optional}>{d.optional}</span>
+                </div>
+                <input
+                  type="text"
+                  className={styles.extrasInput}
+                  placeholder={d.seatingPlaceholder}
+                  value={seatingNote}
+                  onChange={(e) => setSeatingNote(e.target.value)}
+                />
               </div>
             </div>
             <div className={styles.drawerFooter}>
@@ -285,6 +427,13 @@ export function MealsList({ meals, locale }: { meals: MealView[]; locale: Locale
                 <span>{formatCurrency(depositTotal)}</span>
               </div>
               <div className={styles.balanceNote}>{d.balanceNote(formatCurrency(balance))}</div>
+              <label className={styles.consent}>
+                <input type="checkbox" checked={consent} onChange={(e) => {
+                    setConsent(e.target.checked);
+                    if (e.target.checked) setError(null);
+                  }} />
+                <span>{d.consentLabel}</span>
+              </label>
               {error && <p className={styles.error}>{error}</p>}
               <button
                 type="button"

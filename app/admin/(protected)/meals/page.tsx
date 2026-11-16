@@ -31,6 +31,35 @@ const REGISTRATION_ACTIONS = {
   moveDinerToMeal,
 };
 
+/**
+ * One line for the kitchen: how many diners have each dietary restriction (cancelled bookings excluded), e.g.
+ * "צמחוני ×3 · ללא גלוטן ×2 · אחר ×1 (לא אוהב בצל) · ללא הגבלות ×9". Null when nobody has registered.
+ */
+function restrictionSummary(regs: RegistrationData[]): string | null {
+  const counts = new Map<string, number>();
+  const otherNotes: string[] = [];
+  let total = 0;
+  for (const reg of regs) {
+    if (reg.status === "cancelled") continue;
+    for (const diner of reg.diners) {
+      total++;
+      for (const label of diner.restrictions) {
+        const key = label.startsWith("אחר") ? "אחר" : label;
+        counts.set(key, (counts.get(key) ?? 0) + 1);
+        if (key === "אחר" && diner.notes.trim()) otherNotes.push(diner.notes.trim());
+      }
+    }
+  }
+  if (total === 0) return null;
+  const none = counts.get("ללא הגבלות") ?? 0;
+  counts.delete("ללא הגבלות");
+  const parts = [...counts.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .map(([label, n]) => `${label} ×${n}${label === "אחר" && otherNotes.length > 0 ? ` (${otherNotes.join("; ")})` : ""}`);
+  if (none > 0) parts.push(`ללא הגבלות ×${none}`);
+  return parts.length > 0 ? `הגבלות תזונה (${total} סועדים): ${parts.join(" · ")}` : null;
+}
+
 export default async function AdminMealsPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
   const { tab } = await searchParams;
   const activeTab = tab === "archive" ? "archive" : "active";
@@ -49,7 +78,7 @@ export default async function AdminMealsPage({ searchParams }: { searchParams: P
   const { data: registrations } = await db
     .from("meal_registrations")
     .select(
-      "id, meal_id, customer_name, customer_email, customer_phone, status, meal_diners(id, full_name, dietary_restrictions, notes, deposit_paid)"
+      "id, meal_id, customer_name, customer_email, customer_phone, status, occasions, occasion_other, extra_notes, seating_note, meal_diners(id, full_name, age, gender, dietary_restrictions, notes, deposit_paid)"
     )
     .order("created_at", { ascending: false });
 
@@ -62,9 +91,15 @@ export default async function AdminMealsPage({ searchParams }: { searchParams: P
       customerEmail: r.customer_email,
       customerPhone: r.customer_phone,
       status: r.status,
+      occasions: r.occasions ?? [],
+      occasionOther: r.occasion_other ?? "",
+      extraNotes: r.extra_notes ?? "",
+      seatingNote: r.seating_note ?? "",
       diners: r.meal_diners.map((d) => ({
         id: d.id,
         fullName: d.full_name,
+        age: d.age,
+        gender: d.gender,
         restrictions: d.dietary_restrictions,
         notes: d.notes,
         paid: d.deposit_paid,
@@ -166,6 +201,11 @@ export default async function AdminMealsPage({ searchParams }: { searchParams: P
               </h2>
               {isOwner && <NewRegistrationButton mealId={meal.id} mealTitle={meal.title} createAction={createManualRegistration} />}
             </div>
+
+            {(() => {
+              const summary = restrictionSummary(regs);
+              return summary ? <p style={{ marginTop: 8, fontWeight: 600 }}>{summary}</p> : null;
+            })()}
 
             {isOwner && (
               <MealSeatsDisplay
