@@ -10,12 +10,36 @@
 .sidebar {
   background: var(--ink);
   color: var(--cream);
-  padding: 32px 22px;
+  padding: 24px 18px 18px;
   display: flex;
   flex-direction: column;
   position: sticky;
   top: 0;
   height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+}
+
+.sidebarTop {
+  flex-shrink: 0;
+}
+
+.sidebarHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sidebarBottom {
+  flex-shrink: 0;
+  margin-top: 12px;
+}
+
+.drawerClose,
+.menuButton,
+.mobileBar,
+.drawerOverlay {
+  display: none;
 }
 
 @media print {
@@ -50,16 +74,81 @@
   font-size: 12.5px;
   line-height: 1.6;
   color: rgba(239, 232, 216, 0.55);
-  margin-bottom: 40px;
-  padding-bottom: 24px;
+  margin-bottom: 14px;
+  padding-bottom: 14px;
   border-bottom: 1px solid rgba(239, 232, 216, 0.14);
 }
 
+/* The menu scrolls on its own, so a long list never pushes the bottom links out of reach. */
 .nav {
   display: flex;
   flex-direction: column;
   gap: 2px;
   flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-inline-end: 2px;
+}
+
+.navGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.navGroupHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: transparent;
+  border: none;
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: rgba(239, 232, 216, 0.85);
+  text-align: start;
+  cursor: pointer;
+}
+
+.navGroupHead:hover {
+  background: rgba(239, 232, 216, 0.08);
+}
+
+.navGroupHeadActive {
+  color: var(--cream);
+}
+
+.chevron {
+  display: inline-block;
+  font-size: 18px;
+  line-height: 1;
+  transition: transform 0.15s ease;
+}
+
+.chevronOpen {
+  transform: rotate(-90deg);
+}
+
+.navGroupItems {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin: 2px 12px 6px 0;
+  padding-inline-start: 8px;
+  border-inline-start: 1px solid rgba(239, 232, 216, 0.16);
+}
+
+.navGroupItems a {
+  padding: 9px 12px;
+  font-size: 13.5px;
+}
+
+.navActive {
+  background: rgba(239, 232, 216, 0.14);
+  color: var(--cream) !important;
 }
 
 .nav a {
@@ -77,13 +166,19 @@
 }
 
 .signOut {
+  display: block;
+  width: 100%;
+  background: transparent;
+  border: none;
+  font-family: inherit;
   font-size: 13px;
   font-weight: 500;
   color: rgba(239, 232, 216, 0.5);
   text-align: right;
   border-top: 1px solid rgba(239, 232, 216, 0.14);
-  padding-top: 20px;
-  margin-top: 20px;
+  padding-top: 14px;
+  margin-top: 10px;
+  cursor: pointer;
 }
 
 .signOut:hover {
@@ -1059,4 +1154,105 @@
   flex-wrap: wrap;
   gap: 4px 18px;
   font-size: 14px;
+}
+
+/* ---------- phones and small tablets: a top bar and a slide-in menu ---------- */
+@media (max-width: 899px) {
+  .shell {
+    display: block;
+  }
+
+  .mobileBar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    padding: 10px 14px;
+    background: var(--ink);
+    color: var(--cream);
+  }
+
+  .menuButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    border: 1px solid rgba(239, 232, 216, 0.3);
+    background: transparent;
+    color: var(--cream);
+    font-size: 20px;
+    cursor: pointer;
+  }
+
+  .mobileTitle {
+    flex: 1;
+    font-weight: 700;
+    font-size: 16px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .mobileMark {
+    font-family: var(--font-serif-family);
+    font-size: 24px;
+    font-weight: 700;
+  }
+
+  .drawerOverlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    background: rgba(0, 0, 0, 0.5);
+    border: none;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: auto;
+    z-index: 60;
+    width: min(86vw, 320px);
+    height: auto;
+    transform: translateX(100%);
+    transition: transform 0.2s ease;
+    padding-top: 18px;
+    padding-bottom: max(18px, env(safe-area-inset-bottom));
+  }
+
+  .sidebarOpen {
+    transform: translateX(0);
+  }
+
+  .drawerClose {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 1px solid rgba(239, 232, 216, 0.3);
+    background: transparent;
+    color: var(--cream);
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  .content {
+    padding: 24px 16px 60px;
+    min-width: 0;
+  }
+
+  /* Wide tables scroll sideways inside their block instead of pushing the whole page. */
+  .table {
+    display: block;
+    overflow-x: auto;
+  }
 }
