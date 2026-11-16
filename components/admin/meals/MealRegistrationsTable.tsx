@@ -27,6 +27,8 @@ export interface RegistrationData {
   occasionOther: string;
   extraNotes: string;
   seatingNote: string;
+  /** When the visitor confirmed the allergy warning and cancellation policy (online bookings). */
+  consentedAt: string | null;
   diners: DinerData[];
 }
 
@@ -47,6 +49,15 @@ export interface MealRegistrationActions {
   moveDinerToMeal: (fd: FormData) => Promise<void>;
 }
 
+const consentFormat = new Intl.DateTimeFormat("he-IL", {
+  timeZone: "Asia/Jerusalem",
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+});
+
 const GENDER_LABEL = { male: "זכר", female: "נקבה", other: "אחר" } as const;
 
 /** "דנה כהן · 34 · נקבה" for diners who booked online; older / manual diners just have the name. */
@@ -56,16 +67,25 @@ function dinerTitle(d: DinerData): string {
 }
 
 function RegistrationExtras({ reg, colSpan }: { reg: RegistrationData; colSpan: number }) {
-  const parts = [
-    reg.occasions.length > 0 || reg.occasionOther ? `חוגגים: ${[...reg.occasions, reg.occasionOther].filter(Boolean).join(", ")}` : null,
-    reg.extraNotes ? `הערה מהלקוח: ${reg.extraNotes}` : null,
-    reg.seatingNote ? `רוצים לשבת ליד: ${reg.seatingNote}` : null,
-  ].filter(Boolean);
+  const parts: { label: string; value: string }[] = [];
+  if (reg.occasions.length > 0 || reg.occasionOther) {
+    parts.push({ label: "חוגגים", value: [...reg.occasions, reg.occasionOther].filter(Boolean).join(", ") });
+  }
+  if (reg.extraNotes) parts.push({ label: "הערה מהלקוח", value: reg.extraNotes });
+  if (reg.seatingNote) parts.push({ label: "רוצים לשבת ליד", value: reg.seatingNote });
+  if (reg.consentedAt) {
+    parts.push({ label: "אישרו אזהרת אלרגנים ומדיניות ביטול", value: consentFormat.format(new Date(reg.consentedAt)) });
+  }
   if (parts.length === 0) return null;
   return (
     <tr>
-      <td colSpan={colSpan} className={styles.muted}>
-        {parts.join(" · ")}
+      <td colSpan={colSpan} style={{ fontSize: 14, lineHeight: 1.7 }}>
+        {parts.map((p, i) => (
+          <span key={p.label}>
+            {i > 0 && <span className={styles.muted}> · </span>}
+            <b>{p.label}:</b> {p.value}
+          </span>
+        ))}
       </td>
     </tr>
   );
@@ -270,6 +290,19 @@ function RegistrationGroup({
               <label>שם הסועד/ת</label>
               <input name="fullName" type="text" required />
             </div>
+            <div className={styles.field}>
+              <label>גיל</label>
+              <input name="age" type="number" min="1" max="120" style={{ width: 90 }} />
+            </div>
+            <div className={styles.field}>
+              <label>מין</label>
+              <select name="gender" defaultValue="">
+                <option value="">לא צוין</option>
+                <option value="male">זכר</option>
+                <option value="female">נקבה</option>
+                <option value="other">אחר</option>
+              </select>
+            </div>
             <div className={styles.field} style={{ width: "100%" }}>
               <label>הגבלות תזונה (מופרדות בפסיק)</label>
               <input name="restrictions" type="text" />
@@ -277,6 +310,10 @@ function RegistrationGroup({
             <div className={styles.field} style={{ width: "100%" }}>
               <label>הערות</label>
               <input name="notes" type="text" />
+            </div>
+            <div className={styles.field} style={{ width: "100%" }}>
+              <label>אוהב/ת לאכול</label>
+              <input name="favorites" type="text" />
             </div>
             <div className={styles.field}>
               <label>
@@ -395,6 +432,19 @@ function DinerRow({
               <label>שם</label>
               <input name="fullName" type="text" defaultValue={diner.fullName} required />
             </div>
+            <div className={styles.field}>
+              <label>גיל</label>
+              <input name="age" type="number" min="1" max="120" style={{ width: 90 }} defaultValue={diner.age ?? ""} />
+            </div>
+            <div className={styles.field}>
+              <label>מין</label>
+              <select name="gender" defaultValue={diner.gender ?? ""}>
+                <option value="">לא צוין</option>
+                <option value="male">זכר</option>
+                <option value="female">נקבה</option>
+                <option value="other">אחר</option>
+              </select>
+            </div>
             <div className={styles.field} style={{ width: "100%" }}>
               <label>הגבלות תזונה (מופרדות בפסיק)</label>
               <input name="restrictions" type="text" defaultValue={diner.restrictions.join(", ")} />
@@ -402,6 +452,10 @@ function DinerRow({
             <div className={styles.field} style={{ width: "100%" }}>
               <label>הערות</label>
               <input name="notes" type="text" defaultValue={diner.notes} />
+            </div>
+            <div className={styles.field} style={{ width: "100%" }}>
+              <label>אוהב/ת לאכול</label>
+              <input name="favorites" type="text" defaultValue={diner.favorites} />
             </div>
             <div className={styles.field}>
               <label>

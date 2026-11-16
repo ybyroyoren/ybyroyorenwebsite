@@ -15,6 +15,22 @@ function parseRestrictions(value: FormDataEntryValue | null): string[] {
     .filter(Boolean);
 }
 
+/** The optional detail fields shared by "add diner" and "edit diner" in the admin screen. */
+function dinerDetails(formData: FormData) {
+  const fullName = String(formData.get("fullName") ?? "").trim();
+  const [firstName, ...rest] = fullName.split(/\s+/);
+  const age = Number(formData.get("age"));
+  const gender = String(formData.get("gender") ?? "");
+  return {
+    full_name: fullName,
+    first_name: firstName || null,
+    last_name: rest.join(" ") || null,
+    age: Number.isInteger(age) && age >= 1 && age <= 120 ? age : null,
+    gender: gender === "male" || gender === "female" || gender === "other" ? gender : null,
+    favorite_foods: String(formData.get("favorites") ?? "").trim().slice(0, 300),
+  } as const;
+}
+
 async function syncRegistrationSeats(db: Db, registrationId: string): Promise<void> {
   const { data: diners } = await db.from("meal_diners").select("id").eq("registration_id", registrationId);
   const count = diners?.length ?? 0;
@@ -128,7 +144,7 @@ export async function addDinerToRegistration(formData: FormData): Promise<void> 
 
   await db.from("meal_diners").insert({
     registration_id: registrationId,
-    full_name: fullName,
+    ...dinerDetails(formData),
     dietary_restrictions: restrictions,
     notes,
     deposit_paid: paid,
@@ -151,7 +167,7 @@ export async function updateDiner(formData: FormData): Promise<void> {
   await db
     .from("meal_diners")
     .update({
-      full_name: String(formData.get("fullName") ?? "").trim(),
+      ...dinerDetails(formData),
       dietary_restrictions: parseRestrictions(formData.get("restrictions")),
       notes: String(formData.get("notes") ?? "").trim(),
       deposit_paid: formData.get("paid") === "on",
