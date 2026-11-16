@@ -212,6 +212,8 @@ export interface Database {
           gender: "male" | "female" | "other" | null;
           dietary_restrictions: string[];
           notes: string;
+          /** What the diner loves to eat (free text, optional). */
+          favorite_foods: string;
         };
         Insert: Partial<Database["public"]["Tables"]["meal_diners"]["Row"]> & {
           registration_id: string;

@@ -83,6 +83,7 @@ export const FIELD_LABELS: Record<string, string> = {
   total: "סכום",
   full_name: "שם מלא",
   dietary_restrictions: "הגבלות",
+  favorite_foods: "אוהב/ת לאכול",
   first_name: "שם פרטי",
   last_name: "שם משפחה",
   age: "גיל",

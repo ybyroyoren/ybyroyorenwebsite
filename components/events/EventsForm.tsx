@@ -10,7 +10,7 @@ const HOURS = Array.from({ length: 16 }, (_, i) => `${String(i + 8).padStart(2, 
 type Location = "venue" | "other" | null;
 type Format = "buffet" | "seated" | "other" | null;
 
-export function EventsForm({ locale }: { locale: Locale }) {
+export function EventsForm({ locale, onSubmitted }: { locale: Locale; onSubmitted?: () => void }) {
   const [eventType, setEventType] = useState<string | null>(null);
   const [location, setLocation] = useState<Location>(null);
   const [format, setFormat] = useState<Format>(null);
@@ -100,6 +100,7 @@ export function EventsForm({ locale }: { locale: Locale }) {
       }
       track("event_inquiry_submit", { event_type: eventType ?? "", guests });
       setSubmitted(true);
+      onSubmitted?.();
     } catch {
       setError(f.errorGeneric);
     } finally {
@@ -225,7 +226,10 @@ export function EventsForm({ locale }: { locale: Locale }) {
           </button>
         </div>
         {format === "seated" && (
-          <div className={styles.chips} style={{ marginTop: 10 }}>
+          <div className={styles.subLabel}>{f.serviceLabel}</div>
+        )}
+        {format === "seated" && (
+          <div className={styles.chips} style={{ marginTop: 6 }}>
             <button
               type="button"
               className={`${styles.chip} ${service === "plated" ? styles.selected : ""}`}

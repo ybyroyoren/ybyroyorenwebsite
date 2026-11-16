@@ -19,10 +19,11 @@ interface DinerForm {
   gender: Gender | "";
   restrictions: string[];
   notes: string;
+  favorites: string;
 }
 
 function emptyDiner(): DinerForm {
-  return { firstName: "", lastName: "", age: "", gender: "", restrictions: [], notes: "" };
+  return { firstName: "", lastName: "", age: "", gender: "", restrictions: [], notes: "", favorites: "" };
 }
 
 export function MealsList({ meals, locale }: { meals: MealView[]; locale: Locale }) {
@@ -236,23 +237,6 @@ export function MealsList({ meals, locale }: { meals: MealView[]; locale: Locale
               <div className={styles.seatsPicker}>
                 <div className={styles.seatsPickerLabel}>
                   {d.seatsPickerLabel}
-                  <small>
-                    {
-                      seatsDisplay(
-                        {
-                          remaining: selectedMeal.remainingSeats,
-                          total: selectedMeal.totalSeats,
-                          taken: selectedMeal.takenSeats,
-                          textMode: selectedMeal.seatsTextMode,
-                          registrationClosed: selectedMeal.registrationClosed,
-                          textHe: selectedMeal.seatsTextHe,
-                          textEn: selectedMeal.seatsTextEn,
-                          meterMode: selectedMeal.seatsMeterMode,
-                        },
-                        locale
-                      ).label
-                    }
-                  </small>
                 </div>
                 <div className={styles.qtyControl}>
                   <button type="button" onClick={() => changeSeats(-1)}>
@@ -318,29 +302,29 @@ export function MealsList({ meals, locale }: { meals: MealView[]; locale: Locale
                           onChange={(e) => updateDiner(i, { lastName: e.target.value })}
                         />
                       </div>
-                      <div className={`${styles.dinerGrid} ${styles.dinerGridAge}`}>
-                        <input
-                          type="number"
-                          inputMode="numeric"
-                          min={1}
-                          max={120}
-                          placeholder={d.agePlaceholder}
-                          value={diner.age}
-                          onChange={(e) => updateDiner(i, { age: e.target.value })}
-                        />
-                        <div className={styles.genderChips} role="radiogroup" aria-label={d.genderLabel}>
-                          {GENDERS.map((g) => (
-                            <label key={g.key} className={styles.restrictionChip}>
-                              <input
-                                type="radio"
-                                name={`gender-${i}`}
-                                checked={diner.gender === g.key}
-                                onChange={() => updateDiner(i, { gender: g.key })}
-                              />
-                              {label(g, locale)}
-                            </label>
-                          ))}
-                        </div>
+                      <input
+                        type="number"
+                        inputMode="numeric"
+                        min={1}
+                        max={120}
+                        className={styles.ageInput}
+                        placeholder={d.agePlaceholder}
+                        value={diner.age}
+                        onChange={(e) => updateDiner(i, { age: e.target.value })}
+                      />
+                      <div className={styles.fieldLabel}>{d.genderLabel}:</div>
+                      <div className={styles.genderChips} role="radiogroup" aria-label={d.genderLabel}>
+                        {GENDERS.map((g) => (
+                          <label key={g.key} className={styles.restrictionChip}>
+                            <input
+                              type="radio"
+                              name={`gender-${i}`}
+                              checked={diner.gender === g.key}
+                              onChange={() => updateDiner(i, { gender: g.key })}
+                            />
+                            {label(g, locale)}
+                          </label>
+                        ))}
                       </div>
                       <div className={styles.fieldLabel}>{d.restrictionsLabel}</div>
                       <div className={styles.restrictionChecks}>
@@ -365,6 +349,16 @@ export function MealsList({ meals, locale }: { meals: MealView[]; locale: Locale
                         value={diner.notes}
                         onChange={(e) => updateDiner(i, { notes: e.target.value })}
                       />
+                      <div className={styles.fieldLabel} style={{ marginTop: 4 }}>
+                        {d.favoritesLabel} <span className={styles.optional}>{d.optional}</span>
+                      </div>
+                      <input
+                        type="text"
+                        placeholder={d.favoritesPlaceholder}
+                        value={diner.favorites}
+                        onChange={(e) => updateDiner(i, { favorites: e.target.value })}
+                      />
+                      <p className={styles.favoritesHint}>{d.favoritesHint}</p>
                     </div>
                   );
                 })}

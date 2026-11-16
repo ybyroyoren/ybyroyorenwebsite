@@ -1204,3 +1204,8 @@ alter table meal_registrations
   add column consented_at timestamptz,
   add column seating_note text not null default '';
 
+-- ===== 0034_meal_diner_favorites.sql =====
+-- What each open-meal diner especially loves to eat (free text, optional). Not a promise that it is on the menu.
+alter table meal_diners
+  add column favorite_foods text not null default '';
+

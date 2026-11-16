@@ -97,6 +97,8 @@ export interface DinerInput {
   restrictions: string[];
   /** Free text; required when the restriction "other" is chosen. */
   notes: string;
+  /** What the diner loves to eat (optional; not a promise that it is on the menu). */
+  favorites?: string;
 }
 
 export interface RegistrationExtras {
@@ -183,6 +185,7 @@ export async function createPendingRegistration(
     gender: d.gender as Gender,
     dietary_restrictions: hebrewLabels(RESTRICTIONS, d.restrictions),
     notes: (d.notes ?? "").trim().slice(0, 300),
+    favorite_foods: (d.favorites ?? "").trim().slice(0, 300),
   }));
   const { error: dinersError } = await db.from("meal_diners").insert(dinerRows);
   if (dinersError) throw new Error(dinersError.message);

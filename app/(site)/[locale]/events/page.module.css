@@ -246,3 +246,11 @@
   padding: 14px 16px;
   border-radius: 8px;
 }
+
+/* Small heading above a group of choices (e.g. "table service style"). */
+.subLabel {
+  margin-top: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink-soft);
+}

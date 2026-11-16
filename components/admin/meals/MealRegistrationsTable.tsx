@@ -12,6 +12,7 @@ export interface DinerData {
   gender: "male" | "female" | "other" | null;
   restrictions: string[];
   notes: string;
+  favorites: string;
   paid: boolean;
 }
 
@@ -137,6 +138,7 @@ function ReadOnlyGroup({ reg }: { reg: RegistrationData }) {
           <td>
             {d.restrictions.length > 0 ? d.restrictions.join(", ") : "—"}
             {d.notes && ` (${d.notes})`}
+            {d.favorites && <div className={styles.muted}>אוהב/ת: {d.favorites}</div>}
           </td>
         </tr>
       ))}
@@ -352,6 +354,7 @@ function DinerRow({
         <td>
           {diner.restrictions.length > 0 ? diner.restrictions.join(", ") : "—"}
           {diner.notes && ` (${diner.notes})`}
+          {diner.favorites && <div className={styles.muted}>אוהב/ת: {diner.favorites}</div>}
         </td>
         <td>
           <div style={{ display: "flex", gap: 6, justifyContent: "flex-end", flexWrap: "wrap" }}>
