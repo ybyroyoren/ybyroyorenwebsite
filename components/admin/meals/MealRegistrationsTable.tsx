@@ -24,6 +24,8 @@ export interface RegistrationData {
   status: "pending" | "paid" | "cancelled";
   /** Started on the website but the deposit was never paid (not a registration yet). */
   unpaidWebBooking: boolean;
+  /** Booked on the website (false = entered by hand in the admin). */
+  fromWeb: boolean;
   /** What the group is celebrating and anything else they wrote when booking online. */
   occasions: string[];
   occasionOther: string;
@@ -99,11 +101,20 @@ function RegistrationExtras({ reg, colSpan }: { reg: RegistrationData; colSpan: 
   );
 }
 
-const STATUS_LABEL: Record<RegistrationData["status"], string> = {
-  paid: "שולם דרך האתר",
-  pending: "ממתין",
-  cancelled: "בוטל",
-};
+/** What to show next to a booking: its real payment state (the diners\' paid boxes), not only the stored status. */
+function groupStatus(reg: RegistrationData): string {
+  if (reg.status === "cancelled") return "בוטל";
+  const paid = reg.diners.filter((d) => d.paid).length;
+  if (reg.diners.length > 0 && paid === reg.diners.length) return reg.fromWeb ? "שולם דרך האתר" : "שולם";
+  if (paid === 0) return reg.fromWeb ? "ממתין לתשלום" : "טרם שולם";
+  return `שולם חלקית (${paid}/${reg.diners.length})`;
+}
+
+/** Phone and e-mail, or a plain note when a booking entered by hand has neither. */
+function contactLine(reg: RegistrationData): string {
+  const parts = [reg.customerPhone, reg.customerEmail].filter(Boolean);
+  return parts.length > 0 ? parts.join(" · ") : "אין פרטי קשר";
+}
 
 export function MealRegistrationsTable({
   registrations,
@@ -152,7 +163,7 @@ function ReadOnlyGroup({ reg }: { reg: RegistrationData }) {
       <tr className={styles.groupHeaderRow}>
         <td colSpan={3}>
           <span className={styles.groupContact}>
-            {reg.customerName} <span>· {reg.customerPhone} · {reg.customerEmail} · {STATUS_LABEL[reg.status]}</span>
+            {reg.customerName} <span>· {contactLine(reg)} · {groupStatus(reg)}</span>
           </span>
         </td>
       </tr>
@@ -225,7 +236,7 @@ function RegistrationGroup({
             <span className={styles.groupContact}>
               {reg.customerName}{" "}
               <span>
-                · {reg.customerPhone || "—"} · {reg.customerEmail || "—"} · {STATUS_LABEL[reg.status]}
+                · {contactLine(reg)} · {groupStatus(reg)}
               </span>
             </span>
             <div className={styles.groupActions}>

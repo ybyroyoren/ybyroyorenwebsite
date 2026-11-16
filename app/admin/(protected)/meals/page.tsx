@@ -64,6 +64,7 @@ export default async function AdminMealsPage({ searchParams }: { searchParams: P
       customerPhone: r.customer_phone,
       status: r.status,
       unpaidWebBooking: r.status === "pending" && r.source !== "admin",
+      fromWeb: r.source !== "admin",
       occasions: r.occasions ?? [],
       occasionOther: r.occasion_other ?? "",
       extraNotes: r.extra_notes ?? "",
