@@ -13,6 +13,7 @@ import {
   updateRegistrationContact,
 } from "@/lib/actions/admin/meal-registrations";
 import { MealRegistrationsTable, type RegistrationData } from "@/components/admin/meals/MealRegistrationsTable";
+import { restrictionSummary } from "@/lib/restrictionSummary";
 import { MealSeatsDisplay } from "@/components/admin/meals/MealSeatsDisplay";
 import { NewRegistrationButton } from "@/components/admin/meals/NewRegistrationButton";
 import { formatCurrency } from "@/lib/pricing";
@@ -30,35 +31,6 @@ const REGISTRATION_ACTIONS = {
   toggleDinerPaid,
   moveDinerToMeal,
 };
-
-/**
- * One line for the kitchen: how many diners have each dietary restriction (cancelled bookings excluded), e.g.
- * "צמחוני ×3 · ללא גלוטן ×2 · אחר ×1 (לא אוהב בצל) · ללא הגבלות ×9". Null when nobody has registered.
- */
-function restrictionSummary(regs: RegistrationData[]): string | null {
-  const counts = new Map<string, number>();
-  const otherNotes: string[] = [];
-  let total = 0;
-  for (const reg of regs) {
-    if (reg.status === "cancelled") continue;
-    for (const diner of reg.diners) {
-      total++;
-      for (const label of diner.restrictions) {
-        const key = label.startsWith("אחר") ? "אחר" : label;
-        counts.set(key, (counts.get(key) ?? 0) + 1);
-        if (key === "אחר" && diner.notes.trim()) otherNotes.push(diner.notes.trim());
-      }
-    }
-  }
-  if (total === 0) return null;
-  const none = counts.get("ללא הגבלות") ?? 0;
-  counts.delete("ללא הגבלות");
-  const parts = [...counts.entries()]
-    .sort((a, b) => b[1] - a[1])
-    .map(([label, n]) => `${label} ×${n}${label === "אחר" && otherNotes.length > 0 ? ` (${otherNotes.join("; ")})` : ""}`);
-  if (none > 0) parts.push(`ללא הגבלות ×${none}`);
-  return parts.length > 0 ? `הגבלות תזונה (${total} סועדים): ${parts.join(" · ")}` : null;
-}
 
 export default async function AdminMealsPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
   const { tab } = await searchParams;
