@@ -23,7 +23,7 @@ export default function RootLayout({
         {/* The fonts the first paint needs (Hebrew and Latin of the body font), fetched early. */}
         <link rel="preload" href="/fonts/assistant-hebrew.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
         <link rel="preload" href="/fonts/assistant-latin.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
-        <link rel="preload" href="/fonts/gveret-levin-hebrew.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
+        <link rel="preload" href="/fonts/amatic-sc-hebrew.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
         {/* [data-reveal] content is only hidden once JS is known to run; if
             RevealObserver hasn't signalled within 4s, show everything. */}
         <script

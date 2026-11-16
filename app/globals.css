@@ -45,12 +45,13 @@ h3,
   letter-spacing: 0;
 }
 
-/* The big page headings are in handwriting (Gveret Levin, one weight: no faux bold). Anything it lacks falls back to the
-   regular font. The admin screens keep the regular headings. */
+/* The big page headings are in handwriting (Amatic SC bold). Anything it lacks falls back to the regular font. The admin
+   screens keep the regular headings. */
 .siteRoot h1,
 .siteRoot .displayHeading {
   font-family: var(--font-display), var(--font-sans-family);
-  font-weight: 400;
+  font-weight: 700;
+  letter-spacing: 0.01em;
   font-synthesis: none;
 }
 
