@@ -128,10 +128,6 @@
   transition: transform 0.15s ease;
 }
 
-.chevronOpen {
-  transform: rotate(-90deg);
-}
-
 .navGroupItems {
   display: flex;
   flex-direction: column;

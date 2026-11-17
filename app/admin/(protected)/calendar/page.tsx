@@ -12,6 +12,7 @@ import {
   shiftMonth,
   weekdayOf,
 } from "@/lib/calendar";
+import { ChevronIcon } from "@/components/site/ChevronIcon";
 import { categoryLabel } from "@/lib/kitchen/eventDossier";
 import styles from "../../admin.module.css";
 import cal from "./calendar.module.css";
@@ -139,13 +140,13 @@ export default async function AdminCalendarPage({ searchParams }: { searchParams
 
       <div className={cal.toolbar}>
         <Link className={cal.navBtn} href={`/admin/calendar?m=${monthKey(prev.year, prev.month)}`} aria-label="החודש הקודם">
-          ›
+          <ChevronIcon dir="prev" />
         </Link>
         <h2 className={cal.monthTitle}>
           {MONTH_NAMES[month - 1]} {year}
         </h2>
         <Link className={cal.navBtn} href={`/admin/calendar?m=${monthKey(next.year, next.month)}`} aria-label="החודש הבא">
-          ‹
+          <ChevronIcon dir="next" />
         </Link>
         {monthKey(year, month) !== thisMonth && (
           <Link className={styles.btnSecondary} href="/admin/calendar">

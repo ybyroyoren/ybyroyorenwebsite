@@ -121,7 +121,7 @@ export function AdminSidebar({ email, roleLabel, allowed }: { email: string; rol
             </button>
           </div>
           <Link href="/" className={styles.siteLink}>
-            ← חזרה לאתר
+            → חזרה לאתר
           </Link>
           <div className={styles.subtitle}>
             {email}
@@ -151,9 +151,10 @@ export function AdminSidebar({ email, roleLabel, allowed }: { email: string; rol
                   onClick={() => toggle(group.label)}
                 >
                   <span>{group.label}</span>
-                  <span className={`${styles.chevron} ${open ? styles.chevronOpen : ""}`} aria-hidden="true">
-                    ‹
-                  </span>
+                  {/* Closed: points left (the way a Hebrew page continues); open: points down. */}
+                  <svg className={styles.chevron} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
+                    <path d={open ? "M5 9l7 7 7-7" : "M15 5l-7 7 7 7"} />
+                  </svg>
                 </button>
                 {open && (
                   <div className={styles.navGroupItems}>

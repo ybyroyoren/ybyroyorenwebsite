@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { ChevronIcon } from "@/components/site/ChevronIcon";
 import { formatMealDateFull } from "@/lib/date";
 import type { Locale } from "@/lib/dictionary";
 import styles from "./PickupCalendar.module.css";
@@ -134,11 +135,11 @@ export function PickupCalendar({
       <div className={styles.wrap}>
         <div className={styles.head}>
           <button type="button" className={styles.nav} aria-label={t.prev} disabled={index(view) <= index(todayMonth)} onClick={() => shift(-1)}>
-            {locale === "en" ? "‹" : "›"}
+            <ChevronIcon dir="prev" size={16} />
           </button>
           <span className={styles.month}>{monthTitle}</span>
           <button type="button" className={styles.nav} aria-label={t.next} disabled={index(view) >= index(lastMonth)} onClick={() => shift(1)}>
-            {locale === "en" ? "›" : "‹"}
+            <ChevronIcon dir="next" size={16} />
           </button>
         </div>
 
