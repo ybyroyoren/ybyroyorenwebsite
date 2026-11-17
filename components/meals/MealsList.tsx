@@ -1,7 +1,7 @@
 "use client";
 
 import { track } from "@/lib/analytics/client";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { MealView } from "@/lib/meals";
 import { GENDERS, NO_RESTRICTIONS, OCCASIONS, OTHER_OCCASION, OTHER_RESTRICTION, RESTRICTIONS, label, type Gender } from "@/lib/mealForm";
 import { seatsDisplay } from "@/lib/seats";
@@ -44,12 +44,14 @@ export function MealsList({ meals, locale }: { meals: MealView[]; locale: Locale
   const [couponMessage, setCouponMessage] = useState<{ text: string; ok: boolean } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const drawerRef = useRef<HTMLDivElement>(null);
   const t = getDict(locale).meals;
   const d = t.drawer;
 
   function openMeal(meal: MealView) {
     track("meal_register_open", { meal_date: meal.date, remaining: meal.remainingSeats });
     setSelectedMeal(meal);
+    drawerRef.current?.scrollTo(0, 0);
     setSeatsCount(1);
     setDiners([emptyDiner()]);
     setCustomerName("");
@@ -263,17 +265,20 @@ export function MealsList({ meals, locale }: { meals: MealView[]; locale: Locale
       })}
 
       <div className={`${styles.overlay} ${selectedMeal ? styles.open : ""}`} onClick={closeDrawer} />
-      <div className={`${styles.drawer} ${selectedMeal ? styles.open : ""}`}>
+      <div ref={drawerRef} className={`${styles.drawer} ${selectedMeal ? styles.open : ""}`}>
         {selectedMeal && (
           <>
+            {/* The close button floats in the corner while everything else scrolls together. */}
+            <div className={styles.closeWrap}>
+              <button type="button" className={styles.close} onClick={closeDrawer} aria-label={locale === "en" ? "Close" : "סגירה"}>
+                ✕
+              </button>
+            </div>
             <div className={styles.drawerHead}>
               <div>
                 <div className={styles.dayTag}>{formatMealDateFull(selectedMeal.date, locale)}</div>
                 <h3>{selectedMeal.title}</h3>
               </div>
-              <button type="button" className={styles.close} onClick={closeDrawer}>
-                ✕
-              </button>
             </div>
             <div className={styles.drawerBody}>
               <p className={styles.summary}>{d.summary}</p>
