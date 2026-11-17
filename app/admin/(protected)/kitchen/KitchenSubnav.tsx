@@ -5,12 +5,12 @@ import { usePathname } from "next/navigation";
 import styles from "./kitchen.module.css";
 
 const TABS = [
+  { href: "/admin/kitchen/events", label: "אירועים" },
   { href: "/admin/kitchen/ingredients", label: "מרכיבים" },
   { href: "/admin/kitchen/suppliers", label: "ספקים" },
   { href: "/admin/kitchen/equipment", label: "ציוד" },
   { href: "/admin/kitchen/guests", label: "סועדים" },
   { href: "/admin/kitchen/recipes", label: "מתכונים" },
-  { href: "/admin/kitchen/events", label: "אירועים" },
 ];
 
 export function KitchenSubnav() {
