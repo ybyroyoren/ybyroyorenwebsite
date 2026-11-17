@@ -34,8 +34,9 @@ const GROUPS: { label: string; items: NavItem[] }[] = [
   {
     label: "אירועים",
     items: [
-      { section: "events", href: "/admin/events", label: "אירועים פרטיים" },
-      { section: "kitchen_ledger", href: "/admin/kitchen", label: "ניהול אירועים" },
+      { section: "calendar", href: "/admin/calendar", label: "לוח שנה" },
+      { section: "events", href: "/admin/events", label: "פניות לאירועים" },
+      { section: "kitchen_ledger", href: "/admin/kitchen", label: "תיקי אירועים ומטבח" },
     ],
   },
   {

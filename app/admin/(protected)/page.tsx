@@ -13,6 +13,7 @@ const SECTION_PATH: Record<string, string> = {
   events: "/admin/events",
   messages: "/admin/messages",
   kitchen_ledger: "/admin/kitchen",
+  calendar: "/admin/calendar",
   team: "/admin/team",
 };
 

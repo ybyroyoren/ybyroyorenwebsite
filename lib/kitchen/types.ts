@@ -1,3 +1,4 @@
+import type { KLEventDossier } from "./eventDossier";
 export interface KLSupplier {
   id: string;
   name: string;
@@ -142,6 +143,8 @@ export interface KLEvent {
   costSnapshot: KLEventCostSnapshot | null;
   menu: KLEventMenuItem[];
   seats: KLEventGuestSeat[];
+  /** The event file: status, times, venue, dietary, price, staff... (see eventDossier.ts). */
+  dossier: KLEventDossier;
 }
 
 /** Cost of an event as it was when the event was closed (later price changes don't touch it). */

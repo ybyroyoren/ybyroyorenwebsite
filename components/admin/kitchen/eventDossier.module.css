@@ -1,0 +1,259 @@
+/* Event file ("תיק אירוע") editor: section navigation, status switch, field grids and the sticky save bar. */
+
+.jumpNav {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 10px 2px;
+  margin: 0 0 18px;
+  background: var(--cream);
+  border-bottom: 1px solid var(--line);
+  scrollbar-width: none;
+}
+
+.jumpNav::-webkit-scrollbar {
+  display: none;
+}
+
+.jumpNav a {
+  flex-shrink: 0;
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  text-decoration: none;
+  background: var(--cream-dark);
+}
+
+.jumpNav a:hover {
+  border-color: var(--ink);
+}
+
+.section {
+  scroll-margin-top: 70px;
+}
+
+.sectionHint {
+  margin: -12px 0 18px;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+
+.full {
+  grid-column: 1 / -1;
+}
+
+.sub {
+  margin: 22px 0 10px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+/* The two big status buttons: "not closed yet" / "closed". */
+.statusSwitch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.statusBtn {
+  padding: 16px 14px;
+  border-radius: 12px;
+  border: 2px solid var(--line);
+  background: var(--cream);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+}
+
+.statusBtn small {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+
+.statusOpenOn {
+  border-color: #c98a1b;
+  background: #f6e3b8;
+}
+
+.statusClosedOn {
+  border-color: var(--olive-deep);
+  background: var(--olive-mist);
+}
+
+/* A checkbox on its own row, with an optional note field that appears when it is ticked. */
+.checkRow {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 42px;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--cream);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.check input {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  accent-color: var(--olive-deep);
+}
+
+.checkOn {
+  border-color: var(--olive-deep);
+  background: var(--olive-mist);
+}
+
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pills .check {
+  min-height: 38px;
+  padding: 6px 14px;
+  border-radius: 999px;
+}
+
+.menuSteps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--cream);
+}
+
+.row input,
+.row select {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  font-family: inherit;
+  font-size: 14px;
+  background: var(--cream-dark);
+  color: var(--ink);
+  min-width: 0;
+}
+
+.row .grow {
+  flex: 1 1 160px;
+}
+
+.row .narrow {
+  flex: 0 0 110px;
+}
+
+.totals {
+  margin-top: 14px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: var(--olive-mist);
+  display: grid;
+  gap: 4px;
+  font-size: 14px;
+}
+
+.totals strong {
+  font-size: 20px;
+}
+
+.warn {
+  color: var(--danger);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.taskDone {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+.saveBar {
+  position: sticky;
+  bottom: 0;
+  z-index: 6;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 4px calc(12px + env(safe-area-inset-bottom));
+  background: var(--cream);
+  border-top: 1px solid var(--line);
+}
+
+.saveBar .spacer {
+  flex: 1;
+}
+
+.saved {
+  color: var(--olive-deep);
+  font-weight: 700;
+  font-size: 14px;
+}
+
+@media (max-width: 640px) {
+  .statusBtn {
+    font-size: 14px;
+    padding: 12px 8px;
+  }
+  .row .narrow {
+    flex: 1 1 100px;
+  }
+}
+
+.noteInput {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  font-family: inherit;
+  font-size: 14px;
+  background: var(--cream);
+  color: var(--ink);
+  width: 100%;
+}

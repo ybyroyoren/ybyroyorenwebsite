@@ -1,6 +1,7 @@
 import { requireAdminSection } from "@/lib/admin-auth";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { deleteInquiry, updateInquiryStatus } from "@/lib/actions/admin/events";
+import Link from "next/link";
 import { AdminTabs } from "@/components/admin/AdminTabs";
 import styles from "../../admin.module.css";
 
@@ -48,6 +49,10 @@ export default async function AdminEventsPage({ searchParams }: { searchParams: 
     .from("event_inquiries")
     .select("*")
     .order("created_at", { ascending: false });
+
+  // Inquiries that already have an event file, so the button opens it instead of making a second one.
+  const { data: linked } = await db.from("kl_events").select("id, inquiry_id").not("inquiry_id", "is", null);
+  const fileByInquiry = new Map<string, string>((linked ?? []).map((e: { id: string; inquiry_id: string }) => [e.inquiry_id, e.id]));
 
   // "Closed" = marked closed or paid-and-closed (DONE_STATUSES).
   const allInquiries = inquiries ?? [];
@@ -130,6 +135,16 @@ export default async function AdminEventsPage({ searchParams }: { searchParams: 
                 עדכון סטטוס
               </button>
             </form>
+            {isOwner &&
+              (fileByInquiry.has(inq.id) ? (
+                <Link href={`/admin/kitchen/events/${fileByInquiry.get(inq.id)}`} className={styles.btn}>
+                  לתיק האירוע
+                </Link>
+              ) : (
+                <Link href={`/admin/kitchen/events/new?inquiry=${inq.id}`} className={styles.btn}>
+                  פתיחת תיק אירוע
+                </Link>
+              ))}
             {isOwner && (
               <form action={deleteInquiry}>
                 <input type="hidden" name="id" value={inq.id} />

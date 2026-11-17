@@ -1,6 +1,7 @@
 import "server-only";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import type { KLEventType } from "./types";
+import { dossierToRow, type KLEventDossier } from "./eventDossier";
 
 export interface EventMenuLineInput {
   recipeId: string;
@@ -22,6 +23,7 @@ export interface EventInput {
   notes: string;
   menu: EventMenuLineInput[];
   seats: EventSeatInput[];
+  dossier?: Partial<KLEventDossier>;
 }
 
 function validate(input: EventInput): string | null {
@@ -93,6 +95,7 @@ export async function createEvent(input: EventInput): Promise<{ id: string } | {
       location: input.location.trim(),
       guest_count: input.guestCount,
       notes: input.notes.trim(),
+      ...dossierToRow(input.dossier ?? {}),
     })
     .select("id")
     .single();
@@ -117,6 +120,7 @@ export async function updateEvent(eventId: string, input: EventInput): Promise<{
       location: input.location.trim(),
       guest_count: input.guestCount,
       notes: input.notes.trim(),
+      ...(input.dossier ? dossierToRow(input.dossier) : {}),
     })
     .eq("id", eventId);
   if (error) return { error: error.message };

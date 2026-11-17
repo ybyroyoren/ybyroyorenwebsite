@@ -44,3 +44,8 @@ export const getPublicTeam = unstable_cache(() => fetchTeam(true), ["about-team"
 
 /** Everyone, hidden members included (admin screen, never cached). */
 export const getAllTeam = () => fetchTeam(false);
+
+/** Names of the active team, for suggestion lists (e.g. who works an event). */
+export async function getActiveTeamNames(): Promise<string[]> {
+  return (await fetchTeam(true)).map((m) => m.name).filter(Boolean);
+}

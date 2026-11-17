@@ -9,6 +9,7 @@ import type {
   KLRecipe,
   KLSupplier,
 } from "./types";
+import { dossierFromRow } from "./eventDossier";
 import type { EquipmentMap, IngredientMap, RecipeMap, SupplierMap } from "./algorithms";
 
 export async function getSuppliers(): Promise<KLSupplier[]> {
@@ -117,7 +118,7 @@ export async function getEvents(): Promise<KLEvent[]> {
   const db = supabaseAdmin();
   const { data: eventRows } = await db
     .from("kl_events")
-    .select("id, name, date, event_type, location, guest_count, notes, closed_at, cost_snapshot")
+    .select("*")
     .order("date", { ascending: false });
   const { data: menuRows } = await db
     .from("kl_event_menu")
@@ -152,6 +153,7 @@ export async function getEvents(): Promise<KLEvent[]> {
     notes: row.notes,
     closedAt: row.closed_at,
     costSnapshot: row.cost_snapshot ?? null,
+    dossier: dossierFromRow(row),
     menu: menuByEvent.get(row.id) ?? [],
     seats: (seatsByEvent.get(row.id) ?? []).sort((a, b) => a.seatIndex - b.seatIndex),
   }));

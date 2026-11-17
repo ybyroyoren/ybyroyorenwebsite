@@ -17,6 +17,15 @@ import { closeKitchenEvent, reopenKitchenEvent } from "@/lib/actions/admin/kitch
 import { ConfirmButton } from "@/components/admin/ConfirmButton";
 import { CopySummaryButton } from "@/components/admin/kitchen/CopySummaryButton";
 import { PrintButton } from "@/components/admin/kitchen/PrintButton";
+import {
+  DEAL_STATUS_LABEL,
+  KITCHEN_FACILITIES,
+  RESTRICTION_TAGS,
+  STAFF_ROLES,
+  categoryLabel,
+  dossierTotal,
+  serviceStyleLabel,
+} from "@/lib/kitchen/eventDossier";
 import { formatCurrency } from "@/lib/pricing";
 import adminStyles from "../../../../../admin.module.css";
 import styles from "./summary.module.css";
@@ -148,11 +157,55 @@ export default async function EventSummaryPage({ params }: { params: Promise<{ i
           <PrintButton />
           {isOwner && (
             <Link href={`/admin/kitchen/events/${id}`} className={adminStyles.btnSecondary}>
-              עריכת אירוע
+              תיק האירוע
             </Link>
           )}
         </div>
       </div>
+
+      {(() => {
+        const dos = event.dossier;
+        const label = (list: { value: string; label: string }[], v: string) => list.find((x) => x.value === v)?.label ?? v;
+        const rows: [string, string][] = [
+          ["סטטוס", DEAL_STATUS_LABEL[dos.dealStatus]],
+          ["שעות", [dos.gatherTime && `התכנסות ${dos.gatherTime}`, dos.startTime && `התחלה ${dos.startTime}`, dos.endTime && `סיום ${dos.endTime}`].filter(Boolean).join(" · ")],
+          ["סוג", [categoryLabel(dos.category, dos.categoryOther), serviceStyleLabel(dos.serviceStyle)].filter(Boolean).join(" · ")],
+          ["כמויות", [`${event.guestCount} סועדים`, dos.kidsCount > 0 && `${dos.kidsCount} מנות ילדים`, dos.portionsCount !== null && `${dos.portionsCount} מנות שונות`].filter(Boolean).join(" · ")],
+          ["מקום", [dos.venueName, event.location, dos.venueAccess].filter(Boolean).join(" · ")],
+          ["מטבח במקום", [...dos.kitchenHas.map((v) => label(KITCHEN_FACILITIES, v)), dos.kitchenNotes].filter(Boolean).join(" · ")],
+          ["איש קשר", [dos.clientName, dos.clientPhone].filter(Boolean).join(" · ")],
+          ["איש קשר במקום", [dos.siteContactName, dos.siteContactPhone].filter(Boolean).join(" · ")],
+          ["הגבלות כלליות", [...dos.generalRestrictionTags.map((v) => label(RESTRICTION_TAGS, v)), dos.generalRestrictions].filter(Boolean).join(" · ")],
+          ["הגבלות לפי סועד", dos.dinerRestrictions.map((r) => `${r.name}: ${r.restriction}`).join(" | ")],
+          ["תפריט", [dos.menuBuilt && "נבנה", dos.menuSent && "נשלח ללקוח", dos.menuApproved && "אושר", dos.menuNotes].filter(Boolean).join(" · ")],
+          ["צוות", [...dos.staff.map((m) => `${m.name} (${label(STAFF_ROLES, m.role)})`), (dos.needManagers || dos.needCooks || dos.needWaiters) && `נדרש: ${dos.needManagers} מנהלים, ${dos.needCooks} טבחים, ${dos.needWaiters} מלצרים`].filter(Boolean).join(" · ")],
+          ["שתייה", [dos.drinksByUs && `אנחנו דואגים לשתייה${dos.drinksNotes ? ` (${dos.drinksNotes})` : ""}`, dos.alcohol && `אלכוהול${dos.alcoholNotes ? ` (${dos.alcoholNotes})` : ""}`, dos.ice && `קרח${dos.iceNotes ? ` (${dos.iceNotes})` : ""}`].filter(Boolean).join(" · ")],
+          ["ציוד מיוחד", [dos.specialEquipment, dos.bringServingWare && `כלי הגשה${dos.servingWareNotes ? `: ${dos.servingWareNotes}` : ""}`, dos.rentalNeeded && `השכרה${dos.rentalNotes ? `: ${dos.rentalNotes}` : ""}`].filter(Boolean).join(" · ")],
+        ];
+        if (isOwner && (dos.pricePerDiner !== null || dos.priceExtras.length > 0)) {
+          rows.push(["מחיר", `${formatCurrency(dossierTotal(dos, event.guestCount).total)}${dos.pricePerDiner !== null ? ` (${formatCurrency(dos.pricePerDiner)} לסועד)` : ""}`]);
+        }
+        const shown = rows.filter(([, v]) => v);
+        const openTasks = dos.tasks.filter((t) => !t.done);
+        return (
+          <div className={styles.section}>
+            <h2>תיק האירוע</h2>
+            <dl className={adminStyles.details} style={{ gridTemplateColumns: "max-content 1fr" }}>
+              {shown.map(([k, v]) => (
+                <div key={k} style={{ display: "contents" }}>
+                  <dt>{k}</dt>
+                  <dd>{v}</dd>
+                </div>
+              ))}
+            </dl>
+            {openTasks.length > 0 && (
+              <p style={{ marginTop: 10 }}>
+                <b>משימות פתוחות:</b> {openTasks.map((t) => t.text).join(" · ")}
+              </p>
+            )}
+          </div>
+        );
+      })()}
 
       {event.notes && (
         <div className={styles.section}>
@@ -261,9 +314,9 @@ export default async function EventSummaryPage({ params }: { params: Promise<{ i
           <h2>עלות חומרי גלם</h2>
           {frozen && (
             <p className={adminStyles.muted}>
-              האירוע נסגר ב-{new Date(frozen.takenAt).toLocaleDateString("he-IL", { timeZone: "Asia/Jerusalem" })}, והעלות נשמרה כפי שהייתה אז.
+              העלות ננעלה ב-{new Date(frozen.takenAt).toLocaleDateString("he-IL", { timeZone: "Asia/Jerusalem" })}, והעלות נשמרה כפי שהייתה אז.
               שינויי מחיר מאז לא משפיעים עליה. {frozen.partial ? "בזמן הסגירה לחלק מהמרכיבים עדיין לא היה מחיר, והסכום חלקי. " : ""}
-              שינוי בתפריט האירוע לא יעדכן אותה: פתחו מחדש וסגרו שוב.
+              שינוי בתפריט האירוע לא יעדכן אותה: פתחו מחדש ונעלו שוב.
               {liveCost && Math.abs(liveCost.total - frozen.total) > 0.005 && ` (לפי המחירים של היום: ${formatCurrency(liveCost.total)})`}
             </p>
           )}
@@ -289,9 +342,9 @@ export default async function EventSummaryPage({ params }: { params: Promise<{ i
             ) : (
               <ConfirmButton
                 className={adminStyles.btnSecondary}
-                message="לסגור את האירוע ולשמור את העלות הנוכחית? שינויי מחיר בהמשך לא ישנו את העלות של האירוע הזה."
+                message="לנעול את עלות האירוע ולשמור את העלות הנוכחית? שינויי מחיר בהמשך לא ישנו את העלות של האירוע הזה."
               >
-                סגירת אירוע ושמירת העלות
+                נעילת העלות (שמירת העלות הנוכחית)
               </ConfirmButton>
             )}
           </form>
