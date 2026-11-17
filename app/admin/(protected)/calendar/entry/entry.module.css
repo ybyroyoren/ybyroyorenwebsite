@@ -1,0 +1,71 @@
+.kinds {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.kind input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.kind span {
+  display: block;
+  padding: 14px 10px;
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  background: var(--cream);
+  text-align: center;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.kind small {
+  display: block;
+  margin-top: 4px;
+  font-weight: 500;
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.kind input:checked + span {
+  border-color: var(--olive-deep);
+  background: var(--olive-mist);
+}
+
+.kind input:focus-visible + span {
+  outline: 2px solid var(--olive-deep);
+  outline-offset: 2px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+
+.full {
+  grid-column: 1 / -1;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-top: 22px;
+}
+
+.spacer {
+  flex: 1;
+}
+
+@media (max-width: 560px) {
+  .kinds {
+    grid-template-columns: 1fr;
+  }
+}

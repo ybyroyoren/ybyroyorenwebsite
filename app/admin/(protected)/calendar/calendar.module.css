@@ -102,7 +102,23 @@
   background: var(--cream-dark);
   border: 1px solid var(--line);
   border-radius: 14px;
-  overflow: hidden;
+}
+
+/* No overflow:hidden on the grid (the "+" menus must be able to open outside a cell), so the corners are rounded by hand. */
+.weekdays div:first-child {
+  border-top-right-radius: 13px;
+}
+
+.weekdays div:last-child {
+  border-top-left-radius: 13px;
+}
+
+.week:last-child .cell:first-child {
+  border-bottom-right-radius: 13px;
+}
+
+.week:last-child .cell:last-child {
+  border-bottom-left-radius: 13px;
 }
 
 .weekdays,
@@ -345,4 +361,123 @@
   .agendaDate strong {
     font-size: 22px;
   }
+}
+
+/* ---- meetings, notes, blocked dates ---- */
+.kMeeting {
+  background: #2f6f73;
+  color: #ffffff;
+  border: 1.5px solid #2f6f73;
+}
+
+.kNote {
+  background: #ece7d8;
+  color: #3a342a;
+  border: 1.5px solid #bdb59f;
+}
+
+.kBlocked {
+  background: repeating-linear-gradient(135deg, #f3d4cf, #f3d4cf 6px, #f8e3df 6px, #f8e3df 12px);
+  color: #7a2a1e;
+  border: 1.5px solid #c0574a;
+}
+
+.blockedDay {
+  box-shadow: inset 0 0 0 2px rgba(192, 87, 74, 0.45);
+}
+
+/* "+" menu on a day, and the "add" menu in the toolbar (plain <details>, no script) */
+.addMenu {
+  position: relative;
+}
+
+.addMenu summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+.addMenu summary::-webkit-details-marker {
+  display: none;
+}
+
+.menuList {
+  position: absolute;
+  inset-inline-end: 0;
+  top: calc(100% + 4px);
+  z-index: 20;
+  min-width: 170px;
+  display: flex;
+  flex-direction: column;
+  padding: 6px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--cream);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+}
+
+.menuList a {
+  padding: 9px 12px;
+  border-radius: 8px;
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.menuList a:hover {
+  background: var(--olive-mist);
+}
+
+.addMenu[open] .addBtn {
+  opacity: 1;
+}
+
+/* Google Calendar connection card */
+.googleCard {
+  margin-top: 34px;
+}
+
+.googleStatus {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 14px;
+  font-size: 14px;
+}
+
+.googleStatus .ok {
+  color: var(--olive-deep);
+  font-weight: 700;
+}
+
+.googleStatus .bad {
+  color: var(--danger);
+  font-weight: 700;
+}
+
+.steps {
+  margin: 12px 0 0;
+  padding-inline-start: 22px;
+  display: grid;
+  gap: 8px;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.steps code {
+  direction: ltr;
+  unicode-bidi: isolate;
+  background: var(--cream);
+  padding: 1px 6px;
+  border-radius: 5px;
+  font-size: 13px;
+  word-break: break-all;
+}
+
+.keyBox {
+  width: 100%;
+  min-height: 110px;
+  font-family: monospace;
+  font-size: 12px;
+  direction: ltr;
 }

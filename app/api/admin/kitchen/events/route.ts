@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin-auth";
+import { scheduleCalendarSync } from "@/lib/calendarSync";
 import { createEvent, type EventInput } from "@/lib/kitchen/event-mutations";
 
 export async function POST(request: Request) {
@@ -13,5 +14,6 @@ export async function POST(request: Request) {
   if ("error" in result) {
     return NextResponse.json({ error: result.error }, { status: 400 });
   }
+  scheduleCalendarSync();
   return NextResponse.json({ id: result.id });
 }

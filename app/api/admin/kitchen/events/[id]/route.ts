@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin-auth";
+import { scheduleCalendarSync } from "@/lib/calendarSync";
 import { deleteEvent, updateEvent, type EventInput } from "@/lib/kitchen/event-mutations";
 
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -14,6 +15,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
   if ("error" in result) {
     return NextResponse.json({ error: result.error }, { status: 400 });
   }
+  scheduleCalendarSync();
   return NextResponse.json({ ok: true });
 }
 
@@ -25,5 +27,6 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
 
   const { id } = await params;
   await deleteEvent(id);
+  scheduleCalendarSync();
   return NextResponse.json({ ok: true });
 }

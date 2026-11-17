@@ -27,6 +27,7 @@ interface AuditAdmin {
 // Tables never logged: the logs themselves, tracking data, and the customers' carts.
 const SKIP_TABLES = new Set([
   "admin_audit_log",
+  "calendar_sync_links", // sync bookkeeping, not an admin action
   "analytics_events",
   "carts",
   "cart_items",

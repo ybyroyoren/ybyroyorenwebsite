@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/admin-auth";
 import { expireMeals } from "@/lib/cache";
+import { scheduleCalendarSync } from "@/lib/calendarSync";
 import { supabaseAdmin } from "@/lib/supabase/server";
 
 export async function createMeal(formData: FormData): Promise<void> {
@@ -36,6 +37,7 @@ export async function createMeal(formData: FormData): Promise<void> {
 
   revalidatePath("/admin/meals");
   expireMeals();
+  scheduleCalendarSync();
 }
 
 export async function closeMeal(formData: FormData): Promise<void> {
@@ -72,6 +74,7 @@ export async function deleteMeal(formData: FormData): Promise<void> {
   await db.from("meals").delete().eq("id", id);
   revalidatePath("/admin/meals");
   expireMeals();
+  scheduleCalendarSync();
 }
 
 /** Closes (or reopens) registration for one meal by hand. A closed meal stays visible, shown as full. */
